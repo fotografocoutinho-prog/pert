@@ -17,6 +17,7 @@ import Logs from './pages/Logs';
 import Releases from './pages/Releases';
 import Stats from './pages/Stats';
 import Organization from './pages/Organization';
+import Users from './pages/Users';
 
 function Protected({
   children,
@@ -148,6 +149,14 @@ export default function App() {
               element={
                 <Protected mode={mode} onToggleMode={toggle}>
                   <Organization />
+                </Protected>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Users />
                 </Protected>
               }
             />

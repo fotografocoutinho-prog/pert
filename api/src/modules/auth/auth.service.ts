@@ -107,6 +107,53 @@ export async function getUserById(id: string): Promise<User> {
   return toUser(rows[0]);
 }
 
+// The users table is not RLS-scoped (login resolves by email before a tenant is
+// known), so user-management queries filter by the caller's tenant explicitly.
+export async function listUsers(): Promise<User[]> {
+  const { rows } = await query<UserRow>(
+    'SELECT * FROM users WHERE tenant_id = $1 ORDER BY created_at ASC',
+    [currentTenantId()],
+  );
+  return rows.map(toUser);
+}
+
+export async function updateUser(
+  id: string,
+  input: { name?: string; role?: 'admin' | 'operator' | 'client'; active?: boolean },
+): Promise<User> {
+  const columns: Record<string, string> = { name: 'name', role: 'role', active: 'active' };
+  const sets: string[] = [];
+  const values: unknown[] = [];
+  let i = 1;
+  for (const [key, column] of Object.entries(columns)) {
+    const value = (input as Record<string, unknown>)[key];
+    if (value !== undefined) {
+      sets.push(`${column} = $${i++}`);
+      values.push(value);
+    }
+  }
+  if (sets.length === 0) return getUserById(id);
+  sets.push('updated_at = now()');
+  values.push(id, currentTenantId());
+  const { rows } = await query<UserRow>(
+    `UPDATE users SET ${sets.join(', ')} WHERE id = $${i++} AND tenant_id = $${i} RETURNING *`,
+    values,
+  );
+  if (rows.length === 0) throw new HttpError(404, 'not_found', 'User not found');
+  return toUser(rows[0]);
+}
+
+export async function deleteUser(id: string, actingUserId: string): Promise<void> {
+  if (id === actingUserId) {
+    throw new HttpError(400, 'invalid', 'You cannot delete your own account');
+  }
+  const { rowCount } = await query('DELETE FROM users WHERE id = $1 AND tenant_id = $2', [
+    id,
+    currentTenantId(),
+  ]);
+  if (!rowCount) throw new HttpError(404, 'not_found', 'User not found');
+}
+
 export async function createUser(input: {
   email: string;
   name: string;

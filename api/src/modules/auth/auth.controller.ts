@@ -46,3 +46,26 @@ export async function createUserHandler(req: Request, res: Response): Promise<vo
   const user = await authService.createUser(req.body as z.infer<typeof createUserSchema>);
   res.status(201).json(user);
 }
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1).optional(),
+  role: z.enum(['admin', 'operator', 'client']).optional(),
+  active: z.boolean().optional(),
+});
+
+const userIdSchema = z.object({ id: z.string().uuid() });
+
+export async function listUsersHandler(_req: Request, res: Response): Promise<void> {
+  res.json(await authService.listUsers());
+}
+
+export async function updateUserHandler(req: Request, res: Response): Promise<void> {
+  const { id } = userIdSchema.parse(req.params);
+  res.json(await authService.updateUser(id, req.body as z.infer<typeof updateUserSchema>));
+}
+
+export async function deleteUserHandler(req: Request, res: Response): Promise<void> {
+  const { id } = userIdSchema.parse(req.params);
+  await authService.deleteUser(id, req.user!.sub);
+  res.status(204).end();
+}

@@ -12,6 +12,7 @@ import { markOffline, markOnline, recordTelemetry } from '../modules/monitors/mo
 import { saveScreenshot } from '../modules/monitors/screenshot.service.js';
 import { recordPlayEvent } from '../modules/stats/stats.service.js';
 import { writeLog } from '../modules/audit/audit.service.js';
+import { mqttBridge } from '../modules/integrations/mqtt.js';
 import { logger } from '../utils/logger.js';
 
 interface SocketState {
@@ -48,6 +49,7 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
     hub.register(monitorId, socket);
     const ip = (req.socket.remoteAddress ?? '').replace('::ffff:', '');
     void runWithTenant(tenantId, () => markOnline(monitorId, { ip }));
+    mqttBridge.publishStatus(monitorId, true);
 
     socket.send(
       JSON.stringify({
@@ -76,6 +78,7 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
     socket.on('close', () => {
       hub.unregister(monitorId, socket);
       void runWithTenant(tenantId, () => markOffline(monitorId));
+      mqttBridge.publishStatus(monitorId, false);
     });
 
     socket.on('error', (err) => logger.warn('WS socket error', { error: String(err) }));
@@ -102,6 +105,7 @@ async function handleMessage(state: SocketState, msg: PlayerToServer, ip: string
       break;
     case 'heartbeat':
       await recordTelemetry(state.monitorId, msg.telemetry);
+      mqttBridge.publishTelemetry(state.monitorId, msg.telemetry);
       break;
     case 'ack':
       logger.info('Command ack', { monitorId: state.monitorId, command: msg.command, ok: msg.ok });

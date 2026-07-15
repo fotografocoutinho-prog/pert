@@ -24,6 +24,13 @@ export const env = {
   metricsToken: process.env.METRICS_TOKEN ?? '',
   redisUrl: process.env.REDIS_URL ?? '',
 
+  mqtt: {
+    url: process.env.MQTT_URL ?? '',
+    topicPrefix: process.env.MQTT_TOPIC_PREFIX ?? 'signage',
+    // Home Assistant MQTT discovery prefix (default HA convention).
+    haDiscoveryPrefix: process.env.MQTT_HA_DISCOVERY_PREFIX ?? 'homeassistant',
+  },
+
   storage: {
     driver: (process.env.STORAGE_DRIVER ?? 'local') as 'local' | 's3',
     s3: {

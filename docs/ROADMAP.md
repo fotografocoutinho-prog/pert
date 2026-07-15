@@ -65,9 +65,16 @@ the last. Phase 1 is complete.
   aggregation endpoint and a Statistics page
 - Prometheus `/metrics` endpoint for Grafana dashboards
 
+## ✅ Phase 5 — Administration & integrations (done)
+
+- User management: per-tenant users (list/create/update role & active/delete),
+  admin-only, with self-delete protection and strict tenant isolation
+- Telemetry sparklines in the monitor health dialog (dependency-free inline SVG)
+- MQTT / Home Assistant bridge (env-gated): publishes monitor status and
+  telemetry, and announces each screen via Home Assistant MQTT discovery
+
 ## Later — optional
 
 - Billing/payments integration on top of the plan model
 - CDN delivery in front of S3
-- Integrations: MQTT / Home Assistant bridge (env-gated), deeper Grafana panels
-- Programmatic advertising, AI/people-counting (opt-in)
+- Deeper Grafana panels; programmatic advertising, AI/people-counting (opt-in)

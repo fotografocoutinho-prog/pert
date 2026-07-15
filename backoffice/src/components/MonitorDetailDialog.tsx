@@ -16,6 +16,7 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import SyncIcon from '@mui/icons-material/Sync';
 import type { Monitor, MonitorCommand, TelemetrySample } from '@signage/shared';
 import { api, tokenStore } from '../api/client';
+import Sparkline from './Sparkline';
 
 interface TelemetryResponse {
   latest: TelemetrySample | null;
@@ -65,6 +66,9 @@ export default function MonitorDetailDialog({
   const t = data?.latest;
   const bytes = (n: number | null | undefined) =>
     n == null ? '—' : `${(n / 1024 ** 3).toFixed(1)} GB`;
+  // Samples arrive newest-first; reverse to plot oldest → newest.
+  const history = (pick: (s: TelemetrySample) => number | null): (number | null)[] =>
+    [...(data?.samples ?? [])].reverse().map(pick);
   const shotUrl = `${import.meta.env.VITE_API_URL ?? ''}/api/monitors/${monitor.id}/screenshot?token=${tokenStore.access}&v=${shotVersion}`;
 
   return (
@@ -75,10 +79,14 @@ export default function MonitorDetailDialog({
           {feedback && <Alert severity="info" onClose={() => setFeedback(null)}>{feedback}</Alert>}
 
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-            <Metric label="CPU" value={t?.cpuPercent != null ? `${t.cpuPercent}%` : '—'} />
-            <Metric label="RAM" value={t?.ramPercent != null ? `${t.ramPercent}%` : '—'} />
             <Metric label="Temp" value={t?.temperatureC != null ? `${t.temperatureC}°C` : '—'} />
             <Metric label="Free disk" value={bytes(t?.freeDiskBytes)} />
+          </Stack>
+
+          <Stack direction="row" spacing={3} flexWrap="wrap" useFlexGap>
+            <Sparkline label="CPU %" unit="%" max={100} color="#2563eb" values={history((s) => s.cpuPercent)} />
+            <Sparkline label="RAM %" unit="%" max={100} color="#7c3aed" values={history((s) => s.ramPercent)} />
+            <Sparkline label="Temperature" unit="°C" color="#ea580c" values={history((s) => s.temperatureC)} />
           </Stack>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

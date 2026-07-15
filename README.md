@@ -106,6 +106,7 @@ Create the monitor in the backoffice first to obtain its `MONITOR_ID`.
 | GET    | `/api/tenants/me` · `/license`| Tenant + license/usage            |
 | POST   | `/api/tenants`                | Provision a new organization      |
 | GET    | `/api/stats/play`             | Proof-of-play aggregation         |
+| CRUD   | `/api/auth/users`             | Per-tenant user management (admin)|
 | GET    | `/metrics`                    | Prometheus metrics (Grafana)      |
 | WS     | `/ws?token=&monitorId=`       | Real-time player channel          |
 

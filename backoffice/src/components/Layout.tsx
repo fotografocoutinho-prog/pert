@@ -24,6 +24,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import BusinessIcon from '@mui/icons-material/Business';
+import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -42,6 +43,7 @@ const NAV = [
   { to: '/logs', label: 'Audit log', icon: <ArticleIcon /> },
   { to: '/releases', label: 'Updates', icon: <SystemUpdateIcon /> },
   { to: '/organization', label: 'Organization', icon: <BusinessIcon /> },
+  { to: '/users', label: 'Users', icon: <PeopleIcon /> },
 ];
 
 export default function Layout({

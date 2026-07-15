@@ -3,11 +3,14 @@ import { createApp } from './app.js';
 import { attachWebSocketServer } from './ws/server.js';
 import { runMigrations } from './db/migrate.js';
 import { adminPool, pool } from './db/pool.js';
+import { mqttBridge } from './modules/integrations/mqtt.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 
 async function main(): Promise<void> {
   await runMigrations();
+
+  await mqttBridge.start();
 
   const app = createApp();
   const server = createServer(app);
