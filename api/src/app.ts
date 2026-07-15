@@ -9,6 +9,9 @@ import { authRouter } from './modules/auth/auth.routes.js';
 import { monitorRouter } from './modules/monitors/monitor.routes.js';
 import { contentRouter } from './modules/contents/content.routes.js';
 import { playlistRouter } from './modules/playlists/playlist.routes.js';
+import { layoutRouter } from './modules/layouts/layout.routes.js';
+import { scheduleRouter } from './modules/schedules/schedule.routes.js';
+import { playerRouter } from './modules/player/player.routes.js';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes.js';
 import { openApiDocument } from './docs/swagger.js';
 
@@ -29,6 +32,9 @@ export function createApp(): Express {
   app.use('/api/monitors', monitorRouter);
   app.use('/api/contents', contentRouter);
   app.use('/api/playlists', playlistRouter);
+  app.use('/api/layouts', layoutRouter);
+  app.use('/api/schedules', scheduleRouter);
+  app.use('/api/player', playerRouter);
   app.use('/api/dashboard', dashboardRouter);
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));

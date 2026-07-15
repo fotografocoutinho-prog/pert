@@ -25,6 +25,29 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
   }
 }
 
+/**
+ * Like `authenticate`, but also accepts the token via a `?token=` query
+ * parameter. Required for media served to `<img>`/`<video>` elements and the
+ * player, which cannot set an Authorization header.
+ */
+export function authenticateFlexible(req: Request, _res: Response, next: NextFunction): void {
+  const header = req.headers.authorization;
+  const token = header?.startsWith('Bearer ')
+    ? header.slice('Bearer '.length)
+    : typeof req.query.token === 'string'
+      ? req.query.token
+      : null;
+  if (!token) {
+    throw new HttpError(401, 'unauthorized', 'Missing access token');
+  }
+  try {
+    req.user = verifyAccessToken(token);
+    next();
+  } catch {
+    throw new HttpError(401, 'unauthorized', 'Invalid or expired access token');
+  }
+}
+
 export function requireRole(...roles: UserRole[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) throw new HttpError(401, 'unauthorized', 'Not authenticated');

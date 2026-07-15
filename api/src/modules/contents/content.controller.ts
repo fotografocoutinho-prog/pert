@@ -34,6 +34,17 @@ export async function downloadHandler(req: Request, res: Response): Promise<void
   res.sendFile(storage.absolutePath(content.storageKey));
 }
 
+export async function thumbnailHandler(req: Request, res: Response): Promise<void> {
+  const { id } = idSchema.parse(req.params);
+  const content = await service.getContent(id);
+  if (!content.thumbnailKey) {
+    throw new HttpError(404, 'no_thumbnail', 'No thumbnail available for this content');
+  }
+  res.setHeader('Content-Type', 'image/webp');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(storage.absolutePath(content.thumbnailKey));
+}
+
 export async function deleteHandler(req: Request, res: Response): Promise<void> {
   const { id } = idSchema.parse(req.params);
   await service.deleteContent(id);

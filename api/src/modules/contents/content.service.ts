@@ -5,6 +5,7 @@ import { ACCEPTED_MIME_TYPES, type Content, type ContentKind } from '@signage/sh
 import { query } from '../../db/pool.js';
 import { HttpError } from '../../middleware/error.js';
 import { storage } from './storage.js';
+import { probe } from './probe.js';
 
 interface ContentRow {
   id: string;
@@ -74,11 +75,25 @@ export async function ingestUpload(upload: StoredUpload): Promise<Content> {
   await rename(upload.tempPath, dest);
 
   const [checksum, sizeBytes] = await Promise.all([storage.checksum(key), storage.size(key)]);
+  const meta = await probe(key, kind);
 
   const { rows } = await query<ContentRow>(
-    `INSERT INTO contents (name, kind, mime_type, size_bytes, storage_key, checksum)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [upload.originalName, kind, upload.mimeType, sizeBytes, key, checksum],
+    `INSERT INTO contents
+       (name, kind, mime_type, size_bytes, storage_key, checksum,
+        width, height, duration_seconds, thumbnail_key)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+    [
+      upload.originalName,
+      kind,
+      upload.mimeType,
+      sizeBytes,
+      key,
+      checksum,
+      meta.width,
+      meta.height,
+      meta.durationSeconds,
+      meta.thumbnailKey,
+    ],
   );
   return toContent(rows[0]);
 }

@@ -13,6 +13,8 @@ RUN npm run build --workspace @signage/shared \
 # ---- runtime stage ----
 FROM node:22-alpine AS runtime
 ENV NODE_ENV=production
+# ffmpeg/ffprobe enable video duration probing and thumbnail extraction.
+RUN apk add --no-cache ffmpeg
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY shared/package.json ./shared/

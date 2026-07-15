@@ -69,5 +69,32 @@ export const openApiDocument = {
     '/playlists/{id}/items': {
       put: { tags: ['playlists'], summary: 'Replace ordered items', responses: { '200': { description: 'Updated' } } },
     },
+    '/layouts': {
+      get: { tags: ['layouts'], summary: 'List layouts', responses: { '200': { description: 'Layout list' } } },
+      post: { tags: ['layouts'], summary: 'Create layout (optionally from a preset)', responses: { '201': { description: 'Created' } } },
+    },
+    '/layouts/{id}': {
+      get: { tags: ['layouts'], summary: 'Get layout', responses: { '200': { description: 'Layout' } } },
+      patch: { tags: ['layouts'], summary: 'Update layout / zones', responses: { '200': { description: 'Updated' } } },
+      delete: { tags: ['layouts'], summary: 'Delete layout', responses: { '204': { description: 'Deleted' } } },
+    },
+    '/schedules': {
+      get: { tags: ['schedules'], summary: 'List schedules', responses: { '200': { description: 'Schedule list' } } },
+      post: { tags: ['schedules'], summary: 'Create schedule', responses: { '201': { description: 'Created' } } },
+    },
+    '/schedules/{id}': {
+      patch: { tags: ['schedules'], summary: 'Update schedule', responses: { '200': { description: 'Updated' } } },
+      delete: { tags: ['schedules'], summary: 'Delete schedule', responses: { '204': { description: 'Deleted' } } },
+    },
+    '/player/{monitorId}/state': {
+      get: {
+        tags: ['player'],
+        summary: 'Resolved render state (layout + zones + scheduled playlist)',
+        responses: { '200': { description: 'PlayerState' } },
+      },
+    },
+    '/contents/{id}/thumbnail': {
+      get: { tags: ['contents'], summary: 'Content thumbnail (webp)', responses: { '200': { description: 'Thumbnail' } } },
+    },
   },
 } as const;

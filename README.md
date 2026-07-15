@@ -4,10 +4,12 @@ A professional, self-hosted digital signage system — a from-scratch alternativ
 Yodeck / Screenly / Xibo. Manage screens, upload media, build playlists and layouts,
 and drive Raspberry Pi (or Windows/Linux) players in real time.
 
-> **Status:** Phase 1 (foundation) complete and verified end-to-end — authentication,
-> database, media library, playlists, dashboard, the real-time device channel, and a
-> working Electron kiosk player. Later phases add layouts/zones, scheduling, widgets,
-> remote screenshots, and OTA updates. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status:** Phases 1–2 complete and verified end-to-end — authentication, database,
+> media library (with thumbnails/probing), playlists, **multi-zone layouts**, **scheduling**,
+> dashboard, the real-time device channel, and an Electron kiosk player that renders
+> layouts, media and widgets (clock, text, website, YouTube, RSS, weather) with dynamic
+> orientation. Later phases add remote screenshots, incremental sync, and OTA updates.
+> See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Monorepo layout
 
@@ -92,6 +94,10 @@ Create the monitor in the backoffice first to obtain its `MONITOR_ID`.
 | POST   | `/api/monitors/:id/command`   | Send a remote command             |
 | CRUD   | `/api/contents`               | Media library (upload/download)   |
 | CRUD   | `/api/playlists`              | Playlists + ordered items         |
+| CRUD   | `/api/layouts`                | Layouts + zones                   |
+| CRUD   | `/api/schedules`              | Time/day/priority scheduling      |
+| GET    | `/api/player/:id/state`       | Resolved render state for a device|
+| GET    | `/api/contents/:id/thumbnail` | Auto-generated thumbnail (webp)   |
 | WS     | `/ws?token=&monitorId=`       | Real-time player channel          |
 
 Full interactive docs at `/docs`.

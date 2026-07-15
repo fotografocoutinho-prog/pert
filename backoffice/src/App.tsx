@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import Monitors from './pages/Monitors';
 import Contents from './pages/Contents';
 import Playlists from './pages/Playlists';
+import Layouts from './pages/Layouts';
+import LayoutEditor from './pages/LayoutEditor';
+import Schedules from './pages/Schedules';
 
 function Protected({
   children,
@@ -85,6 +88,30 @@ export default function App() {
               element={
                 <Protected mode={mode} onToggleMode={toggle}>
                   <Playlists />
+                </Protected>
+              }
+            />
+            <Route
+              path="/layouts"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Layouts />
+                </Protected>
+              }
+            />
+            <Route
+              path="/layouts/:id"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <LayoutEditor />
+                </Protected>
+              }
+            />
+            <Route
+              path="/schedules"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Schedules />
                 </Protected>
               }
             />

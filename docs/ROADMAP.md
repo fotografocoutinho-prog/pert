@@ -18,14 +18,19 @@ the last. Phase 1 is complete.
 - Electron kiosk player: playlist playback, watchdog, offline reconnect/resync
 - Swagger docs, Docker Compose, GitHub Actions CI, Raspberry Pi installer
 
-## Phase 2 — Layouts, zones & scheduling
+## ✅ Phase 2 — Layouts, zones & scheduling (done)
 
-- Layout editor (1/2/3/4 zones) with independent per-zone playlists
-- Zone kinds: video, image, clock, text, RSS, HTML, website, YouTube, weather
-- Orientation (landscape/portrait) + dynamic rotation without restart
-- Resolution handling: auto-scale, 720p→8K, custom, aspect ratios, fit/fill/stretch
-- Scheduling: dates, times, weekdays, campaigns, priorities
-- Thumbnail generation + media probing (duration/resolution) via ffmpeg/sharp
+- Layout editor (1/2/3/4 zones + custom) with independent per-zone playlists
+- Zone kinds: video, image, clock, text, RSS/news, HTML, website, YouTube, weather
+- Orientation (landscape/portrait) with dynamic rotation applied without restart
+- Scale modes fit/fill/stretch per item; content never distorted unless "stretch"
+- Scheduling: date range, time window, weekdays, priorities; highest-priority
+  matching schedule overrides the monitor's default playlist
+- Resolved player-state endpoint (`/api/player/:id/state`) merges layout + zones +
+  scheduling into a single render payload
+- Image probing (dimensions) + thumbnails via sharp; video duration/thumbnail via
+  ffmpeg/ffprobe when available (graceful degradation otherwise)
+- Token-in-query media auth so `<img>`/`<video>` and the player can load assets
 
 ## Phase 3 — Remote management & reliability
 

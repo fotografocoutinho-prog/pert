@@ -18,6 +18,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import MonitorIcon from '@mui/icons-material/DesktopWindows';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import ViewQuiltIcon from '@mui/icons-material/ViewQuilt';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -30,6 +32,8 @@ const NAV = [
   { to: '/monitors', label: 'Monitors', icon: <MonitorIcon /> },
   { to: '/contents', label: 'Content', icon: <CollectionsIcon /> },
   { to: '/playlists', label: 'Playlists', icon: <PlaylistPlayIcon /> },
+  { to: '/layouts', label: 'Layouts', icon: <ViewQuiltIcon /> },
+  { to: '/schedules', label: 'Schedules', icon: <ScheduleIcon /> },
 ];
 
 export default function Layout({
