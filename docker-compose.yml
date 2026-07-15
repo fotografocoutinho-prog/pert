@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-signage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-signage}
+      POSTGRES_DB: ${POSTGRES_DB:-signage}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-signage}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-signage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-signage}
+      POSTGRES_DB: ${POSTGRES_DB:-signage}
+      API_PORT: 4000
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      STORAGE_DIR: /data/storage
+    volumes:
+      - storage_data:/data/storage
+    ports:
+      - "4000:4000"
+
+  backoffice:
+    build:
+      context: .
+      dockerfile: backoffice/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:
+  storage_data:

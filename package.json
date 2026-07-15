@@ -1,0 +1,28 @@
+{
+  "name": "signage-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Professional Digital Signage platform (backoffice, player, API, database).",
+  "license": "MIT",
+  "workspaces": [
+    "shared",
+    "api",
+    "backoffice",
+    "player"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace shared && npm run build --workspace api && npm run build --workspace backoffice",
+    "build:shared": "npm run build --workspace shared",
+    "dev:api": "npm run dev --workspace api",
+    "dev:backoffice": "npm run dev --workspace backoffice",
+    "dev:player": "npm run dev --workspace player",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "migrate": "npm run migrate --workspace api",
+    "seed": "npm run seed --workspace api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

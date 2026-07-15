@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: signage
+          POSTGRES_PASSWORD: signage
+          POSTGRES_DB: signage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U signage"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: signage
+      POSTGRES_PASSWORD: signage
+      POSTGRES_DB: signage
+      JWT_ACCESS_SECRET: ci-access
+      JWT_REFRESH_SECRET: ci-refresh
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared package
+        run: npm run build:shared
+
+      - name: Typecheck all workspaces
+        run: npm run typecheck
+
+      - name: Run migrations
+        run: npm run migrate
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build all
+        run: npm run build

@@ -1,0 +1,21 @@
+{
+  "name": "@signage/player",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electron kiosk player for the digital signage platform.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "dev": "npm run build && electron .",
+    "start": "electron .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@signage/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "electron": "^33.2.0",
+    "typescript": "^5.6.3"
+  }
+}
