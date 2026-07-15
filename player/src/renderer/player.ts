@@ -18,6 +18,7 @@ interface ResolvedItem {
   durationSeconds: number;
   scaleMode: ScaleMode;
   transition: string;
+  checksum: string;
 }
 
 interface ResolvedPlaylist {
@@ -51,6 +52,10 @@ interface SignageBridge {
   onConfig(cb: (config: PlayerConfig) => void): void;
   restart(): void;
   reload(): void;
+  getTelemetry(): Promise<Record<string, unknown>>;
+  captureScreenshot(): Promise<string | null>;
+  cacheContents(items: { contentId: string; checksum: string }[]): Promise<Record<string, string>>;
+  checkUpdate(): Promise<{ version: string } | null>;
 }
 
 const signage = (window as unknown as { signage: SignageBridge }).signage;
@@ -64,6 +69,7 @@ let socket: WebSocket | null = null;
 const startedAt = Date.now();
 let generation = 0; // bumped on each state load to cancel running loops
 const timers: number[] = [];
+let localUrls: Record<string, string> = {}; // contentId -> file:// URL when cached
 
 function setStatus(text: string): void {
   statusEl.textContent = text;
@@ -85,9 +91,23 @@ async function apiGet<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-// Media served to <img>/<video> carries the token as a query param.
+// Prefer the offline cache; fall back to the authenticated remote URL.
 function contentUrl(id: string): string {
-  return `${config!.apiUrl}/api/contents/${id}/download?token=${encodeURIComponent(config!.token)}`;
+  return (
+    localUrls[id] ??
+    `${config!.apiUrl}/api/contents/${id}/download?token=${encodeURIComponent(config!.token)}`
+  );
+}
+
+/** Collects every content item referenced by the state, for the offline cache. */
+function collectCacheItems(state: PlayerState): { contentId: string; checksum: string }[] {
+  const items: { contentId: string; checksum: string }[] = [];
+  const add = (pl: ResolvedPlaylist | null) => {
+    for (const it of pl?.items ?? []) items.push({ contentId: it.contentId, checksum: it.checksum });
+  };
+  add(state.fallbackPlaylist);
+  for (const z of state.layout?.zones ?? []) add(z.playlist);
+  return items;
 }
 
 function shuffled<T>(arr: T[]): T[] {
@@ -134,6 +154,15 @@ async function loadState(): Promise<void> {
   try {
     const state = await apiGet<PlayerState>(`/api/player/${config!.monitorId}/state`);
     if (gen !== generation) return;
+
+    // Pre-cache media for offline playback; ignore failures (falls back to remote).
+    try {
+      localUrls = await signage.cacheContents(collectCacheItems(state));
+    } catch {
+      localUrls = {};
+    }
+    if (gen !== generation) return;
+
     applyOrientation(state.orientation);
     stage.innerHTML = '';
     splash.style.display = 'none';
@@ -475,22 +504,52 @@ function handleCommand(command: string, commandId: string): void {
   switch (command) {
     case 'restart':
       signage.restart();
-      break;
+      return;
     case 'update_content':
     case 'clear_cache':
       void loadState();
+      break;
+    case 'screenshot':
+      void captureAndSend(commandId);
+      return;
+    case 'update_player':
+      void applyUpdate();
       break;
   }
   send({ type: 'ack', command, commandId, ok: true });
 }
 
+async function captureAndSend(commandId: string): Promise<void> {
+  try {
+    const dataUrl = await signage.captureScreenshot();
+    if (dataUrl) send({ type: 'screenshot', commandId, dataUrl });
+    send({ type: 'ack', command: 'screenshot', commandId, ok: !!dataUrl });
+  } catch {
+    send({ type: 'ack', command: 'screenshot', commandId, ok: false });
+  }
+}
+
+async function applyUpdate(): Promise<void> {
+  try {
+    const applied = await signage.checkUpdate();
+    if (applied) signage.restart();
+  } catch {
+    /* ignore; will retry on next command */
+  }
+}
+
 function startHeartbeat(intervalMs: number): void {
-  window.setInterval(() => {
-    send({
-      type: 'heartbeat',
-      telemetry: { online: true, uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000) },
-    });
-  }, intervalMs);
+  const beat = async () => {
+    let telemetry: Record<string, unknown>;
+    try {
+      telemetry = await signage.getTelemetry();
+    } catch {
+      telemetry = { online: true, uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000) };
+    }
+    send({ type: 'heartbeat', telemetry });
+  };
+  void beat();
+  window.setInterval(() => void beat(), intervalMs);
 }
 
 // ---------------------------------------------------------------------------

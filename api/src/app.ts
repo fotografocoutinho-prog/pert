@@ -12,6 +12,8 @@ import { playlistRouter } from './modules/playlists/playlist.routes.js';
 import { layoutRouter } from './modules/layouts/layout.routes.js';
 import { scheduleRouter } from './modules/schedules/schedule.routes.js';
 import { playerRouter } from './modules/player/player.routes.js';
+import { auditRouter } from './modules/audit/audit.routes.js';
+import { updateRouter } from './modules/updates/update.routes.js';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes.js';
 import { openApiDocument } from './docs/swagger.js';
 
@@ -35,6 +37,8 @@ export function createApp(): Express {
   app.use('/api/layouts', layoutRouter);
   app.use('/api/schedules', scheduleRouter);
   app.use('/api/player', playerRouter);
+  app.use('/api/logs', auditRouter);
+  app.use('/api/updates', updateRouter);
   app.use('/api/dashboard', dashboardRouter);
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));

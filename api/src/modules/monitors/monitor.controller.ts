@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { MonitorCommand } from '@signage/shared';
 import * as service from './monitor.service.js';
+import { getLatestScreenshot } from './screenshot.service.js';
+import { writeLog } from '../audit/audit.service.js';
 import { hub } from '../../ws/hub.js';
 import { HttpError } from '../../middleware/error.js';
 
@@ -71,8 +73,31 @@ export async function commandHandler(req: Request, res: Response): Promise<void>
   const { command, payload } = req.body as z.infer<typeof commandSchema>;
   await service.getMonitor(id); // 404 if missing
   const { commandId, delivered } = hub.sendCommand(id, command as MonitorCommand, payload);
+  await writeLog({
+    userId: req.user?.sub ?? null,
+    monitorId: id,
+    action: `monitor.command.${command}`,
+    level: delivered ? 'info' : 'warn',
+    detail: { commandId, delivered },
+  });
   if (!delivered) {
     throw new HttpError(409, 'offline', 'Monitor is offline; command not delivered');
   }
   res.status(202).json({ commandId, delivered });
+}
+
+export async function telemetryHandler(req: Request, res: Response): Promise<void> {
+  const { id } = idSchema.parse(req.params);
+  await service.getMonitor(id);
+  const samples = await service.listTelemetry(id);
+  res.json({ latest: samples[0] ?? null, samples });
+}
+
+export async function screenshotHandler(req: Request, res: Response): Promise<void> {
+  const { id } = idSchema.parse(req.params);
+  const shot = await getLatestScreenshot(id);
+  res.setHeader('Content-Type', shot.mimeType);
+  res.setHeader('X-Captured-At', shot.createdAt);
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(shot.path);
 }

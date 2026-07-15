@@ -11,6 +11,8 @@ export interface ResolvedItem {
   durationSeconds: number;
   scaleMode: ScaleMode;
   transition: TransitionType;
+  /** SHA-256 of the source file — used by the player's offline cache. */
+  checksum: string;
 }
 
 export interface ResolvedPlaylist {

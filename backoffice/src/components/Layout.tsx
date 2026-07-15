@@ -20,6 +20,8 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import ArticleIcon from '@mui/icons-material/Article';
+import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -34,6 +36,8 @@ const NAV = [
   { to: '/playlists', label: 'Playlists', icon: <PlaylistPlayIcon /> },
   { to: '/layouts', label: 'Layouts', icon: <ViewQuiltIcon /> },
   { to: '/schedules', label: 'Schedules', icon: <ScheduleIcon /> },
+  { to: '/logs', label: 'Audit log', icon: <ArticleIcon /> },
+  { to: '/releases', label: 'Updates', icon: <SystemUpdateIcon /> },
 ];
 
 export default function Layout({

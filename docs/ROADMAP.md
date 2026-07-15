@@ -32,13 +32,21 @@ the last. Phase 1 is complete.
   ffmpeg/ffprobe when available (graceful degradation otherwise)
 - Token-in-query media auth so `<img>`/`<video>` and the player can load assets
 
-## Phase 3 — Remote management & reliability
+## ✅ Phase 3 — Remote management & reliability (done)
 
-- Remote screenshot capture and streaming
-- Device health: CPU, RAM, temperature, free disk, network state, uptime
-- Logs viewer + audit trail UI
-- Incremental/differential content sync with checksums and local cache
-- OTA player updates with rollback
+- Remote screenshot capture (Electron `capturePage` → WebSocket → stored, served
+  to the backoffice monitor dialog)
+- Device health: CPU, RAM, SoC temperature, free disk and uptime gathered in the
+  player's main process; history stored and charted per monitor
+- Audit trail: `writeLog` helper wired into login and remote commands, player logs
+  persisted, and a filterable Audit-log page
+- Incremental/differential content sync: checksum-addressed offline cache in the
+  player that only downloads changed assets, verifies integrity, and prunes stale
+  files (keeps playing offline, resyncs on reconnect)
+- OTA player updates with rollback: release registry + latest manifest endpoint, a
+  player updater that compares versions, downloads and checksum-verifies the bundle,
+  promotes it, and rolls back automatically after repeated boot failures
+  (pure version/rollback logic unit-tested)
 
 ## Phase 4 — Scale & platform
 

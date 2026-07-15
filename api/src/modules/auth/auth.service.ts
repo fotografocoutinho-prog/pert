@@ -3,6 +3,7 @@ import { query } from '../../db/pool.js';
 import { HttpError } from '../../middleware/error.js';
 import { hashPassword, sha256, verifyPassword } from '../../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.js';
+import { writeLog } from '../audit/audit.service.js';
 import { env } from '../../config/env.js';
 
 interface UserRow {
@@ -51,6 +52,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
   }
   const user = toUser(row);
   const tokens = await issueTokens(user);
+  await writeLog({ userId: user.id, action: 'auth.login', detail: { email: user.email } });
   return { user, tokens };
 }
 

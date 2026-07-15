@@ -23,12 +23,15 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import type { Layout, Monitor, Orientation, Playlist } from '@signage/shared';
 import { api } from '../api/client';
+import MonitorDetailDialog from '../components/MonitorDetailDialog';
 
 export default function Monitors() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Monitor | null>(null);
+  const [detail, setDetail] = useState<Monitor | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
 
@@ -112,7 +115,10 @@ export default function Monitors() {
                 <TableCell>{m.pairingCode ?? '—'}</TableCell>
                 <TableCell>{m.lastSeenAt ? new Date(m.lastSeenAt).toLocaleString() : '—'}</TableCell>
                 <TableCell align="right">
-                  <IconButton size="small" onClick={() => setEditing(m)}>
+                  <IconButton size="small" onClick={() => setDetail(m)} title="Health & control">
+                    <MonitorHeartIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => setEditing(m)} title="Edit">
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </TableCell>
@@ -206,6 +212,8 @@ export default function Monitors() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {detail && <MonitorDetailDialog monitor={detail} onClose={() => setDetail(null)} />}
     </Stack>
   );
 }

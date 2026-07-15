@@ -130,6 +130,30 @@ export async function markOffline(id: string): Promise<void> {
   await query(`UPDATE monitors SET status = 'offline', updated_at = now() WHERE id = $1`, [id]);
 }
 
+export async function listTelemetry(
+  id: string,
+  limit = 100,
+): Promise<import('@signage/shared').TelemetrySample[]> {
+  const { rows } = await query<{
+    cpu_percent: string | null;
+    ram_percent: string | null;
+    temperature_c: string | null;
+    free_disk_bytes: string | null;
+    created_at: Date;
+  }>(
+    `SELECT cpu_percent, ram_percent, temperature_c, free_disk_bytes, created_at
+       FROM telemetry WHERE monitor_id = $1 ORDER BY created_at DESC LIMIT $2`,
+    [id, limit],
+  );
+  return rows.map((r) => ({
+    cpuPercent: r.cpu_percent === null ? null : Number(r.cpu_percent),
+    ramPercent: r.ram_percent === null ? null : Number(r.ram_percent),
+    temperatureC: r.temperature_c === null ? null : Number(r.temperature_c),
+    freeDiskBytes: r.free_disk_bytes === null ? null : Number(r.free_disk_bytes),
+    createdAt: r.created_at.toISOString(),
+  }));
+}
+
 export async function recordTelemetry(id: string, t: MonitorTelemetry): Promise<void> {
   await query(
     `UPDATE monitors SET last_seen_at = now(), status = 'online',

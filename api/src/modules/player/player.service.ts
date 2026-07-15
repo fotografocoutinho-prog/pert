@@ -34,6 +34,7 @@ interface ResolvedItemRow {
   duration_seconds: string;
   scale_mode: string;
   transition: string;
+  checksum: string;
   loop: boolean;
   shuffle: boolean;
 }
@@ -42,7 +43,7 @@ interface ResolvedItemRow {
 async function resolvePlaylist(playlistId: string): Promise<ResolvedPlaylist | null> {
   const { rows } = await query<ResolvedItemRow>(
     `SELECT pi.content_id, c.kind, c.mime_type, pi.duration_seconds,
-            pi.scale_mode, pi.transition, p.loop, p.shuffle
+            pi.scale_mode, pi.transition, c.checksum, p.loop, p.shuffle
        FROM playlists p
        JOIN playlist_items pi ON pi.playlist_id = p.id
        JOIN contents c ON c.id = pi.content_id
@@ -70,6 +71,7 @@ async function resolvePlaylist(playlistId: string): Promise<ResolvedPlaylist | n
       durationSeconds: Number(r.duration_seconds),
       scaleMode: (r.scale_mode as ResolvedPlaylist['items'][number]['scaleMode']) ?? 'fit',
       transition: (r.transition as ResolvedPlaylist['items'][number]['transition']) ?? 'fade',
+      checksum: r.checksum,
     })),
   };
 }

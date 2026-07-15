@@ -8,6 +8,8 @@ import {
 import { verifyAccessToken } from '../utils/jwt.js';
 import { hub } from './hub.js';
 import { markOffline, markOnline, recordTelemetry } from '../modules/monitors/monitor.service.js';
+import { saveScreenshot } from '../modules/monitors/screenshot.service.js';
+import { writeLog } from '../modules/audit/audit.service.js';
 import { logger } from '../utils/logger.js';
 
 interface SocketState {
@@ -102,14 +104,20 @@ async function handleMessage(state: SocketState, msg: PlayerToServer, ip: string
       logger.info('Command ack', { monitorId: state.monitorId, command: msg.command, ok: msg.ok });
       break;
     case 'screenshot':
-      // Phase 2 will persist screenshots; log receipt for now.
-      logger.info('Screenshot received', { monitorId: state.monitorId, commandId: msg.commandId });
+      try {
+        await saveScreenshot(state.monitorId, msg.dataUrl);
+        logger.info('Screenshot stored', { monitorId: state.monitorId, commandId: msg.commandId });
+      } catch (err) {
+        logger.warn('Failed to store screenshot', { error: String(err) });
+      }
       break;
     case 'log':
-      logger[msg.level === 'error' ? 'error' : msg.level === 'warn' ? 'warn' : 'info'](
-        `Player log: ${msg.message}`,
-        { monitorId: state.monitorId },
-      );
+      await writeLog({
+        monitorId: state.monitorId,
+        action: 'player_log',
+        level: msg.level,
+        detail: { message: msg.message },
+      });
       break;
   }
 }

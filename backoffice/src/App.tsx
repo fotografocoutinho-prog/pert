@@ -13,6 +13,8 @@ import Playlists from './pages/Playlists';
 import Layouts from './pages/Layouts';
 import LayoutEditor from './pages/LayoutEditor';
 import Schedules from './pages/Schedules';
+import Logs from './pages/Logs';
+import Releases from './pages/Releases';
 
 function Protected({
   children,
@@ -112,6 +114,22 @@ export default function App() {
               element={
                 <Protected mode={mode} onToggleMode={toggle}>
                   <Schedules />
+                </Protected>
+              }
+            />
+            <Route
+              path="/logs"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Logs />
+                </Protected>
+              }
+            />
+            <Route
+              path="/releases"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Releases />
                 </Protected>
               }
             />
