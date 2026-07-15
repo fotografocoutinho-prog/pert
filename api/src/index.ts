@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { createApp } from './app.js';
 import { attachWebSocketServer } from './ws/server.js';
 import { runMigrations } from './db/migrate.js';
-import { pool } from './db/pool.js';
+import { adminPool, pool } from './db/pool.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 
@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   const shutdown = async (signal: string): Promise<void> => {
     logger.info(`Received ${signal}, shutting down`);
     server.close();
-    await pool.end();
+    await Promise.allSettled([pool.end(), adminPool.end()]);
     process.exit(0);
   };
   process.on('SIGINT', () => void shutdown('SIGINT'));

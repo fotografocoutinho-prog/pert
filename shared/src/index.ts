@@ -7,4 +7,5 @@ export * from './types/layout.js';
 export * from './types/schedule.js';
 export * from './types/player.js';
 export * from './types/ops.js';
+export * from './types/tenant.js';
 export * from './protocol/ws.js';

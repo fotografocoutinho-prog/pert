@@ -31,7 +31,9 @@ export async function downloadHandler(req: Request, res: Response): Promise<void
   const content = await service.getContent(id);
   res.setHeader('Content-Type', content.mimeType);
   res.setHeader('X-Checksum', content.checksum);
-  res.sendFile(storage.absolutePath(content.storageKey));
+  const stream = await storage.read(content.storageKey);
+  stream.on('error', () => res.destroy());
+  stream.pipe(res);
 }
 
 export async function thumbnailHandler(req: Request, res: Response): Promise<void> {
@@ -42,7 +44,9 @@ export async function thumbnailHandler(req: Request, res: Response): Promise<voi
   }
   res.setHeader('Content-Type', 'image/webp');
   res.setHeader('Cache-Control', 'public, max-age=86400');
-  res.sendFile(storage.absolutePath(content.thumbnailKey));
+  const stream = await storage.read(content.thumbnailKey);
+  stream.on('error', () => res.destroy());
+  stream.pipe(res);
 }
 
 export async function deleteHandler(req: Request, res: Response): Promise<void> {

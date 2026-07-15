@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload, UserRole } from '@signage/shared';
 import { verifyAccessToken } from '../utils/jwt.js';
+import { tenantStore } from '../db/pool.js';
+import { openTenantContext } from './tenant.js';
 import { HttpError } from './error.js';
 
 declare global {
@@ -12,17 +14,19 @@ declare global {
   }
 }
 
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
+export function authenticate(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
     throw new HttpError(401, 'unauthorized', 'Missing or malformed Authorization header');
   }
   try {
     req.user = verifyAccessToken(header.slice('Bearer '.length));
-    next();
   } catch {
     throw new HttpError(401, 'unauthorized', 'Invalid or expired access token');
   }
+  openTenantContext(req, res)
+    .then((ctx) => tenantStore.run(ctx, () => next()))
+    .catch(next);
 }
 
 /**
@@ -30,7 +34,7 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
  * parameter. Required for media served to `<img>`/`<video>` elements and the
  * player, which cannot set an Authorization header.
  */
-export function authenticateFlexible(req: Request, _res: Response, next: NextFunction): void {
+export function authenticateFlexible(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ')
     ? header.slice('Bearer '.length)
@@ -42,10 +46,12 @@ export function authenticateFlexible(req: Request, _res: Response, next: NextFun
   }
   try {
     req.user = verifyAccessToken(token);
-    next();
   } catch {
     throw new HttpError(401, 'unauthorized', 'Invalid or expired access token');
   }
+  openTenantContext(req, res)
+    .then((ctx) => tenantStore.run(ctx, () => next()))
+    .catch(next);
 }
 
 export function requireRole(...roles: UserRole[]) {

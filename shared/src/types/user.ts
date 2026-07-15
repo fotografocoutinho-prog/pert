@@ -4,6 +4,7 @@ export type UserRole = 'admin' | 'operator' | 'client';
 
 export interface User {
   id: UUID;
+  tenantId: UUID;
   email: string;
   name: string;
   role: UserRole;
@@ -30,6 +31,7 @@ export interface LoginResponse {
 
 export interface JwtPayload {
   sub: UUID;
+  tenantId: UUID;
   role: UserRole;
   email: string;
 }

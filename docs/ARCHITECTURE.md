@@ -80,11 +80,31 @@ without touching callers.
 `layouts`, `schedules`, `telemetry`, `logs`, `settings`. See
 `database/migrations/001_init.sql`.
 
+## Multi-tenancy (Phase 4)
+
+Isolation is enforced by PostgreSQL Row-Level Security, not by application `WHERE`
+clauses — so a missed filter cannot leak data across tenants.
+
+- Every authenticated request checks out a connection and runs
+  `set_config('app.tenant_id', <tenant>)`; that connection is stored in an
+  `AsyncLocalStorage` and used for all queries in the request.
+- Scoped tables have `FORCE ROW LEVEL SECURITY` and a policy
+  `USING (tenant_id = current_setting('app.tenant_id'))`, plus a column default
+  that auto-fills `tenant_id` on insert.
+- Because a table owner and superusers bypass RLS, the API connects as a
+  dedicated **non-superuser role** (`signage_app`, auto-provisioned by
+  migrations). Migrations/DDL run as the admin role.
+- The WebSocket server derives the tenant from the device token and wraps its
+  writes in the same tenant context.
+
 ## Scaling notes
 
-- The API is stateless except for the WS `hub`. To run multiple API instances, the
-  hub moves to Redis pub/sub (planned) so a command reaches whichever node holds the
-  device socket.
-- PostgreSQL is the single source of truth; telemetry is append-only and can be
-  partitioned/rolled up for thousands of devices.
-- Static content and the backoffice bundle are served by nginx / a CDN.
+- The API is stateless except for the WS `hub`, which routes through a pluggable
+  message bus: in-memory for one node, Redis pub/sub (`REDIS_URL`) across a
+  cluster so a command reaches whichever node holds the device socket.
+- Media goes through a `StorageDriver` — local filesystem or S3
+  (`STORAGE_DRIVER=s3`, any S3-compatible endpoint) — and downloads stream
+  through it, so content can sit behind object storage / a CDN.
+- PostgreSQL is the single source of truth; telemetry and play-events are
+  append-only and can be partitioned/rolled up for thousands of devices.
+- `GET /metrics` exposes Prometheus gauges for Grafana.

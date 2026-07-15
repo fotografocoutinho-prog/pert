@@ -48,11 +48,26 @@ the last. Phase 1 is complete.
   promotes it, and rolls back automatically after repeated boot failures
   (pure version/rollback logic unit-tested)
 
-## Phase 4 — Scale & platform
+## ✅ Phase 4 — Scale & platform (done)
 
-- Redis-backed WS hub for horizontal scaling (thousands of devices)
-- Multi-tenant (clients / companies), licensing, billing
-- S3 storage driver, CDN delivery
-- Statistics & proof-of-play reporting
-- Integrations: MQTT, Home Assistant, Grafana
-- Optional: programmatic advertising, AI, people counting
+- Multi-tenant isolation via PostgreSQL Row-Level Security: every request runs
+  on a connection scoped by `app.tenant_id`, with `FORCE ROW LEVEL SECURITY` and
+  a dedicated non-superuser runtime role so isolation is enforced at the database
+  (defense in depth — a forgotten `WHERE` cannot leak across tenants)
+- Tenant provisioning (new organization + admin) and per-tenant onboarding
+- Licensing: plan-based screen limits (free/pro/enterprise) enforced on create,
+  with a live license/usage endpoint
+- Pluggable WebSocket hub: in-memory for a single node, Redis pub/sub across a
+  cluster so commands reach whichever node holds a device socket
+- Pluggable storage driver: local filesystem by default, S3 (any S3-compatible
+  endpoint) via `STORAGE_DRIVER=s3`; downloads stream through the driver
+- Proof-of-play: players report play events over the socket; tenant-scoped
+  aggregation endpoint and a Statistics page
+- Prometheus `/metrics` endpoint for Grafana dashboards
+
+## Later — optional
+
+- Billing/payments integration on top of the plan model
+- CDN delivery in front of S3
+- Integrations: MQTT / Home Assistant bridge (env-gated), deeper Grafana panels
+- Programmatic advertising, AI/people-counting (opt-in)

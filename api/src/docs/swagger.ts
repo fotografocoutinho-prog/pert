@@ -96,5 +96,17 @@ export const openApiDocument = {
     '/contents/{id}/thumbnail': {
       get: { tags: ['contents'], summary: 'Content thumbnail (webp)', responses: { '200': { description: 'Thumbnail' } } },
     },
+    '/tenants/me': {
+      get: { tags: ['tenants'], summary: 'Current tenant', responses: { '200': { description: 'Tenant' } } },
+    },
+    '/tenants/license': {
+      get: { tags: ['tenants'], summary: 'License + screen usage', responses: { '200': { description: 'License' } } },
+    },
+    '/tenants': {
+      post: { tags: ['tenants'], summary: 'Provision a new tenant + admin', responses: { '201': { description: 'Created' } } },
+    },
+    '/stats/play': {
+      get: { tags: ['stats'], summary: 'Proof-of-play aggregation', responses: { '200': { description: 'PlayStats' } } },
+    },
   },
 } as const;

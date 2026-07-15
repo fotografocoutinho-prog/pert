@@ -7,6 +7,7 @@ export type PlayerToServer =
   | { type: 'heartbeat'; telemetry: MonitorTelemetry }
   | { type: 'ack'; command: MonitorCommand; commandId: UUID; ok: boolean; message?: string }
   | { type: 'screenshot'; commandId: UUID; dataUrl: string }
+  | { type: 'play'; contentId: UUID; durationSeconds: number }
   | { type: 'log'; level: 'info' | 'warn' | 'error'; message: string };
 
 /** Messages sent from the server to a player. */

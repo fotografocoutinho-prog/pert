@@ -4,6 +4,7 @@ import type { MonitorCommand } from '@signage/shared';
 import * as service from './monitor.service.js';
 import { getLatestScreenshot } from './screenshot.service.js';
 import { writeLog } from '../audit/audit.service.js';
+import { assertScreenQuota } from '../tenants/tenant.service.js';
 import { hub } from '../../ws/hub.js';
 import { HttpError } from '../../middleware/error.js';
 
@@ -51,6 +52,7 @@ export async function getHandler(req: Request, res: Response): Promise<void> {
 }
 
 export async function createHandler(req: Request, res: Response): Promise<void> {
+  await assertScreenQuota(req.user!.tenantId);
   const monitor = await service.createMonitor(req.body as z.infer<typeof createMonitorSchema>);
   res.status(201).json(monitor);
 }
@@ -99,5 +101,6 @@ export async function screenshotHandler(req: Request, res: Response): Promise<vo
   res.setHeader('Content-Type', shot.mimeType);
   res.setHeader('X-Captured-At', shot.createdAt);
   res.setHeader('Cache-Control', 'no-store');
-  res.sendFile(shot.path);
+  shot.stream.on('error', () => res.destroy());
+  shot.stream.pipe(res);
 }

@@ -6,20 +6,23 @@ import {
   type PlayerToServer,
 } from '@signage/shared';
 import { verifyAccessToken } from '../utils/jwt.js';
+import { runWithTenant } from '../db/pool.js';
 import { hub } from './hub.js';
 import { markOffline, markOnline, recordTelemetry } from '../modules/monitors/monitor.service.js';
 import { saveScreenshot } from '../modules/monitors/screenshot.service.js';
+import { recordPlayEvent } from '../modules/stats/stats.service.js';
 import { writeLog } from '../modules/audit/audit.service.js';
 import { logger } from '../utils/logger.js';
 
 interface SocketState {
-  monitorId?: string;
+  monitorId: string;
+  tenantId: string;
   alive: boolean;
 }
 
 /**
- * Players connect to /ws?token=<jwt>&monitorId=<uuid>. The JWT is a normal
- * access token; a monitor is paired to a device account (or a service token).
+ * Players connect to /ws?token=<jwt>&monitorId=<uuid>. The JWT carries the
+ * tenant, so every device write is scoped to that tenant (RLS-enforced).
  */
 export function attachWebSocketServer(server: Server): WebSocketServer {
   const wss = new WebSocketServer({ server, path: WS_PATH });
@@ -33,17 +36,18 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
       socket.close(4001, 'missing token or monitorId');
       return;
     }
+    let tenantId: string;
     try {
-      verifyAccessToken(token);
+      tenantId = verifyAccessToken(token).tenantId;
     } catch {
       socket.close(4003, 'invalid token');
       return;
     }
 
-    const state: SocketState = { monitorId, alive: true };
+    const state: SocketState = { monitorId, tenantId, alive: true };
     hub.register(monitorId, socket);
     const ip = (req.socket.remoteAddress ?? '').replace('::ffff:', '');
-    void markOnline(monitorId, { ip });
+    void runWithTenant(tenantId, () => markOnline(monitorId, { ip }));
 
     socket.send(
       JSON.stringify({
@@ -64,14 +68,14 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
       } catch {
         return;
       }
-      handleMessage(state, msg, ip).catch((err) =>
+      runWithTenant(state.tenantId, () => handleMessage(state, msg, ip)).catch((err) =>
         logger.error('WS message handler failed', { error: String(err) }),
       );
     });
 
     socket.on('close', () => {
       hub.unregister(monitorId, socket);
-      void markOffline(monitorId);
+      void runWithTenant(tenantId, () => markOffline(monitorId));
     });
 
     socket.on('error', (err) => logger.warn('WS socket error', { error: String(err) }));
@@ -80,7 +84,7 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
   // Liveness ping/pong sweep.
   const interval = setInterval(() => {
     for (const socket of wss.clients) {
-      const s = socket as WebSocket & { _state?: SocketState };
+      const s = socket as WebSocket;
       if (s.readyState !== s.OPEN) continue;
       socket.ping();
     }
@@ -92,7 +96,6 @@ export function attachWebSocketServer(server: Server): WebSocketServer {
 }
 
 async function handleMessage(state: SocketState, msg: PlayerToServer, ip: string): Promise<void> {
-  if (!state.monitorId) return;
   switch (msg.type) {
     case 'hello':
       await markOnline(state.monitorId, { os: msg.os, playerVersion: msg.playerVersion, ip });
@@ -110,6 +113,9 @@ async function handleMessage(state: SocketState, msg: PlayerToServer, ip: string
       } catch (err) {
         logger.warn('Failed to store screenshot', { error: String(err) });
       }
+      break;
+    case 'play':
+      await recordPlayEvent(state.monitorId, msg.contentId, msg.durationSeconds);
       break;
     case 'log':
       await writeLog({

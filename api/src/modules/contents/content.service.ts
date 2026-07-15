@@ -1,11 +1,21 @@
-import { rename } from 'node:fs/promises';
-import { mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { createReadStream } from 'node:fs';
+import { rm, stat } from 'node:fs/promises';
+import crypto from 'node:crypto';
 import { ACCEPTED_MIME_TYPES, type Content, type ContentKind } from '@signage/shared';
 import { query } from '../../db/pool.js';
 import { HttpError } from '../../middleware/error.js';
 import { storage } from './storage.js';
 import { probe } from './probe.js';
+
+function checksumFile(path: string): Promise<string> {
+  return new Promise((resolvePromise, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = createReadStream(path);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolvePromise(hash.digest('hex')));
+    stream.on('error', reject);
+  });
+}
 
 interface ContentRow {
   id: string;
@@ -70,12 +80,22 @@ export async function ingestUpload(upload: StoredUpload): Promise<Content> {
   }
 
   const key = storage.keyFor(upload.originalName);
-  const dest = storage.absolutePath(key);
-  await mkdir(dirname(dest), { recursive: true });
-  await rename(upload.tempPath, dest);
 
-  const [checksum, sizeBytes] = await Promise.all([storage.checksum(key), storage.size(key)]);
-  const meta = await probe(key, kind);
+  // Compute checksum/size and probe on the local temp file before storing it.
+  const [checksum, fileStat, meta] = await Promise.all([
+    checksumFile(upload.tempPath),
+    stat(upload.tempPath),
+    probe(upload.tempPath, kind),
+  ]);
+
+  let thumbnailKey: string | null = null;
+  if (meta.thumbnail) {
+    thumbnailKey = `${key}.thumb.webp`;
+    await storage.putBuffer(thumbnailKey, meta.thumbnail);
+  }
+  // Moves (local) or uploads (S3) the file, consuming the temp path.
+  await storage.put(key, upload.tempPath);
+  await rm(upload.tempPath, { force: true }).catch(() => undefined);
 
   const { rows } = await query<ContentRow>(
     `INSERT INTO contents
@@ -86,13 +106,13 @@ export async function ingestUpload(upload: StoredUpload): Promise<Content> {
       upload.originalName,
       kind,
       upload.mimeType,
-      sizeBytes,
+      Number(fileStat.size),
       key,
       checksum,
       meta.width,
       meta.height,
       meta.durationSeconds,
-      meta.thumbnailKey,
+      thumbnailKey,
     ],
   );
   return toContent(rows[0]);

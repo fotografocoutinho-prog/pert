@@ -1,10 +1,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import crypto from 'node:crypto';
 import sharp from 'sharp';
 import type { ContentKind } from '@signage/shared';
-import { storage } from './storage.js';
 import { logger } from '../../utils/logger.js';
 
 const execFileAsync = promisify(execFile);
@@ -13,57 +14,45 @@ export interface ProbeResult {
   width: number | null;
   height: number | null;
   durationSeconds: number | null;
-  thumbnailKey: string | null;
+  thumbnail: Buffer | null;
 }
 
 const THUMB_WIDTH = 400;
+const EMPTY: ProbeResult = { width: null, height: null, durationSeconds: null, thumbnail: null };
 
-/** Probes a stored file for dimensions/duration and generates a thumbnail. */
-export async function probe(storageKey: string, kind: ContentKind): Promise<ProbeResult> {
+/** Probes a local file for dimensions/duration and builds a thumbnail buffer. */
+export async function probe(localPath: string, kind: ContentKind): Promise<ProbeResult> {
   try {
-    if (kind === 'image') return await probeImage(storageKey);
-    if (kind === 'video') return await probeVideo(storageKey);
-    if (kind === 'pdf') return await probePdf(storageKey);
+    if (kind === 'image') return await probeImage(localPath);
+    if (kind === 'video') return await probeVideo(localPath);
   } catch (err) {
-    logger.warn('Media probe failed; continuing without metadata', {
-      storageKey,
-      error: String(err),
-    });
+    logger.warn('Media probe failed; continuing without metadata', { error: String(err) });
   }
-  return { width: null, height: null, durationSeconds: null, thumbnailKey: null };
+  return EMPTY;
 }
 
-async function probeImage(storageKey: string): Promise<ProbeResult> {
-  const src = storage.absolutePath(storageKey);
-  const meta = await sharp(src).metadata();
-  const thumbnailKey = await writeThumbnail(storageKey, sharp(src));
-  return {
-    width: meta.width ?? null,
-    height: meta.height ?? null,
-    durationSeconds: null,
-    thumbnailKey,
-  };
+async function probeImage(localPath: string): Promise<ProbeResult> {
+  const meta = await sharp(localPath).metadata();
+  const thumbnail = await sharp(localPath)
+    .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
+    .webp({ quality: 70 })
+    .toBuffer();
+  return { width: meta.width ?? null, height: meta.height ?? null, durationSeconds: null, thumbnail };
 }
 
-async function probePdf(_storageKey: string): Promise<ProbeResult> {
-  // First page render requires a PDF rasterizer (added in a later phase).
-  return { width: null, height: null, durationSeconds: null, thumbnailKey: null };
-}
-
-async function probeVideo(storageKey: string): Promise<ProbeResult> {
-  const src = storage.absolutePath(storageKey);
+async function probeVideo(localPath: string): Promise<ProbeResult> {
   let width: number | null = null;
   let height: number | null = null;
   let durationSeconds: number | null = null;
 
-  if (await hasFfprobe()) {
+  if (await hasBinary('ffprobe')) {
     try {
       const { stdout } = await execFileAsync('ffprobe', [
         '-v', 'error',
         '-select_streams', 'v:0',
         '-show_entries', 'stream=width,height:format=duration',
         '-of', 'json',
-        src,
+        localPath,
       ]);
       const parsed = JSON.parse(stdout) as {
         streams?: { width?: number; height?: number }[];
@@ -78,56 +67,36 @@ async function probeVideo(storageKey: string): Promise<ProbeResult> {
     }
   }
 
-  let thumbnailKey: string | null = null;
-  if (await hasFfmpeg()) {
-    thumbnailKey = await writeVideoThumbnail(storageKey, src);
+  let thumbnail: Buffer | null = null;
+  if (await hasBinary('ffmpeg')) {
+    const tmp = join(tmpdir(), `thumb-${crypto.randomUUID()}.webp`);
+    try {
+      await execFileAsync('ffmpeg', [
+        '-y', '-i', localPath, '-ss', '00:00:01.000', '-vframes', '1',
+        '-vf', `scale=${THUMB_WIDTH}:-1`, tmp,
+      ]);
+      thumbnail = await readFile(tmp);
+    } catch (err) {
+      logger.warn('ffmpeg thumbnail failed', { error: String(err) });
+    } finally {
+      await rm(tmp, { force: true });
+    }
   }
 
-  return { width, height, durationSeconds, thumbnailKey };
+  return { width, height, durationSeconds, thumbnail };
 }
 
-async function writeThumbnail(storageKey: string, pipeline: sharp.Sharp): Promise<string> {
-  const thumbKey = `${storageKey}.thumb.webp`;
-  const dest = storage.absolutePath(thumbKey);
-  await mkdir(dirname(dest), { recursive: true });
-  await pipeline.resize({ width: THUMB_WIDTH, withoutEnlargement: true }).webp({ quality: 70 }).toFile(dest);
-  return thumbKey;
-}
+const binaryCache = new Map<string, boolean>();
 
-async function writeVideoThumbnail(storageKey: string, src: string): Promise<string | null> {
-  const thumbKey = `${storageKey}.thumb.webp`;
-  const dest = storage.absolutePath(thumbKey);
-  await mkdir(dirname(dest), { recursive: true });
-  try {
-    await execFileAsync('ffmpeg', [
-      '-y', '-i', src, '-ss', '00:00:01.000', '-vframes', '1',
-      '-vf', `scale=${THUMB_WIDTH}:-1`, dest,
-    ]);
-    return thumbKey;
-  } catch (err) {
-    logger.warn('ffmpeg thumbnail failed', { error: String(err) });
-    return null;
-  }
-}
-
-let ffprobeAvailable: boolean | null = null;
-let ffmpegAvailable: boolean | null = null;
-
-async function hasFfprobe(): Promise<boolean> {
-  if (ffprobeAvailable === null) ffprobeAvailable = await binaryExists('ffprobe');
-  return ffprobeAvailable;
-}
-
-async function hasFfmpeg(): Promise<boolean> {
-  if (ffmpegAvailable === null) ffmpegAvailable = await binaryExists('ffmpeg');
-  return ffmpegAvailable;
-}
-
-async function binaryExists(bin: string): Promise<boolean> {
+async function hasBinary(bin: string): Promise<boolean> {
+  const cached = binaryCache.get(bin);
+  if (cached !== undefined) return cached;
   try {
     await execFileAsync(bin, ['-version']);
+    binaryCache.set(bin, true);
     return true;
   } catch {
+    binaryCache.set(bin, false);
     return false;
   }
 }

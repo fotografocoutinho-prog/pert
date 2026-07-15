@@ -4,13 +4,13 @@ A professional, self-hosted digital signage system — a from-scratch alternativ
 Yodeck / Screenly / Xibo. Manage screens, upload media, build playlists and layouts,
 and drive Raspberry Pi (or Windows/Linux) players in real time.
 
-> **Status:** Phases 1–3 complete and verified end-to-end — authentication, database,
-> media library (with thumbnails/probing), playlists, **multi-zone layouts**, **scheduling**,
-> **remote management** (screenshots, device health/telemetry, audit log), **offline
-> content cache**, and **OTA player updates with rollback**. The Electron kiosk player
-> renders layouts, media and widgets (clock, text, website, YouTube, RSS, weather) with
-> dynamic orientation and keeps playing offline. Later phases add horizontal scaling,
-> multi-tenant and integrations. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status:** Phases 1–4 complete and verified end-to-end. On top of authentication,
+> media library, playlists, **multi-zone layouts**, **scheduling**, **remote management**
+> (screenshots, telemetry, audit log), **offline cache** and **OTA updates**, the platform
+> is now **multi-tenant** (PostgreSQL Row-Level Security), with **plan-based licensing**,
+> a **Redis-ready WebSocket hub** for horizontal scaling, a **pluggable local/S3 storage
+> driver**, **proof-of-play statistics**, and a **Prometheus `/metrics`** endpoint for
+> Grafana. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Monorepo layout
 
@@ -103,6 +103,10 @@ Create the monitor in the backoffice first to obtain its `MONITOR_ID`.
 | GET    | `/api/monitors/:id/screenshot`| Latest remote screenshot          |
 | GET    | `/api/logs`                   | Audit trail (filterable)          |
 | CRUD   | `/api/updates/player`         | OTA release registry + manifest   |
+| GET    | `/api/tenants/me` · `/license`| Tenant + license/usage            |
+| POST   | `/api/tenants`                | Provision a new organization      |
+| GET    | `/api/stats/play`             | Proof-of-play aggregation         |
+| GET    | `/metrics`                    | Prometheus metrics (Grafana)      |
 | WS     | `/ws?token=&monitorId=`       | Real-time player channel          |
 
 Full interactive docs at `/docs`.

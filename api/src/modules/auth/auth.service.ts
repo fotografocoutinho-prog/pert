@@ -1,5 +1,5 @@
 import type { LoginResponse, User } from '@signage/shared';
-import { query } from '../../db/pool.js';
+import { currentTenantId, query, runWithTenant } from '../../db/pool.js';
 import { HttpError } from '../../middleware/error.js';
 import { hashPassword, sha256, verifyPassword } from '../../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt.js';
@@ -8,6 +8,7 @@ import { env } from '../../config/env.js';
 
 interface UserRow {
   id: string;
+  tenant_id: string;
   email: string;
   name: string;
   role: 'admin' | 'operator' | 'client';
@@ -20,6 +21,7 @@ interface UserRow {
 function toUser(row: UserRow): User {
   return {
     id: row.id,
+    tenantId: row.tenant_id,
     email: row.email,
     name: row.name,
     role: row.role,
@@ -30,7 +32,12 @@ function toUser(row: UserRow): User {
 }
 
 async function issueTokens(user: User): Promise<LoginResponse['tokens']> {
-  const accessToken = signAccessToken({ sub: user.id, role: user.role, email: user.email });
+  const accessToken = signAccessToken({
+    sub: user.id,
+    tenantId: user.tenantId,
+    role: user.role,
+    email: user.email,
+  });
   const refreshToken = signRefreshToken({ sub: user.id });
   const expiresAt = new Date(Date.now() + env.jwt.refreshTtl * 1000);
   await query(
@@ -52,7 +59,10 @@ export async function login(email: string, password: string): Promise<LoginRespo
   }
   const user = toUser(row);
   const tokens = await issueTokens(user);
-  await writeLog({ userId: user.id, action: 'auth.login', detail: { email: user.email } });
+  // Login runs outside any tenant context; scope the audit write to the user's tenant.
+  await runWithTenant(user.tenantId, () =>
+    writeLog({ userId: user.id, action: 'auth.login', detail: { email: user.email } }),
+  );
   return { user, tokens };
 }
 
@@ -104,11 +114,12 @@ export async function createUser(input: {
   role: 'admin' | 'operator' | 'client';
 }): Promise<User> {
   const hash = await hashPassword(input.password);
+  const tenantId = currentTenantId();
   try {
     const { rows } = await query<UserRow>(
-      `INSERT INTO users (email, name, password_hash, role)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [input.email, input.name, hash, input.role],
+      `INSERT INTO users (tenant_id, email, name, password_hash, role)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [tenantId, input.email, input.name, hash, input.role],
     );
     return toUser(rows[0]);
   } catch (err) {

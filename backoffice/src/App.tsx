@@ -15,6 +15,8 @@ import LayoutEditor from './pages/LayoutEditor';
 import Schedules from './pages/Schedules';
 import Logs from './pages/Logs';
 import Releases from './pages/Releases';
+import Stats from './pages/Stats';
+import Organization from './pages/Organization';
 
 function Protected({
   children,
@@ -130,6 +132,22 @@ export default function App() {
               element={
                 <Protected mode={mode} onToggleMode={toggle}>
                   <Releases />
+                </Protected>
+              }
+            />
+            <Route
+              path="/stats"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Stats />
+                </Protected>
+              }
+            />
+            <Route
+              path="/organization"
+              element={
+                <Protected mode={mode} onToggleMode={toggle}>
+                  <Organization />
                 </Protected>
               }
             />

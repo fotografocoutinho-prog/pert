@@ -297,6 +297,8 @@ async function playItem(el: HTMLElement, item: ResolvedItem, gen: number): Promi
   } else {
     await delay(item.durationSeconds * 1000);
   }
+  // Proof-of-play: report the item once it has finished showing.
+  send({ type: 'play', contentId: item.contentId, durationSeconds: item.durationSeconds });
   void gen;
 }
 

@@ -31,6 +31,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-signage}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-signage}
       POSTGRES_DB: ${POSTGRES_DB:-signage}
+      APP_DB_USER: ${APP_DB_USER:-signage_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-signage_app}
       API_PORT: 4000
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh}

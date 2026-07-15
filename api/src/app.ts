@@ -15,6 +15,10 @@ import { playerRouter } from './modules/player/player.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
 import { updateRouter } from './modules/updates/update.routes.js';
 import { dashboardRouter } from './modules/dashboard/dashboard.routes.js';
+import { tenantRouter } from './modules/tenants/tenant.routes.js';
+import { statsRouter } from './modules/stats/stats.routes.js';
+import { metricsHandler } from './modules/metrics/metrics.js';
+import { asyncHandler } from './utils/asyncHandler.js';
 import { openApiDocument } from './docs/swagger.js';
 
 export function createApp(): Express {
@@ -29,6 +33,8 @@ export function createApp(): Express {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
+  app.get('/metrics', asyncHandler(metricsHandler));
+
   app.use('/api', apiLimiter);
   app.use('/api/auth', authRouter);
   app.use('/api/monitors', monitorRouter);
@@ -39,6 +45,8 @@ export function createApp(): Express {
   app.use('/api/player', playerRouter);
   app.use('/api/logs', auditRouter);
   app.use('/api/updates', updateRouter);
+  app.use('/api/tenants', tenantRouter);
+  app.use('/api/stats', statsRouter);
   app.use('/api/dashboard', dashboardRouter);
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));

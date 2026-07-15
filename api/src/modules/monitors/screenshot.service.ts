@@ -1,5 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import type { Readable } from 'node:stream';
 import { query } from '../../db/pool.js';
 import { storage } from '../contents/storage.js';
 import { HttpError } from '../../middleware/error.js';
@@ -12,9 +11,7 @@ export async function saveScreenshot(monitorId: string, dataUrl: string): Promis
   const buffer = Buffer.from(base64, 'base64');
 
   const key = `screenshots/${monitorId}.img`;
-  const dest = storage.absolutePath(key);
-  await mkdir(dirname(dest), { recursive: true });
-  await writeFile(dest, buffer);
+  await storage.putBuffer(key, buffer);
 
   await query(
     `INSERT INTO screenshots (monitor_id, storage_key, mime_type, created_at)
@@ -27,14 +24,14 @@ export async function saveScreenshot(monitorId: string, dataUrl: string): Promis
 
 export async function getLatestScreenshot(
   monitorId: string,
-): Promise<{ path: string; mimeType: string; createdAt: string }> {
+): Promise<{ stream: Readable; mimeType: string; createdAt: string }> {
   const { rows } = await query<{ storage_key: string; mime_type: string; created_at: Date }>(
     'SELECT storage_key, mime_type, created_at FROM screenshots WHERE monitor_id = $1',
     [monitorId],
   );
   if (rows.length === 0) throw new HttpError(404, 'not_found', 'No screenshot captured yet');
   return {
-    path: storage.absolutePath(rows[0].storage_key),
+    stream: await storage.read(rows[0].storage_key),
     mimeType: rows[0].mime_type,
     createdAt: rows[0].created_at.toISOString(),
   };
