@@ -12,3 +12,4 @@ storage/
 *.tsbuildinfo
 player/release/
 backoffice/dist/
+graphify-out/
