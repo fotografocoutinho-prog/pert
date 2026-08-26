@@ -181,6 +181,7 @@ a { color: var(--brand); }
   backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .topbar h1 { font-size: 1.28rem; margin-right: auto; }
+#nav-toggle { display: none; }
 .topbar__sub { display: block; font-size: .82rem; font-weight: 400; color: var(--muted); }
 
 .view { padding: 26px; display: none; }
@@ -193,6 +194,7 @@ a { color: var(--brand); }
     transform: translateX(-105%); transition: transform .25s ease; box-shadow: var(--shadow);
   }
   .sidebar.is-open { transform: none; }
+  #nav-toggle { display: inline-flex; }
   .view { padding: 18px 16px; }
   .topbar { padding: 14px 16px; }
 }

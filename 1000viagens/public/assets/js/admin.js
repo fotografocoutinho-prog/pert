@@ -153,7 +153,6 @@
     fillFilterSelects();
     await Promise.all([loadStats(), loadLeads()]);
     switchView(location.hash.replace('#', '') in VIEWS ? location.hash.replace('#', '') : 'dashboard');
-    if (window.matchMedia('(max-width: 900px)').matches) $('#nav-toggle').style.display = '';
   }
 
   function paintBrand() {
