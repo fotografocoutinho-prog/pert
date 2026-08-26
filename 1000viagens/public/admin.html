@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backoffice — 1000viagens</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+<!-- ─────────────────────────────  Entrada  ─────────────────────────────── -->
+<div class="login" id="login" hidden>
+  <div class="login__card">
+    <div class="login__logo">
+      <svg width="38" height="38" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect width="48" height="48" rx="11" fill="#0E4F6B"/>
+        <circle cx="24" cy="24" r="15" fill="none" stroke="#7FC4DE" stroke-width="1.6" opacity=".55"/>
+        <path d="M32.6 15.4 26 26 15.4 32.6 22 22l10.6-6.6Z" fill="#F07A3C"/>
+        <circle cx="24" cy="24" r="2.2" fill="#FDFBF7"/>
+      </svg>
+      <b>1000<em>viagens</em></b>
+    </div>
+    <h1>Backoffice</h1>
+    <p>Entre para ver os pedidos de orçamento e gerir o site.</p>
+    <form id="login-form">
+      <div class="field">
+        <label class="lbl" for="password">Password</label>
+        <input class="input" type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <p class="hint" id="login-error" style="color:var(--critical)" hidden></p>
+      <button class="btn" type="submit" style="width:100%;margin-top:8px" id="login-submit">Entrar</button>
+    </form>
+    <p class="login__hint">Esqueceu-se da password? Defina <code>ADMIN_PASSWORD</code> no servidor e reinicie.</p>
+  </div>
+</div>
+
+<!-- ──────────────────────────────  Aplicação  ──────────────────────────── -->
+<div class="app" id="app" hidden>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__logo" id="sidebar-logo">
+      <svg width="30" height="30" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect width="48" height="48" rx="11" fill="#0E4F6B"/>
+        <path d="M32.6 15.4 26 26 15.4 32.6 22 22l10.6-6.6Z" fill="#F07A3C"/>
+        <circle cx="24" cy="24" r="2.2" fill="#FDFBF7"/>
+      </svg>
+      <b>1000<em>viagens</em></b>
+    </div>
+
+    <nav class="sidebar__nav" aria-label="Secções">
+      <button class="sidebar__link is-active" data-view="dashboard">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"/></svg>
+        Painel
+      </button>
+      <button class="sidebar__link" data-view="leads">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10" stroke-linecap="round"/></svg>
+        Pedidos <span id="leads-badge" class="pill pill--novo" style="margin-left:auto" hidden></span>
+      </button>
+
+      <div class="sidebar__section">Definições</div>
+      <button class="sidebar__link" data-view="brand">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 7v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V7l-8-4Z" stroke-linejoin="round"/></svg>
+        Marca e logótipo
+      </button>
+      <button class="sidebar__link" data-view="company">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round"/></svg>
+        Dados da empresa
+      </button>
+      <button class="sidebar__link" data-view="content">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8" stroke-linecap="round"/></svg>
+        Conteúdos do site
+      </button>
+      <button class="sidebar__link" data-view="integrations">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" stroke-linecap="round"/></svg>
+        Integrações
+      </button>
+      <button class="sidebar__link" data-view="security">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round"/></svg>
+        Segurança
+      </button>
+    </nav>
+
+    <div class="sidebar__foot">
+      <a class="sidebar__link" href="/" target="_blank" rel="noopener">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ver o site
+      </a>
+      <button class="sidebar__link" id="logout">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 17l5-5-5-5M20 12H9M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="btn btn--ghost btn--icon" id="nav-toggle" aria-label="Abrir menu" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <h1 id="view-title">Painel<span class="topbar__sub" id="view-sub">Resumo dos pedidos de orçamento</span></h1>
+      <button class="btn btn--ghost btn--icon" id="theme-toggle" aria-label="Alternar tema claro/escuro">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <!-- ── Painel ── -->
+    <section class="view is-active" id="view-dashboard" aria-labelledby="view-title">
+      <div class="filters" id="dash-filters">
+        <div class="segmented" id="range-presets" role="group" aria-label="Período">
+          <button data-range="30">30 dias</button>
+          <button data-range="90">90 dias</button>
+          <button data-range="365" class="is-active">12 meses</button>
+          <button data-range="tudo">Tudo</button>
+        </div>
+        <select class="select" id="filter-type" style="max-width:220px" aria-label="Tipo de viagem"></select>
+        <span class="hint" id="filter-note" style="margin-left:auto"></span>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="hero-stat">
+          <div>
+            <span class="stat__label">Valor médio por pedido</span>
+            <div class="hero-stat__value" id="kpi-hero">—</div>
+          </div>
+          <p class="hero-stat__meta" id="kpi-hero-meta">Média do orçamento estimado por pedido no período selecionado.</p>
+        </div>
+      </div>
+
+      <div class="grid grid--kpi" style="margin-bottom:16px">
+        <div class="card stat"><span class="stat__label">Pedidos recebidos</span><span class="stat__value" id="kpi-leads">—</span><span class="stat__delta" id="kpi-leads-sub"></span></div>
+        <div class="card stat"><span class="stat__label">Valor médio por pessoa</span><span class="stat__value" id="kpi-person">—</span><span class="stat__delta" id="kpi-person-sub"></span></div>
+        <div class="card stat"><span class="stat__label">Taxa de conversão</span><span class="stat__value" id="kpi-conv">—</span><span class="stat__delta" id="kpi-conv-sub"></span></div>
+        <div class="card stat"><span class="stat__label">Valor em carteira</span><span class="stat__value" id="kpi-pipeline">—</span><span class="stat__delta" id="kpi-pipeline-sub"></span></div>
+      </div>
+
+      <div class="grid grid--2">
+        <div class="card" style="grid-column:1/-1">
+          <div class="card__head">
+            <div><h3>Evolução dos pedidos</h3><p id="trend-sub">Pedidos recebidos ao longo do tempo</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="trend">Ver tabela</button></div>
+          </div>
+          <div id="chart-trend"></div>
+          <div class="table-view" id="table-trend" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Destinos mais pedidos</h3><p>Onde os clientes querem ir</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="destinations">Ver tabela</button></div>
+          </div>
+          <div id="chart-destinations"></div>
+          <div class="table-view" id="table-destinations" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Faixas etárias</h3><p>Idade de quem faz o pedido</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="ages">Ver tabela</button></div>
+          </div>
+          <div id="chart-ages"></div>
+          <div class="table-view" id="table-ages" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Tipo de viagem</h3><p>Que produtos procuram</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="types">Ver tabela</button></div>
+          </div>
+          <div id="chart-types"></div>
+          <div class="table-view" id="table-types" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Orçamento por pessoa</h3><p>Escalão indicado no pedido</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="budgets">Ver tabela</button></div>
+          </div>
+          <div id="chart-budgets"></div>
+          <div class="table-view" id="table-budgets" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Quando querem viajar</h3><p>Mês de partida pedido</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="season">Ver tabela</button></div>
+          </div>
+          <div id="chart-season"></div>
+          <div class="table-view" id="table-season" hidden></div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <div><h3>Funil comercial</h3><p>Estado dos pedidos no período</p></div>
+            <div class="card__actions"><button class="btn btn--ghost btn--sm" data-table="pipeline">Ver tabela</button></div>
+          </div>
+          <div id="chart-pipeline"></div>
+          <div class="table-view" id="table-pipeline" hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Pedidos ── -->
+    <section class="view" id="view-leads">
+      <div class="filters">
+        <input class="input grow" type="search" id="leads-search" placeholder="Procurar por nome, e-mail, destino ou referência…" aria-label="Procurar">
+        <select class="select" id="leads-status" style="max-width:190px" aria-label="Estado"></select>
+        <select class="select" id="leads-type" style="max-width:190px" aria-label="Tipo de viagem"></select>
+        <select class="select" id="leads-range" style="max-width:160px" aria-label="Período">
+          <option value="30">Últimos 30 dias</option>
+          <option value="90">Últimos 90 dias</option>
+          <option value="365" selected>Últimos 12 meses</option>
+          <option value="tudo">Desde sempre</option>
+        </select>
+        <a class="btn btn--ghost" id="export-csv" href="#" download>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></svg>
+          Exportar CSV
+        </a>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data" id="leads-table">
+          <thead>
+            <tr>
+              <th>Referência</th><th>Cliente</th><th>Viagem</th><th>Quando</th>
+              <th class="num">Viajantes</th><th class="num">Valor estimado</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="leads-body"></tbody>
+        </table>
+        <div class="empty" id="leads-empty" hidden>
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3" stroke-linecap="round"/></svg>
+          <p>Ainda não há pedidos com estes filtros.</p>
+        </div>
+      </div>
+      <p class="hint" id="leads-count" style="margin-top:12px"></p>
+    </section>
+
+    <!-- ── Definições (geradas pelo JavaScript) ── -->
+    <section class="view" id="view-brand"></section>
+    <section class="view" id="view-company"></section>
+    <section class="view" id="view-content"></section>
+    <section class="view" id="view-integrations"></section>
+    <section class="view" id="view-security"></section>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<!-- ── Detalhe do pedido ── -->
+<aside class="drawer" id="drawer" aria-label="Detalhe do pedido" aria-hidden="true">
+  <div class="drawer__head">
+    <div>
+      <h2 id="drawer-title">—</h2>
+      <p id="drawer-sub"></p>
+    </div>
+    <button class="btn btn--ghost btn--icon" id="drawer-close" aria-label="Fechar" style="margin-left:auto">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer__body" id="drawer-body"></div>
+  <div class="drawer__foot" id="drawer-foot"></div>
+</aside>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="/assets/js/charts.js"></script>
+<script src="/assets/js/admin.js"></script>
+</body>
+</html>

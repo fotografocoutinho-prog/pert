@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#04202F"/><stop offset="55%" stop-color="#0E4F6B"/>
+      <stop offset="82%" stop-color="#E0895A"/><stop offset="100%" stop-color="#F5B478"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#s)"/>
+  <circle cx="900" cy="470" r="90" fill="#FFE0B4" opacity=".9"/>
+  <path d="M0 470h1200v160H0z" fill="#08303F"/>
+  <g fill="#FFD9A8" opacity=".45">
+    <rect x="840" y="500" width="120" height="5" rx="2.5"/><rect x="800" y="530" width="200" height="5" rx="2.5"/>
+    <rect x="860" y="562" width="90" height="5" rx="2.5"/>
+  </g>
+  <text x="90" y="300" font-family="Georgia, serif" font-size="86" fill="#FDFBF7">1000<tspan fill="#F07A3C">viagens</tspan></text>
+  <text x="92" y="360" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#BFD9E4">Orçamentos de viagens feitos à medida · resposta em 24 h</text>
+</svg>

@@ -1,0 +1,13 @@
+# Dados de produção: pedidos, definições, sessões e uploads.
+# Nunca entram no repositório — são a base de dados do site.
+# A pasta é criada automaticamente no arranque do servidor.
+/data/
+
+# Ambiente
+.env
+.env.local
+
+# Sistema
+node_modules/
+*.log
+.DS_Store

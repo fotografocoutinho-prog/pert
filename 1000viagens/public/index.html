@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1000viagens — orçamentos de viagens feitos à medida</title>
+<meta name="description" content="Diga-nos para onde quer ir, quando e com que orçamento. A 1000viagens prepara uma proposta à medida em menos de 24 horas úteis. Sem custos e sem compromisso.">
+<meta name="theme-color" content="#0E4F6B">
+<link rel="canonical" href="/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="1000viagens">
+<meta property="og:title" content="1000viagens — a sua próxima viagem começa com quatro perguntas">
+<meta property="og:description" content="Orçamentos de viagens feitos à medida, em menos de 24 horas úteis. Sem custos e sem compromisso.">
+<meta property="og:image" content="/assets/img/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" id="favicon">
+<script>document.documentElement.classList.add('js');</script>
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/form.css">
+<script type="application/ld+json" id="schema-org">{}</script>
+</head>
+<body>
+
+<a class="sr-only" href="#pedido">Saltar para o pedido de orçamento</a>
+
+<!-- ─────────────────────────────  Cabeçalho  ───────────────────────────── -->
+<header class="header" id="header">
+  <div class="header__inner">
+    <a class="logo" href="/" id="logo">
+      <svg class="logo__mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="24" cy="24" r="23" stroke="currentColor" stroke-opacity=".28" stroke-width="1.5"/>
+        <path d="M24 5c6.5 5.2 9.8 11.6 9.8 19S30.5 37.8 24 43c-6.5-5.2-9.8-11.6-9.8-19S17.5 10.2 24 5Z" stroke="currentColor" stroke-opacity=".28" stroke-width="1.5"/>
+        <path d="M5.5 24h37" stroke="currentColor" stroke-opacity=".28" stroke-width="1.5"/>
+        <path d="M33.4 14.6 26.2 26.2 14.6 33.4l7.2-11.6 11.6-7.2Z" fill="#F07A3C"/>
+        <circle cx="24" cy="24" r="2.4" fill="currentColor"/>
+      </svg>
+      <span class="logo__text">
+        <span class="logo__name" id="logo-name">1000<em>viagens</em></span>
+        <span class="logo__tag" id="logo-tag">Agência de viagens</span>
+      </span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Navegação principal">
+      <a href="#destinos">Destinos</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#testemunhos">Testemunhos</a>
+      <a href="#faq">Perguntas</a>
+    </nav>
+
+    <a class="header__phone" id="header-phone" href="tel:" hidden>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span></span>
+    </a>
+
+    <a class="btn btn--accent btn--sm" href="#pedido">Pedir orçamento</a>
+
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Abrir menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+<!-- ───────────────────────────────  Herói  ─────────────────────────────── -->
+<section class="hero" id="topo">
+  <div class="hero__scene" aria-hidden="true">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" role="presentation">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#04202F"/>
+          <stop offset="38%" stop-color="#0B3D55"/>
+          <stop offset="63%" stop-color="#2A6F86"/>
+          <stop offset="80%" stop-color="#E0895A"/>
+          <stop offset="92%" stop-color="#F5B478"/>
+        </linearGradient>
+        <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#E9A473"/>
+          <stop offset="18%" stop-color="#1F6C8C"/>
+          <stop offset="100%" stop-color="#062634"/>
+        </linearGradient>
+        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#FFD9A8" stop-opacity=".95"/>
+          <stop offset="45%" stop-color="#F5A25F" stop-opacity=".35"/>
+          <stop offset="100%" stop-color="#F5A25F" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="ridge1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#123C51"/><stop offset="100%" stop-color="#0A2C3D"/>
+        </linearGradient>
+        <linearGradient id="ridge2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0A2C3D"/><stop offset="100%" stop-color="#061E2A"/>
+        </linearGradient>
+      </defs>
+
+      <rect width="1440" height="900" fill="url(#sky)"/>
+
+      <!-- estrelas -->
+      <g fill="#FFFFFF" opacity=".5">
+        <circle cx="180" cy="90" r="1.6"/><circle cx="360" cy="52" r="1.1"/><circle cx="520" cy="128" r="1.4"/>
+        <circle cx="760" cy="70" r="1"/><circle cx="980" cy="118" r="1.5"/><circle cx="1180" cy="60" r="1.2"/>
+        <circle cx="1320" cy="146" r="1.4"/><circle cx="90" cy="196" r="1"/><circle cx="640" cy="188" r="1.2"/>
+        <circle cx="1080" cy="210" r="1"/>
+      </g>
+
+      <!-- sol -->
+      <circle cx="1010" cy="632" r="230" fill="url(#sunGlow)"/>
+      <circle cx="1010" cy="632" r="72" fill="#FFE0B4"/>
+
+      <!-- nuvens -->
+      <g fill="#FFE0B4">
+        <rect x="806" y="556" width="408" height="7" rx="3.5" opacity=".3"/>
+        <rect x="890" y="584" width="270" height="6" rx="3" opacity=".24"/>
+        <rect x="770" y="610" width="470" height="8" rx="4" opacity=".18"/>
+      </g>
+
+      <!-- ilhas ao longe -->
+      <path d="M0 640 L120 566 190 610 268 540 350 640Z" fill="url(#ridge1)" opacity=".85"/>
+      <path d="M1180 640 L1268 572 1330 606 1400 548 1440 588 1440 640Z" fill="url(#ridge1)" opacity=".85"/>
+
+      <!-- mar -->
+      <rect y="640" width="1440" height="260" fill="url(#sea)"/>
+      <g fill="#FFD9A8" opacity=".5">
+        <rect x="946" y="668" width="128" height="4" rx="2"/>
+        <rect x="900" y="694" width="220" height="4" rx="2"/>
+        <rect x="960" y="722" width="100" height="4" rx="2"/>
+        <rect x="880" y="752" width="264" height="5" rx="2.5"/>
+        <rect x="940" y="792" width="150" height="4" rx="2"/>
+      </g>
+      <g fill="#FFFFFF" opacity=".14">
+        <rect x="120" y="704" width="180" height="3" rx="1.5"/>
+        <rect x="320" y="760" width="240" height="3" rx="1.5"/>
+        <rect x="60" y="826" width="300" height="3" rx="1.5"/>
+      </g>
+
+      <!-- costa em primeiro plano -->
+      <path d="M0 812 C 220 776 380 856 620 830 C 860 804 1060 866 1440 828 L1440 900 L0 900Z" fill="url(#ridge2)"/>
+
+      <!-- palmeira -->
+      <g fill="#04202F" opacity=".92">
+        <path d="M92 900 C 96 800 104 736 118 686 L134 690 C 122 742 116 806 116 900Z"/>
+        <path d="M126 682 C 90 654 46 648 8 664 42 634 96 634 126 664Z"/>
+        <path d="M126 678 C 108 636 74 606 30 592 78 592 122 622 138 668Z"/>
+        <path d="M132 676 C 146 632 184 600 232 592 190 614 160 646 148 684Z"/>
+        <path d="M134 684 C 172 660 220 656 262 672 220 646 168 646 132 672Z"/>
+        <path d="M130 690 C 154 706 168 734 170 764 148 736 134 716 122 702Z"/>
+      </g>
+
+      <!-- aves -->
+      <g stroke="#04202F" stroke-width="2.4" fill="none" opacity=".5" stroke-linecap="round">
+        <path d="M1150 400 q 14 -12 28 0 q 14 -12 28 0"/>
+        <path d="M1236 352 q 10 -9 20 0 q 10 -9 20 0"/>
+        <path d="M1088 452 q 8 -7 16 0 q 8 -7 16 0"/>
+      </g>
+    </svg>
+  </div>
+  <div class="hero__photo" id="hero-photo" hidden></div>
+  <div class="hero__veil"></div>
+
+  <div class="hero__inner">
+    <div class="hero__content">
+      <p class="eyebrow hero__eyebrow" id="hero-eyebrow">Agência de viagens · Portugal</p>
+      <h1 id="hero-title">A sua próxima viagem começa com <em>cinco perguntas</em></h1>
+      <p class="hero__sub" id="hero-subtitle">
+        Diga-nos para onde sonha ir, quando e com que orçamento. Em menos de 24 horas úteis
+        recebe uma proposta feita à mão por quem conhece o destino.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--accent" href="#pedido" id="hero-cta1">
+          Pedir orçamento gratuito
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn--light" href="#destinos" id="hero-cta2">Ver destinos</a>
+      </div>
+      <div class="hero__stats" id="hero-stats"></div>
+    </div>
+  </div>
+
+  <a class="hero__scroll" href="#destinos" aria-label="Ver mais">
+    Explorar
+    <span></span>
+  </a>
+</section>
+
+<!-- ─────────────────────────  Barra de confiança  ──────────────────────── -->
+<section class="trust">
+  <div class="container">
+    <div class="trust__grid">
+      <div class="trust__item">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><b>Agência licenciada</b><span id="trust-rnavt">Registo RNAVT</span></div>
+      </div>
+      <div class="trust__item">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><b>Resposta em 24 h</b><span>Dias úteis, sempre com nome e rosto</span></div>
+      </div>
+      <div class="trust__item">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 10h18M6 3v3M18 3v3" stroke-linecap="round"/><rect x="3" y="6" width="18" height="15" rx="2.5"/><path d="M8 14h4" stroke-linecap="round"/></svg>
+        <div><b>Pagamento faseado</b><span>Reserve agora, pague até à partida</span></div>
+      </div>
+      <div class="trust__item">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3a9 9 0 0 0-9 9v4a3 3 0 0 0 3 3h1v-7H5v-.5a7 7 0 0 1 14 0V15h-2v7h1a3 3 0 0 0 3-3v-4a9 9 0 0 0-9-9Z" stroke-linejoin="round"/></svg>
+        <div><b>Apoio em viagem</b><span>Falamos consigo, esteja onde estiver</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────  Destinos  ───────────────────────────── -->
+<section class="section" id="destinos">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="eyebrow">Inspiração</p>
+      <h2 id="destinations-title">Destinos que estão a encher malas</h2>
+      <p id="destinations-subtitle">Uma seleção da equipa para inspirar o seu pedido.</p>
+    </div>
+    <div class="destinations" id="destinations"></div>
+  </div>
+</section>
+
+<!-- ────────────────────────────  Como funciona  ────────────────────────── -->
+<section class="section section--sand" id="como-funciona">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">Simples e sem compromisso</p>
+      <h2 id="steps-title">Como funciona</h2>
+    </div>
+    <div class="steps reveal" id="steps"></div>
+  </div>
+</section>
+
+<!-- ─────────────────────  Formulário de pedido  ────────────────────────── -->
+<section class="section quote" id="pedido">
+  <div class="container">
+    <div class="quote__layout">
+      <aside class="quote__aside reveal">
+        <p class="eyebrow">Pedido de orçamento</p>
+        <h2 id="form-title">Conte-nos a viagem que tem em mente</h2>
+        <p id="form-subtitle">Quanto mais nos contar, mais afinada fica a proposta.</p>
+        <ul class="quote__promises">
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+            <span>Gratuito e sem compromisso — só paga se decidir viajar connosco.</span>
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+            <span>Leva cerca de três minutos e pode voltar atrás em qualquer passo.</span>
+          </li>
+          <li>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+            <span>Um consultor dedicado responde-lhe pelo canal que escolher.</span>
+          </li>
+        </ul>
+        <div class="quote__help" id="quote-help" hidden>
+          <b>Prefere falar connosco?</b>
+          <p style="margin:0;font-size:.9rem;color:var(--ink-soft)">
+            <a id="help-phone" href="tel:"></a><br>
+            <span id="help-hours"></span>
+          </p>
+        </div>
+      </aside>
+
+      <div class="quote__card reveal">
+        <!-- barra de progresso -->
+        <div class="quote__progress" id="quote-progress">
+          <div class="progress__meta">
+            <span>Passo <b id="progress-current">1</b> de 5</span>
+            <span id="progress-label">A viagem</span>
+          </div>
+          <div class="progress__track"><div class="progress__bar" id="progress-bar" style="width:20%"></div></div>
+          <div class="progress__dots" id="progress-dots" role="list"></div>
+        </div>
+
+        <form class="quote__body" id="quote-form" novalidate autocomplete="on">
+          <div class="form-alert" id="form-alert" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+            <span id="form-alert-text"></span>
+          </div>
+
+          <!-- Passo 1 — a viagem -->
+          <section class="step-panel is-active" data-step="1" aria-labelledby="step1-title">
+            <h3 id="step1-title">Que tipo de viagem procura?</h3>
+            <p class="step-panel__hint">Escolha o que mais se aproxima — ajustamos depois.</p>
+
+            <fieldset class="field" id="field-trip-type">
+              <legend class="sr-only">Tipo de viagem</legend>
+              <div class="choices choices--tiles" id="trip-types"></div>
+              <p class="field__error" id="error-trip-type">Escolha um tipo de viagem.</p>
+            </fieldset>
+
+            <div class="field" id="field-destination">
+              <label for="destination">Para onde quer ir?</label>
+              <input class="input" type="text" id="destination" name="destination" list="destinos-populares"
+                     placeholder="Ex.: Maldivas, Nova Iorque, cruzeiro no Mediterrâneo…" autocomplete="off">
+              <datalist id="destinos-populares"></datalist>
+              <p class="field__error" id="error-destination">Escreva o destino ou escolha a opção abaixo.</p>
+            </div>
+
+            <div class="consent" style="margin-bottom:0">
+              <input type="checkbox" id="undecided" name="undecided">
+              <label for="undecided"><b>Ainda não sei — surpreendam-me.</b> Sugerimos destinos a partir das datas, do orçamento e do tipo de viagem.</label>
+            </div>
+          </section>
+
+          <!-- Passo 2 — quando -->
+          <section class="step-panel" data-step="2" aria-labelledby="step2-title">
+            <h3 id="step2-title">Quando pensa viajar?</h3>
+            <p class="step-panel__hint">Se ainda não tem datas fechadas, indique só o mês.</p>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="start-date">Data de ida <span class="field__hint">opcional</span></label>
+                <input class="input" type="date" id="start-date" name="startDate">
+              </div>
+              <div class="field">
+                <label for="end-date">Data de volta <span class="field__hint">opcional</span></label>
+                <input class="input" type="date" id="end-date" name="endDate">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="month">Ou mês aproximado</label>
+                <input class="input" type="month" id="month" name="month">
+              </div>
+              <div class="field">
+                <label for="nights">Quantas noites?</label>
+                <select class="select" id="nights" name="nights">
+                  <option value="">Ainda não sei</option>
+                  <option value="3">2 a 3 noites</option>
+                  <option value="5">4 a 5 noites</option>
+                  <option value="7">6 a 8 noites</option>
+                  <option value="10">9 a 12 noites</option>
+                  <option value="15">13 a 20 noites</option>
+                  <option value="25">Mais de 20 noites</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="consent">
+              <input type="checkbox" id="flexible" name="flexible" checked>
+              <label for="flexible"><b>As minhas datas são flexíveis.</b> Se houver melhor preço uns dias antes ou depois, quero saber.</label>
+            </div>
+          </section>
+
+          <!-- Passo 3 — quem vai -->
+          <section class="step-panel" data-step="3" aria-labelledby="step3-title">
+            <h3 id="step3-title">Quem vai viajar?</h3>
+            <p class="step-panel__hint">As idades ajudam-nos a encontrar quartos e preços certos.</p>
+
+            <div class="grid-2">
+              <div class="counter">
+                <div class="counter__label"><b>Adultos</b><span>12 anos ou mais</span></div>
+                <div class="counter__controls">
+                  <button type="button" class="counter__btn" data-counter="adults" data-delta="-1" aria-label="Menos adultos">−</button>
+                  <span class="counter__value" id="adults-value" aria-live="polite">2</span>
+                  <button type="button" class="counter__btn" data-counter="adults" data-delta="1" aria-label="Mais adultos">+</button>
+                </div>
+              </div>
+              <div class="counter">
+                <div class="counter__label"><b>Crianças</b><span>0 a 11 anos</span></div>
+                <div class="counter__controls">
+                  <button type="button" class="counter__btn" data-counter="children" data-delta="-1" aria-label="Menos crianças">−</button>
+                  <span class="counter__value" id="children-value" aria-live="polite">0</span>
+                  <button type="button" class="counter__btn" data-counter="children" data-delta="1" aria-label="Mais crianças">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="child-ages" id="child-ages"></div>
+
+            <fieldset class="field" style="margin-top:22px">
+              <legend class="fieldset__legend">A sua faixa etária <span class="field__hint">ajuda-nos a sugerir o ritmo certo</span></legend>
+              <div class="chips" id="age-ranges"></div>
+            </fieldset>
+          </section>
+
+          <!-- Passo 4 — orçamento e preferências -->
+          <section class="step-panel" data-step="4" aria-labelledby="step4-title">
+            <h3 id="step4-title">Orçamento e preferências</h3>
+            <p class="step-panel__hint">Um valor aproximado por pessoa chega — não fica preso a ele.</p>
+
+            <fieldset class="field">
+              <legend class="fieldset__legend">Orçamento por pessoa</legend>
+              <div class="choices choices--list" id="budget-ranges"></div>
+            </fieldset>
+
+            <fieldset class="field">
+              <legend class="fieldset__legend">O que gostaria de ver incluído?</legend>
+              <div class="chips" id="includes"></div>
+            </fieldset>
+
+            <div class="grid-3">
+              <div class="field">
+                <label for="hotel-category">Categoria do hotel</label>
+                <select class="select" id="hotel-category" name="hotelCategory"></select>
+              </div>
+              <div class="field">
+                <label for="board">Regime</label>
+                <select class="select" id="board" name="board"></select>
+              </div>
+              <div class="field">
+                <label for="pace">Ritmo da viagem</label>
+                <select class="select" id="pace" name="pace"></select>
+              </div>
+            </div>
+
+            <fieldset class="field">
+              <legend class="fieldset__legend">O que não pode faltar? <span class="field__hint">escolha os que quiser</span></legend>
+              <div class="chips" id="interests"></div>
+            </fieldset>
+
+            <div class="field" style="margin-bottom:0">
+              <label for="notes">Há mais alguma coisa que devamos saber? <span class="field__hint">opcional</span></label>
+              <textarea class="textarea" id="notes" name="notes"
+                placeholder="Ex.: aniversário de casamento, mobilidade reduzida, quero voo direto, viajo com o meu cão…"></textarea>
+            </div>
+          </section>
+
+          <!-- Passo 5 — contactos -->
+          <section class="step-panel" data-step="5" aria-labelledby="step5-title">
+            <h3 id="step5-title">Para onde enviamos a proposta?</h3>
+            <p class="step-panel__hint">Falta pouco — só precisamos de saber como o contactar.</p>
+
+            <div class="summary" id="summary">
+              <h4>Resumo do pedido</h4>
+              <dl id="summary-list"></dl>
+            </div>
+
+            <div class="grid-2">
+              <div class="field" id="field-name">
+                <label for="name">Nome</label>
+                <input class="input" type="text" id="name" name="name" autocomplete="name" placeholder="Nome e apelido">
+                <p class="field__error" id="error-name">Diga-nos como se chama.</p>
+              </div>
+              <div class="field" id="field-email">
+                <label for="email">E-mail</label>
+                <input class="input" type="email" id="email" name="email" autocomplete="email" placeholder="nome@exemplo.pt">
+                <p class="field__error" id="error-email">Indique um e-mail válido.</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field" id="field-phone">
+                <label for="phone">Telemóvel <span class="field__hint">opcional</span></label>
+                <input class="input" type="tel" id="phone" name="phone" autocomplete="tel" placeholder="+351 900 000 000">
+                <p class="field__error" id="error-phone">Para contacto telefónico precisamos do número.</p>
+              </div>
+              <div class="field">
+                <label for="best-time">Melhor altura para falarmos</label>
+                <select class="select" id="best-time" name="bestTime"></select>
+              </div>
+            </div>
+
+            <fieldset class="field">
+              <legend class="fieldset__legend">Como prefere ser contactado?</legend>
+              <div class="chips" id="contact-channels"></div>
+            </fieldset>
+
+            <div class="field">
+              <label for="source">Como nos conheceu? <span class="field__hint">opcional</span></label>
+              <select class="select" id="source" name="source"></select>
+            </div>
+
+            <div class="consent" id="field-rgpd">
+              <input type="checkbox" id="rgpd" name="rgpd">
+              <label for="rgpd" id="rgpd-label">Autorizo a 1000viagens a tratar os meus dados para preparar este orçamento e a contactar-me sobre ele. <a href="/privacidade" target="_blank" rel="noopener">Política de privacidade</a>.</label>
+            </div>
+            <p class="field__error" id="error-rgpd" style="margin:-8px 0 14px">É necessário autorizar o tratamento dos dados.</p>
+
+            <div class="consent">
+              <input type="checkbox" id="marketing" name="marketing">
+              <label for="marketing">Quero receber sugestões de viagens e promoções por e-mail. Pode cancelar quando quiser.</label>
+            </div>
+
+            <!-- armadilha anti-robô (invisível para pessoas) -->
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+              <label for="website">Não preencher</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+          </section>
+
+          <!-- navegação -->
+          <div class="quote__nav">
+            <button type="button" class="btn btn--ghost btn--sm" id="btn-back" hidden>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Voltar
+            </button>
+            <span class="quote__nav-note" id="nav-note">Guardamos o rascunho neste dispositivo.</span>
+            <button type="button" class="btn btn--accent" id="btn-next">
+              Continuar
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button type="submit" class="btn btn--accent" id="btn-submit" hidden>
+              Enviar pedido
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            </button>
+          </div>
+        </form>
+
+        <!-- ecrã de sucesso -->
+        <div class="success" id="success" role="status">
+          <div class="success__badge">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+          </div>
+          <h3 id="success-title">Pedido recebido!</h3>
+          <p id="success-text">Obrigado — vamos analisar o seu pedido e responder em menos de 24 horas úteis.</p>
+          <div class="success__ref">
+            <span>Referência do pedido</span>
+            <b id="success-ref">—</b>
+          </div>
+          <div class="success__actions">
+            <a class="btn btn--accent" id="success-whatsapp" href="#" hidden>Falar já por WhatsApp</a>
+            <button type="button" class="btn btn--ghost" id="btn-new-request">Fazer outro pedido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────  Vantagens  ───────────────────────────── -->
+<section class="section section--paper" id="porque-nos">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">Porquê a 1000viagens</p>
+      <h2>Uma agência de pessoas, não de formulários automáticos</h2>
+    </div>
+    <div class="highlights reveal" id="highlights"></div>
+  </div>
+</section>
+
+<!-- ────────────────────────────  Testemunhos  ──────────────────────────── -->
+<section class="section section--sand" id="testemunhos">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">Histórias</p>
+      <h2 id="testimonials-title">O que dizem os nossos clientes</h2>
+    </div>
+    <div class="testimonials reveal" id="testimonials"></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────────  FAQ  ───────────────────────────────── -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <p class="eyebrow">Ainda com dúvidas?</p>
+      <h2 id="faq-title">Perguntas frequentes</h2>
+    </div>
+    <div class="faq reveal" id="faq-list"></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────  Faixa final  ─────────────────────────── -->
+<section class="cta-band">
+  <div class="container">
+    <h2 id="cta-title">Pronto para começar?</h2>
+    <p id="cta-text">Leva três minutos a preencher e não fica obrigado a nada.</p>
+    <p style="margin-top:26px">
+      <a class="btn btn--accent" href="#pedido">
+        Pedir o meu orçamento
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </p>
+  </div>
+</section>
+</main>
+
+<!-- ────────────────────────────────  Rodapé  ───────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <span class="logo">
+          <svg class="logo__mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <circle cx="24" cy="24" r="23" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"/>
+            <path d="M24 5c6.5 5.2 9.8 11.6 9.8 19S30.5 37.8 24 43c-6.5-5.2-9.8-11.6-9.8-19S17.5 10.2 24 5Z" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"/>
+            <path d="M5.5 24h37" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"/>
+            <path d="M33.4 14.6 26.2 26.2 14.6 33.4l7.2-11.6 11.6-7.2Z" fill="#F07A3C"/>
+            <circle cx="24" cy="24" r="2.4" fill="currentColor"/>
+          </svg>
+          <span class="logo__text">
+            <span class="logo__name" id="footer-logo-name">1000<em>viagens</em></span>
+            <span class="logo__tag" id="footer-tagline">Mil destinos, uma viagem só sua</span>
+          </span>
+        </span>
+        <p class="footer__about" id="footer-about">
+          Agência de viagens portuguesa. Organizamos viagens à medida para todo o mundo,
+          com atendimento humano do primeiro contacto ao regresso.
+        </p>
+        <div class="footer__socials" id="footer-socials"></div>
+      </div>
+
+      <div>
+        <h4>Navegar</h4>
+        <ul>
+          <li><a href="#destinos">Destinos</a></li>
+          <li><a href="#como-funciona">Como funciona</a></li>
+          <li><a href="#pedido">Pedir orçamento</a></li>
+          <li><a href="#faq">Perguntas frequentes</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Contactos</h4>
+        <ul id="footer-contacts"></ul>
+      </div>
+
+      <div>
+        <h4>Informação legal</h4>
+        <ul>
+          <li id="footer-legal-name">—</li>
+          <li id="footer-nif" hidden></li>
+          <li id="footer-rnavt" hidden></li>
+          <li><a href="/privacidade">Política de privacidade</a></li>
+          <li><a href="https://www.livroreclamacoes.pt" target="_blank" rel="noopener">Livro de reclamações</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© <span id="year">2026</span> <span id="footer-brand">1000viagens</span>. Todos os direitos reservados.</span>
+      <span>Feito com cuidado para quem gosta de viajar.</span>
+    </div>
+  </div>
+</footer>
+
+<a class="whatsapp" id="whatsapp" href="#" target="_blank" rel="noopener" aria-label="Falar por WhatsApp" hidden>
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 21.5c-1.7 0-3.3-.5-4.7-1.3l-3.3.9.9-3.2A9.4 9.4 0 0 1 2.6 12 9.4 9.4 0 0 1 12 2.6 9.4 9.4 0 0 1 21.4 12 9.4 9.4 0 0 1 12 21.5M12 .7C5.8.7.7 5.8.7 12c0 2 .5 3.9 1.5 5.6L.6 23.4l6-1.6c1.6.9 3.5 1.4 5.4 1.4 6.2 0 11.3-5.1 11.3-11.3S18.2.7 12 .7"/></svg>
+</a>
+
+<div class="cookie" id="cookie" hidden>
+  <p style="margin:0" id="cookie-text">Este site usa apenas armazenamento local para guardar o rascunho do seu pedido.</p>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn--sm btn--accent" id="cookie-ok" style="flex:1">Compreendi</button>
+    <a class="btn btn--sm btn--ghost" href="/privacidade">Saber mais</a>
+  </div>
+</div>
+
+<noscript>
+  <div style="padding:26px;background:#FEF6F4;text-align:center">
+    Para pedir orçamento online é preciso ativar o JavaScript.
+    Em alternativa, escreva-nos para <a href="mailto:geral@1000viagens.pt">geral@1000viagens.pt</a>.
+  </div>
+</noscript>
+
+<script src="/assets/js/scenes.js"></script>
+<script src="/assets/js/site.js"></script>
+</body>
+</html>
