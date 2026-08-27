@@ -469,7 +469,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     const asset = safeJoin(PUBLIC_DIR, url.pathname);
-    if (asset && (await serveFile(res, asset, { req }))) return;
+    if (asset) {
+      if (await serveFile(res, asset, { req })) return;
+      // Pastas: /viagens/maldivas/ → /viagens/maldivas/index.html
+      if (await serveFile(res, path.join(asset, 'index.html'), { req })) return;
+    }
 
     // 404 com a cara do site
     const notFound = await serveFile(res, path.join(PUBLIC_DIR, '404.html'));

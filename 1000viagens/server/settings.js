@@ -8,7 +8,8 @@
 export const DEFAULT_SETTINGS = {
   brand: {
     name: '1000viagens',
-    tagline: 'Mil destinos, uma viagem só sua',
+    siteUrl: 'https://www.1000viagens.pt',   // usado no canonical, Open Graph e sitemap
+    tagline: 'Travel Booking · mil destinos, uma viagem só sua',
     logoUrl: '',            // preenchido pelo upload no backoffice
     logoDarkUrl: '',
     faviconUrl: '',
@@ -18,7 +19,7 @@ export const DEFAULT_SETTINGS = {
   },
 
   company: {
-    legalName: '1000viagens — Agência de Viagens, Lda.',
+    legalName: '1000viagens — Travel Booking, Lda.',
     nif: '',
     rnavt: '',
     address: '',
@@ -41,7 +42,7 @@ export const DEFAULT_SETTINGS = {
 
   content: {
     hero: {
-      eyebrow: 'Agência de viagens · Portugal',
+      eyebrow: 'Travel Booking · Portugal',
       title: 'A sua próxima viagem começa com cinco perguntas',
       subtitle:
         'Diga-nos para onde sonha ir, quando e com que orçamento. Em menos de 24 horas úteis recebe uma proposta feita à mão por quem conhece o destino.',

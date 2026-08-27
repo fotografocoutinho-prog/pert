@@ -10,7 +10,11 @@
     "dev": "node --watch server/index.js",
     "seed": "node scripts/seed-demo.js",
     "reset": "node scripts/seed-demo.js --reset",
-    "test": "node scripts/test-api.mjs"
+    "test": "node scripts/test-api.mjs",
+    "build:seo": "node scripts/build-seo.mjs",
+    "build:cpanel": "node scripts/build-cpanel.mjs",
+    "test:cpanel": "node scripts/test-cpanel.mjs",
+    "test:all": "npm test && npm run build:cpanel && npm run test:cpanel"
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,16 @@
+# Só os pontos de entrada são acessíveis; os módulos internos (_*.php) não.
+Options -Indexes
+<FilesMatch "^_.*\.php$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+<IfModule mod_authz_core.c>
+  <Files "base">
+    Require all denied
+  </Files>
+</IfModule>

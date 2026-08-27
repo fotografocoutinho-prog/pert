@@ -1,0 +1,76 @@
+1000viagens — como pôr o site no ar (cPanel)
+==================================================================
+
+O QUE ESTÁ NESTA PASTA
+  index.php / index.html   página principal
+  admin.html               backoffice (endereço: /admin)
+  viagens/                 páginas de destino, já otimizadas para o Google
+  assets/                  imagens, estilos e código do site
+  api/                     o "motor" em PHP (pedidos, backoffice, estatísticas)
+  dados/                   onde ficam guardados os pedidos e as definições
+  uploads/                 imagens que enviar pelo backoffice (logótipo, fotos)
+  .htaccess                regras do servidor (endereços, segurança, velocidade)
+
+
+PASSO 1 — CARREGAR OS FICHEIROS
+  1. Entre no cPanel → File Manager → pasta public_html.
+  2. Carregue o ficheiro 1000viagens-cpanel.zip.
+  3. Clique com o botão direito → Extract.
+  4. Apague o .zip depois de extrair.
+
+  Se o site vai ficar num subdomínio ou numa subpasta, extraia para a pasta
+  correspondente em vez de public_html.
+
+
+PASSO 2 — PERMISSÕES DAS PASTAS
+  No File Manager, clique com o botão direito em cada uma destas pastas →
+  Change Permissions, e ponha 755 (ou 775 se 755 não deixar gravar):
+
+      dados/      uploads/
+
+  É nelas que o site grava os pedidos e as imagens.
+
+
+PASSO 3 — PRIMEIRA ENTRADA NO BACKOFFICE
+  Abra https://oseudominio.pt/admin
+  Password inicial:  1000viagens
+  Mude-a logo em Segurança → Mudar password.
+
+
+PASSO 4 — PREENCHER OS SEUS DADOS
+  No backoffice:
+   · Marca e logótipo → carregue o logótipo e escreva o ENDEREÇO DO SITE
+     (por exemplo https://www.oseudominio.pt). Este passo é importante:
+     é o endereço que o Google indexa.
+   · Dados da empresa → NIF, RNAVT, morada, telefone, WhatsApp, e-mail.
+   · Integrações → e-mail para receber os pedidos e o código TravelPartner.
+
+
+PASSO 5 — SSL E ENDEREÇO ÚNICO
+  1. cPanel → Segurança → SSL/TLS Status → ative o certificado gratuito.
+  2. Abra o ficheiro .htaccess (File Manager → Edit) e retire o # das linhas
+     do HTTPS e da versão do domínio que escolher (com ou sem www).
+
+
+PASSO 6 — DIZER AO GOOGLE QUE O SITE EXISTE
+  1. Vá a search.google.com/search-console e adicione a propriedade do domínio.
+  2. Em "Sitemaps", submeta:  sitemap.xml
+  3. Em "Inspeção de URL", peça a indexação da página inicial.
+  4. Crie também o perfil gratuito em business.google.com (Perfil de Empresa) —
+     para pesquisas locais é o que mais peso tem.
+
+  O sitemap já inclui a página inicial, o índice de destinos e cada página de
+  destino. As páginas novas aparecem no Google em regra ao fim de alguns dias.
+
+
+DÚVIDAS FREQUENTES
+  · "O backoffice diz que não consegue gravar" → permissões da pasta dados/.
+  · "As imagens não aparecem" → permissões da pasta uploads/.
+  · "Não recebo os e-mails" → confirme o e-mail em Integrações e veja a pasta
+    de spam; alguns alojamentos exigem que o remetente seja do mesmo domínio.
+  · "Acrescentei destinos no backoffice e não têm página própria" → as páginas
+    de destino são geradas quando o pacote é preparado; peça a regeneração.
+
+CÓPIA DE SEGURANÇA
+  Guarde de vez em quando a pasta dados/ (e uploads/). É aí que estão todos os
+  pedidos dos clientes e as definições do site.

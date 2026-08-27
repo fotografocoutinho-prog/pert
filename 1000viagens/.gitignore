@@ -11,3 +11,9 @@
 node_modules/
 *.log
 .DS_Store
+
+# O pacote pronto para cPanel é versionado de propósito: assim pode ser
+# descarregado do GitHub sem ter de instalar nada.
+# (Regenera-se sempre com: npm run build:cpanel)
+!/dist/
+!/dist/**

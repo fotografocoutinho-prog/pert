@@ -1,0 +1,201 @@
+{
+  "_leia-me": "Conteúdo editorial das páginas de destino (/viagens/<slug>/). A informação comercial — preço, noites, etiqueta, ilustração — vem do backoffice; o texto vem daqui. Para acrescentar um destino novo, copie um bloco e mude o que precisar; sem bloco próprio, a página é gerada a partir de um modelo genérico.",
+
+  "maldivas": {
+    "title": "Viagens para as Maldivas",
+    "metaDescription": "Viagens para as Maldivas com voos, transferes de hidroavião e resort escolhido a dedo. Orçamento à medida em 24 horas, grátis e sem compromisso.",
+    "intro": "As Maldivas são o destino que quase toda a gente tem na lista e poucos sabem por onde começar: são mais de mil ilhas, cada resort é praticamente uma ilha inteira e a escolha certa muda por completo a viagem. Tratamos disso consigo — dizemos-lhe onde vale a pena ficar consoante o que procura (mergulho, sossego, lua de mel, família) e montamos a viagem de porta a porta.",
+    "why": [
+      "Água transparente e temperatura estável durante todo o ano, entre 28 °C e 31 °C.",
+      "Bangalôs sobre a água, com acesso direto ao mar e recife à porta.",
+      "Mergulho e snorkeling entre mantas, tartarugas e tubarões-baleia.",
+      "Regime de tudo incluído que evita surpresas na fatura no fim da estadia."
+    ],
+    "bestTime": "A época seca vai de novembro a abril, com sol firme e mar calmo — é também a altura mais concorrida e mais cara. De maio a outubro há aguaceiros curtos, o verde fica mais intenso e os preços descem bastante; para quem não precisa de viajar em agosto, é a melhor relação entre custo e experiência.",
+    "practical": {
+      "Como se chega": "Sem voo direto de Portugal. Faz-se escala em Dubai, Doha ou Istambul, com 13 a 16 horas de viagem até Malé, e daí hidroavião ou lancha rápida até ao resort.",
+      "Documentos": "Passaporte válido por mais de 6 meses. O visto de turismo (30 dias) é gratuito e dado à chegada.",
+      "Moeda": "Rufiyaa, mas nos resorts paga-se em dólares, euros ou cartão.",
+      "Fuso horário": "Mais 4 horas do que em Portugal continental.",
+      "Duração típica": "7 a 10 noites, muitas vezes com uma noite em Dubai à ida ou à volta."
+    },
+    "included": [
+      "Voos com escala e bagagem de porão",
+      "Transfere de hidroavião ou lancha entre Malé e o resort",
+      "Resort com regime de meia pensão ou tudo incluído",
+      "Seguro de viagem com cobertura médica",
+      "Assistência em português durante toda a viagem"
+    ],
+    "faq": [
+      { "q": "Quanto custa uma viagem às Maldivas?", "a": "Uma semana com voos, transferes e resort de 4 ou 5 estrelas começa perto dos 1.890 € por pessoa na época baixa. Em época alta, e em bangalôs sobre a água, os valores sobem. Diga-nos o seu orçamento e mostramos o que é possível dentro dele." },
+      { "q": "Vale a pena ficar num bangalô sobre a água?", "a": "Vale para quem procura privacidade e a experiência de entrar no mar a partir do quarto. Uma solução frequente é dividir a estadia: umas noites em bangalô de praia e as últimas sobre a água." },
+      { "q": "Dá para ir com crianças?", "a": "Dá, e há resorts pensados para isso, com clube infantil, piscina própria e refeições adaptadas. Outros são só para adultos — dizemos-lhe quais antes de reservar." },
+      { "q": "Preciso de vacinas?", "a": "Não há vacinas obrigatórias para viajantes vindos de Portugal. Recomendamos sempre uma consulta do viajante antes da partida." }
+    ]
+  },
+
+  "ilhas-gregas": {
+    "title": "Viagens para as Ilhas Gregas",
+    "metaDescription": "Santorini, Mykonos, Creta ou Rodes: montamos a sua viagem às ilhas gregas com voos e hotel. Orçamento à medida em 24 horas, sem compromisso.",
+    "intro": "As ilhas gregas não são todas iguais e é aí que a maioria das viagens se decide. Santorini vive das vistas de caldeira e do pôr do sol; Mykonos é vida noturna e praias organizadas; Creta e Rodes têm história, aldeias e distâncias que pedem carro; Naxos e Milos são a escolha de quem quer preços mais contidos. Ajudamos a escolher — e a combinar duas ilhas na mesma viagem, se fizer sentido.",
+    "why": [
+      "Voos diretos sazonais a partir de Lisboa e do Porto, com pouco mais de três horas e meia de viagem.",
+      "Praias de água transparente e aldeias brancas com vista de mar.",
+      "Gastronomia simples e barata fora das zonas mais turísticas.",
+      "Fácil combinar duas ou três ilhas por ferry, sem voltar ao continente."
+    ],
+    "bestTime": "Maio, junho, setembro e início de outubro são o ponto certo: mar quente, calor suportável e preços bem abaixo dos de agosto. Julho e agosto são a época alta, com tudo aberto, muita gente e o meltemi — o vento do norte que refresca mas condiciona alguns ferries.",
+    "practical": {
+      "Como se chega": "Voo direto para Atenas todo o ano e, no verão, também para Santorini, Mykonos, Creta e Rodes. Cerca de 3h30 de viagem.",
+      "Documentos": "Cartão de cidadão chega — a Grécia é da União Europeia.",
+      "Moeda": "Euro.",
+      "Fuso horário": "Mais 2 horas do que em Portugal continental.",
+      "Duração típica": "7 noites numa ilha, ou 10 noites para combinar duas."
+    },
+    "included": [
+      "Voos diretos ou com uma escala, com bagagem",
+      "Hotel escolhido pela localização, não só pelo preço",
+      "Transferes do aeroporto ou porto até ao hotel",
+      "Ferries entre ilhas, quando a viagem os inclui",
+      "Seguro de viagem e assistência em português"
+    ],
+    "faq": [
+      { "q": "Que ilha grega escolher na primeira viagem?", "a": "Santorini para as vistas e o romance, Creta para quem quer praia e história com mais dias, Naxos ou Paros para uma viagem tranquila e mais barata. Diga-nos o que procura e sugerimos duas ou três opções." },
+      { "q": "Dá para visitar mais do que uma ilha?", "a": "Dá, e é frequente. Os ferries ligam quase tudo no verão. O nosso conselho é não fazer mais de duas ilhas em sete noites — cada mudança come meio dia." },
+      { "q": "Quanto custa uma semana nas ilhas gregas?", "a": "A partir de cerca de 740 € por pessoa com voo e hotel, fora da época alta. Em agosto, e em Santorini com vista de caldeira, os valores sobem muito." },
+      { "q": "É preciso alugar carro?", "a": "Em Creta e Rodes compensa. Em ilhas pequenas como Santorini, os autocarros e táxis chegam para quase tudo." }
+    ]
+  },
+
+  "laponia": {
+    "title": "Viagens para a Lapónia",
+    "metaDescription": "Lapónia com aurora boreal, trenós de husky e a aldeia do Pai Natal. Viagem organizada com voos, alojamento e atividades. Orçamento em 24 horas.",
+    "intro": "A Lapónia é uma viagem de inverno que se prepara com antecedência — o alojamento com vista para a aurora esgota cedo e as atividades marcam-se antes de chegar. Organizamos o pacote completo: voos, transferes, alojamento aquecido, fato térmico e as experiências que fazem a diferença, da caça à aurora ao trenó de renas.",
+    "why": [
+      "Aurora boreal em noites limpas entre setembro e março.",
+      "Trenós de husky e de renas, motas de neve e passeios com raquetes.",
+      "A aldeia do Pai Natal em Rovaniemi, aberta todo o ano.",
+      "Dormir em iglus de vidro ou cabanas com vista para o céu."
+    ],
+    "bestTime": "De dezembro a março há neve garantida, gelo firme e todas as atividades a funcionar — dezembro é o mês do Natal e o mais procurado por famílias. Setembro, outubro e novembro são mais baratos e continuam a ter boas noites de aurora, mas com menos neve.",
+    "practical": {
+      "Como se chega": "Voo com escala em Helsínquia, Estocolmo ou Oslo até Rovaniemi, Kittilä ou Ivalo. Entre 6 e 9 horas de viagem, contando a escala.",
+      "Documentos": "Cartão de cidadão chega — Finlândia e Suécia são da União Europeia.",
+      "Moeda": "Euro na Finlândia; coroa sueca na Suécia.",
+      "Temperatura": "Entre -5 °C e -25 °C no inverno. O equipamento térmico costuma estar incluído nas atividades.",
+      "Duração típica": "4 a 5 noites, que chegam para 3 ou 4 atividades sem correrias."
+    },
+    "included": [
+      "Voos com escala e bagagem de porão",
+      "Alojamento aquecido, com opção de iglu de vidro",
+      "Transferes do aeroporto",
+      "Atividades reservadas antes da partida (husky, renas, caça à aurora)",
+      "Equipamento térmico e seguro de viagem"
+    ],
+    "faq": [
+      { "q": "Vou mesmo ver a aurora boreal?", "a": "Ninguém pode garantir — depende da atividade solar e do céu estar limpo. Com três ou quatro noites na Lapónia entre setembro e março, as probabilidades são elevadas, e as caçadas à aurora com guia aumentam-nas bastante." },
+      { "q": "É uma viagem para crianças?", "a": "É, e das melhores. A aldeia do Pai Natal, os trenós e a neve funcionam muito bem com miúdos. Escolhemos atividades com idade mínima adequada." },
+      { "q": "Quanto custa uma viagem à Lapónia?", "a": "A partir de cerca de 1.250 € por pessoa por 4 noites, com voos, alojamento e atividades. Em dezembro os preços sobem — quem reserva com seis meses de antecedência poupa bastante." },
+      { "q": "Que roupa é preciso levar?", "a": "Roupa térmica em camadas, gorro, luvas e botas quentes. O fato térmico exterior e as botas de neve costumam estar incluídos nas atividades." }
+    ]
+  },
+
+  "marraquexe": {
+    "title": "Viagens para Marraquexe",
+    "metaDescription": "Escapadinha a Marraquexe com voo direto e riad na medina. Fim de semana prolongado ou uma semana com o deserto incluído. Orçamento em 24 horas.",
+    "intro": "Marraquexe está a menos de duas horas de voo e parece outro mundo: a medina, os souks, os jardins e a praça Jemaa el-Fna à noite. É o destino perfeito para um fim de semana prolongado, e ganha muito se lhe juntar dois dias no deserto ou nas montanhas do Atlas.",
+    "why": [
+      "Voo direto de Lisboa em cerca de 1h45.",
+      "Riads com pátio e piscina dentro da medina, a preços difíceis de encontrar noutro sítio.",
+      "Souks, o jardim Majorelle, os palácios e o hammam.",
+      "Fácil de esticar até ao deserto de Agafay, ao vale de Ourika ou a Essaouira."
+    ],
+    "bestTime": "Março a maio e setembro a novembro são os meses ideais, com temperaturas entre os 20 °C e os 28 °C. O verão passa muito facilmente dos 40 °C; o inverno é ameno de dia e frio à noite, e é a época mais barata.",
+    "practical": {
+      "Como se chega": "Voo direto de Lisboa (cerca de 1h45) ou com escala a partir do Porto.",
+      "Documentos": "Passaporte válido. Os cidadãos portugueses não precisam de visto para estadias até 90 dias.",
+      "Moeda": "Dirham marroquino. Levante dinheiro no destino; nos souks negoceia-se e paga-se em numerário.",
+      "Fuso horário": "O mesmo de Portugal continental durante quase todo o ano.",
+      "Duração típica": "3 a 4 noites, ou 6 a 7 se juntar deserto e Atlas."
+    },
+    "included": [
+      "Voo direto com bagagem",
+      "Riad ou hotel na medina, com transfere do aeroporto",
+      "Visitas com guia em português, se quiser",
+      "Excursões ao deserto de Agafay, Atlas ou Essaouira",
+      "Seguro de viagem e assistência"
+    ],
+    "faq": [
+      { "q": "Quantos dias chegam para conhecer Marraquexe?", "a": "Três noites chegam para a medina, os jardins, os palácios e um jantar na praça. Com cinco ou seis noites já dá para incluir o deserto de Agafay e um dia no Atlas." },
+      { "q": "É seguro viajar para Marraquexe?", "a": "É um destino turístico consolidado e as zonas visitadas são seguras. Como em qualquer cidade grande, convém ter atenção aos pertences e combinar preços antes de aceitar serviços." },
+      { "q": "Quanto custa uma escapadinha a Marraquexe?", "a": "A partir de cerca de 390 € por pessoa com voo direto e três noites em riad. Datas fora de férias escolares baixam bastante o valor." },
+      { "q": "Dá para fazer com crianças?", "a": "Dá. Os riads costumam ter piscina, e há passeios de camelo, quintas no Atlas e a praia de Essaouira a duas horas e meia." }
+    ]
+  },
+
+  "cruzeiro-no-mediterraneo": {
+    "title": "Cruzeiros no Mediterrâneo",
+    "metaDescription": "Cruzeiros no Mediterrâneo com pensão completa, várias cidades numa só viagem e voos incluídos. Escolhemos o navio e a cabina certos. Orçamento em 24 horas.",
+    "intro": "Um cruzeiro no Mediterrâneo resolve o problema de querer ver muito sem fazer e desfazer malas: dorme-se sempre no mesmo sítio e acorda-se num porto diferente. A diferença está no navio, na cabina e no itinerário — e é aí que entramos, para que não pague por aquilo de que não precisa.",
+    "why": [
+      "Barcelona, Roma, Nápoles, Palma, Marselha ou as ilhas gregas na mesma viagem.",
+      "Pensão completa a bordo, com entretenimento e atividades incluídas.",
+      "Cabinas para famílias e camarotes com varanda a preços muito diferentes conforme a época.",
+      "Voos e transferes até ao porto de embarque tratados por nós."
+    ],
+    "bestTime": "De abril a outubro, com o pico em julho e agosto. Maio, junho, setembro e outubro dão o melhor equilíbrio: tempo bom, portos menos cheios e tarifas mais simpáticas. As saídas de inverno existem, com itinerários mais curtos e preços baixos.",
+    "practical": {
+      "Como se chega": "Voo até ao porto de embarque — Barcelona, Génova, Civitavecchia (Roma), Marselha ou Veneza — mais transfere até ao terminal.",
+      "Documentos": "Cartão de cidadão para itinerários dentro da União Europeia; passaporte se houver escalas em Marrocos, Turquia ou Israel.",
+      "Moeda": "Euro na maioria dos portos. A bordo, tudo é debitado no cartão associado à cabina.",
+      "Duração típica": "7 noites, com embarque ao sábado ou ao domingo.",
+      "A bordo": "Refeições, espetáculos, piscinas e clube infantil incluídos. Bebidas, excursões e spa costumam ser à parte."
+    },
+    "included": [
+      "Voos de e para o porto de embarque",
+      "Cruzeiro em cabina interior, exterior ou com varanda",
+      "Pensão completa a bordo",
+      "Taxas portuárias e transferes",
+      "Pacote de bebidas e excursões, se quiser incluí-los"
+    ],
+    "faq": [
+      { "q": "O que está incluído no preço de um cruzeiro?", "a": "Alojamento, todas as refeições principais, entretenimento a bordo, piscinas e clubes infantis. Bebidas, excursões em terra, spa e restaurantes de especialidade pagam-se à parte — dizemos-lhe sempre o que fica de fora." },
+      { "q": "Vale a pena a cabina com varanda?", "a": "Em itinerários com muita navegação, faz diferença. Em cruzeiros que atracam todos os dias, a cabina interior chega e a diferença de preço dá para as excursões." },
+      { "q": "Quanto custa um cruzeiro no Mediterrâneo?", "a": "A partir de cerca de 690 € por pessoa por 7 noites em pensão completa, sem voos. Com voos e taxas, conte a partir de 900 €, conforme a época." },
+      { "q": "É bom para famílias?", "a": "É dos formatos mais confortáveis com crianças: clube infantil, refeições a qualquer hora e um destino novo por dia sem mudar de quarto." }
+    ]
+  },
+
+  "nova-iorque": {
+    "title": "Viagens para Nova Iorque",
+    "metaDescription": "City break em Nova Iorque com voo direto de Lisboa e hotel em Manhattan. Passeios, musicais e miradouros incluídos à medida. Orçamento em 24 horas.",
+    "intro": "Nova Iorque é o city break que toda a gente quer fazer uma vez — e que corre muito melhor quando o hotel fica no sítio certo e os bilhetes estão comprados antes de sair de casa. Tratamos do voo direto, do hotel em Manhattan e das reservas que costumam esgotar: miradouros, musicais e jogos.",
+    "why": [
+      "Voo direto de Lisboa em cerca de 8 horas.",
+      "Central Park, Times Square, a Estátua da Liberdade e os miradouros dos arranha-céus.",
+      "Museus de primeira linha: MoMA, Met, Museu de História Natural.",
+      "Bilhetes para musicais da Broadway e jogos da NBA ou MLB reservados antes da partida."
+    ],
+    "bestTime": "Abril a junho e setembro a novembro dão as melhores temperaturas para andar a pé. Dezembro tem a cidade decorada e o ambiente de Natal, com preços de hotel bem mais altos. Janeiro e fevereiro são frios e são a época mais barata do ano.",
+    "practical": {
+      "Como se chega": "Voo direto de Lisboa para Newark ou JFK, cerca de 8 horas. Do Porto, com uma escala.",
+      "Documentos": "Passaporte eletrónico e autorização ESTA, pedida online antes da viagem. Trate dela com pelo menos duas semanas de antecedência.",
+      "Moeda": "Dólar americano. Praticamente tudo se paga com cartão.",
+      "Fuso horário": "Menos 5 horas do que em Portugal continental.",
+      "Duração típica": "5 noites, que dão para os essenciais sem correrias."
+    },
+    "included": [
+      "Voo direto com bagagem de porão",
+      "Hotel em Manhattan, escolhido pela zona e pelos transportes",
+      "Transferes do aeroporto, se quiser",
+      "Bilhetes para miradouros, musicais e museus",
+      "Seguro de viagem com cobertura médica reforçada para os Estados Unidos"
+    ],
+    "faq": [
+      { "q": "Quantos dias são precisos em Nova Iorque?", "a": "Cinco noites é o mínimo confortável para os principais pontos. Com sete, dá para incluir bairros como o Brooklyn e Harlem sem andar sempre a correr." },
+      { "q": "Preciso de visto para os Estados Unidos?", "a": "Não, mas precisa de passaporte eletrónico e da autorização ESTA, pedida online antes de viajar. Tratamos de o avisar com tempo e explicamos o processo." },
+      { "q": "Em que zona convém ficar?", "a": "Midtown para quem quer tudo à mão, Upper West Side para uma zona mais tranquila junto ao Central Park, Brooklyn para preços mais baixos com boa ligação de metro." },
+      { "q": "Quanto custa uma viagem a Nova Iorque?", "a": "A partir de cerca de 980 € por pessoa com voo e cinco noites de hotel, fora das épocas de maior procura. Dezembro e as férias escolares são mais caros." }
+    ]
+  }
+}

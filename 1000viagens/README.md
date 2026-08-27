@@ -1,20 +1,47 @@
 # 1000viagens
 
-Site de agência de viagens com **página de captação de pedidos de orçamento** e
-**backoffice** para gerir marca, conteúdos, pedidos e estatísticas.
+Site de travel booking com **página de captação de pedidos de orçamento**,
+**páginas de destino otimizadas para o Google** e **backoffice** para gerir
+marca, conteúdos, pedidos e estatísticas.
 
 Feito de raiz, **sem dependências externas** (nem npm install, nem base de dados,
-nem CDN): só o Node.js. Arranca em segundos em qualquer alojamento.
+nem CDN). Corre em dois sítios, com o mesmo comportamento:
+
+| Alojamento | Como |
+|---|---|
+| **cPanel / alojamento partilhado** (recomendado) | `npm run build:cpanel` → carregue `dist/1000viagens-cpanel.zip` para `public_html` e extraia. Só precisa de PHP 7.4+. |
+| **Servidor próprio com Node** | `npm start` |
 
 | | |
 |---|---|
-| Site público | `http://localhost:3000/` |
-| Backoffice | `http://localhost:3000/admin` |
-| Política de privacidade | `http://localhost:3000/privacidade` |
+| Site público | `/` |
+| Destinos | `/viagens/` e `/viagens/<destino>/` |
+| Backoffice | `/admin` |
+| Política de privacidade | `/privacidade` |
 
 ---
 
-## Arrancar em 30 segundos
+## Pôr no ar num alojamento cPanel
+
+```bash
+npm run build:cpanel
+```
+
+Gera `dist/1000viagens-cpanel.zip`. No cPanel:
+
+1. **File Manager → public_html** → carregue o `.zip` → botão direito → **Extract**.
+2. Ponha as pastas `dados/` e `uploads/` em **755** (Change Permissions).
+3. Abra `https://oseudominio.pt/admin` — password inicial `1000viagens`, mude-a logo.
+4. No backoffice, preencha **Marca → Endereço do site** com o seu domínio.
+5. Ative o **SSL** no cPanel e retire o `#` das linhas de HTTPS no `.htaccess`.
+6. Submeta `sitemap.xml` no Google Search Console.
+
+As instruções completas, passo a passo, ficam em `dist/cpanel/LEIA-ME.txt`.
+O ficheiro `docs/SEO.md` explica o que fazer a seguir para aparecer nas pesquisas.
+
+---
+
+## Arrancar em 30 segundos (Node, para desenvolvimento)
 
 ```bash
 cd 1000viagens
@@ -36,7 +63,8 @@ npm run seed -- --clear   # apaga tudo quando já não precisar
 
 ## O que o cliente vê
 
-Uma página única, pensada para transformar visitas em pedidos:
+Uma página principal pensada para transformar visitas em pedidos, mais uma
+página por destino para captar quem procura no Google:
 
 - **Herói** com ilustração de pôr do sol desenhada em SVG (ou a sua fotografia).
 - **Destinos em destaque** — cada cartão abre o formulário com o destino preenchido.
@@ -48,6 +76,9 @@ Uma página única, pensada para transformar visitas em pedidos:
   4. orçamento por pessoa, o que quer incluído, hotel, regime, ritmo, interesses e notas;
   5. contactos, canal e horário preferidos, como nos conheceu, RGPD e marketing.
 - **Como funciona**, **porquê nós**, **testemunhos**, **perguntas frequentes**.
+- **Páginas de destino** (`/viagens/maldivas/`, `/viagens/laponia/`…) com texto
+  próprio, melhor altura para viajar, o que está incluído, informação prática,
+  perguntas frequentes e ligação ao formulário já com o destino preenchido.
 - **Rodapé** com contactos, morada, NIF, RNAVT e ligação ao Livro de Reclamações.
 - Botão flutuante de **WhatsApp** e aviso de privacidade.
 
@@ -239,13 +270,28 @@ cada nova versão.
 ## Comandos
 
 ```bash
-npm start                  # arrancar
+npm start                  # arrancar (Node)
 npm run dev                # arrancar com recarregamento automático
-npm test                   # 32 testes de ponta a ponta da API
+npm test                   # 32 testes de ponta a ponta da API em Node
+npm run build:seo          # gerar as páginas de destino, sitemap e robots
+npm run build:cpanel       # preparar dist/1000viagens-cpanel.zip
+npm run test:cpanel        # 39 testes do pacote PHP (precisa de php na máquina)
+npm run test:all           # tudo acima, pela ordem certa
 npm run seed               # dados de demonstração
 npm run seed -- --reset    # regerar os dados de demonstração
 npm run seed -- --clear    # apagar todos os pedidos
 ```
+
+## Onde estão as coisas
+
+| Precisa de… | Mexa em |
+|---|---|
+| texto das páginas de destino | `content/destinos.json` |
+| opções do formulário | `server/catalog.js` |
+| textos e conteúdos do site | backoffice → Conteúdos do site |
+| o motor PHP do cPanel | `cpanel/api/` |
+| regras do Apache | `cpanel/.htaccess` |
+| estratégia de pesquisa | `docs/SEO.md` |
 
 ## Notas de desenho
 
