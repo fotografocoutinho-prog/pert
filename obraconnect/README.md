@@ -1,58 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ObraConnect
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plataforma SaaS de gestão integral de obras, engenharia e fiscalização, para empresas de construção em Portugal.
+Laravel 13 + Vue 3, MySQL/MariaDB, pensada para correr em **cPanel** e migrar para VPS sem reescrever código.
 
-## About Laravel
+**Versão 0.1.0 — Fase 1 (fundação SaaS multi-tenant).** O que está feito e o que falta: [`docs/PROGRESSO.md`](docs/PROGRESSO.md).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Documentação
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| | Documento |
+| --- | --- |
+| A | [Análise funcional e lacunas](docs/01-analise-funcional.md) |
+| B | [Arquitetura técnica](docs/02-arquitetura.md) |
+| C | [Modelo de dados e diagrama ER](docs/03-modelo-dados.md) |
+| D | [Módulos e dependências](docs/04-modulos.md) |
+| E | [Matriz de permissões](docs/05-matriz-permissoes.md) |
+| F | [MVP e critérios de aceitação](docs/06-mvp.md) |
+| G | [Plano de desenvolvimento e riscos](docs/08-plano-desenvolvimento.md) |
+| H | Estrutura e instalação (este ficheiro) |
+| | [Guia de instalação em cPanel](docs/07-guia-cpanel.md) |
+| | [Migração para VPS/cloud](docs/09-migracao-vps.md) |
+| | [Checklist de segurança](docs/10-checklist-seguranca.md) |
+| | [Backup e restauro](docs/11-backup-restauro.md) |
+| | [Plano de testes](docs/12-plano-testes.md) |
+| | [API (OpenAPI 3.1)](docs/openapi.yaml) |
+| | [Manual do administrador](docs/13-manual-administrador.md) · [Manual do utilizador](docs/14-manual-utilizador.md) |
+| | [Plano comercial](docs/15-plano-comercial.md) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Estrutura
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+obraconnect/
+├── app/
+│   ├── Access/          catálogo de permissões, perfis-modelo, resolução de permissões
+│   ├── Actions/         casos de uso (registar empresa, convidar, aceitar convite, gerir membros)
+│   ├── Audit/           auditoria append-only e eventos de autenticação
+│   ├── Billing/         limites e funcionalidades por plano
+│   ├── Console/Commands obraconnect:* (permissões, admin, subscrições, exportações, SQL)
+│   ├── Enums/           estados (empresa, subscrição, associação, papéis da plataforma)
+│   ├── Http/            controladores API v1 (+ Platform/), middleware, resources
+│   ├── Jobs/            trabalhos em fila (exportação de dados)
+│   ├── Models/          Eloquent
+│   ├── Support/         validador de NIF
+│   └── Tenancy/         contexto da empresa, âmbito global, BelongsToTenant, exportador
+├── config/obraconnect.php   configuração do produto
+├── database/
+│   ├── migrations/
+│   ├── seeders/         permissões, planos, demo (só local)
+│   └── sql/obraconnect-install.sql   SQL completo para phpMyAdmin
+├── deploy/cpanel/       index.php adaptador, cron, php.ini recomendado
+├── docs/
+├── lang/pt_PT/          traduções (validação, autenticação, emails)
+├── public/              raiz web (.htaccess, PWA, build/ compilado)
+├── resources/js/        SPA Vue 3 + TypeScript (api, stores, router, components, pages)
+├── resources/views/     app.blade.php (SPA), setup.blade.php (/instalar), emails
+├── routes/              api.php (v1), web.php (SPA + /instalar), console.php (agendador)
+├── scripts/             build-release.sh, generate-install-sql.sh
+└── tests/               PHPUnit (isolamento, permissões, plataforma, subscrições, exportação...)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Desenvolvimento local
 
-## Contributing
+Requisitos: PHP 8.3+, Composer, Node 20+, MySQL 8 / MariaDB 10.6+ (ou só SQLite para testes).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+cd obraconnect
+composer install
+npm ci
+cp .env.example .env
+# Para desenvolvimento: APP_ENV=local, APP_DEBUG=true, FORCE_HTTPS=false,
+# SESSION_SECURE_COOKIE=false, MAIL_MAILER=log, SANCTUM_STATEFUL_DOMAINS=localhost:8000, e dados da BD
+php artisan key:generate
+php artisan migrate --seed       # em APP_ENV=local cria dados de demonstração
 
-## Code of Conduct
+npm run dev                      # Vite (terminal 1)
+php artisan serve                # http://localhost:8000 (terminal 2)
+php artisan queue:work           # emails e exportações (terminal 3)
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Contas de demonstração (só com `APP_ENV=local`), password `ObraConnect2026`:
+- `admin@demo.obraconnect.test` — administrador da empresa "Construções Demo, Lda."
+- `plataforma@obraconnect.test` — super administrador da plataforma (pede para ativar 2FA)
 
-## Security Vulnerabilities
+## Testes e qualidade
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan test                 # 74 testes, SQLite em memória
+DB_CONNECTION=mariadb DB_DATABASE=obraconnect_test DB_USERNAME=... DB_PASSWORD=... php artisan test
+npm run typecheck
+vendor/bin/pint --test
+```
 
-## License
+O CI (`.github/workflows/obraconnect.yml` na raiz do repositório) corre tudo isto em SQLite e MySQL 8.4, verifica o SQL de instalação e publica o ZIP de release como artefacto.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Produção em cPanel
+
+Resumo (detalhe em [`docs/07-guia-cpanel.md`](docs/07-guia-cpanel.md)):
+
+1. Gerar o ZIP (`scripts/build-release.sh`) ou descarregá-lo do CI.
+2. Extrair em `/home/UTILIZADOR/obraconnect` e apontar o domínio para `obraconnect/public`.
+3. Importar `database/sql/obraconnect-install.sql` no phpMyAdmin (ou `php artisan migrate --force`).
+4. Configurar `.env`.
+5. Criar o super administrador em `/instalar` (com `SETUP_TOKEN`) ou `php artisan obraconnect:create-platform-admin`.
+6. Cron a cada minuto: `php artisan schedule:run`.
+
+## Comandos do produto
+
+| Comando | Função |
+| --- | --- |
+| `obraconnect:sync-permissions` | Sincroniza permissões com o catálogo em código |
+| `obraconnect:create-platform-admin {email} --role=` | Cria/promove equipa da plataforma (`super_admin`, `support`, `billing`) |
+| `obraconnect:subscriptions-sweep` | Ciclo trial → só leitura → suspensão (diário) |
+| `obraconnect:prune-exports` | Apaga exportações expiradas (de hora a hora) |
+| `obraconnect:install-sql` | Regenera o SQL de instalação a partir das migrações |

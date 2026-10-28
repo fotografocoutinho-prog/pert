@@ -43,7 +43,7 @@ flowchart LR
 | Framework | Laravel 13 | Versão estável atual, ecossistema maduro, migrações, filas, agendador, políticas, validação |
 | Autenticação | Laravel Fortify (headless) + Sanctum | Fortify trata login, recuperação de password, verificação de email e 2FA TOTP com código auditado pela comunidade. Sanctum dá sessão por cookie à SPA (sem tokens no `localStorage`) e tokens para integrações |
 | Autorização | RBAC próprio sobre o Gate do Laravel | Permissões `modulo.acao` guardadas em BD, perfis por empresa, âmbito de obra preparado |
-| Base de dados | MySQL 8.0+ ou MariaDB 10.6+ | É o que o cPanel oferece. Esquema compatível com ambos (testado em MariaDB 10.11 e SQLite) |
+| Base de dados | MySQL 8.0+ ou MariaDB 10.6+ | É o que o cPanel oferece. Esquema compatível com ambos (testes a passar em MySQL 8.4 no CI, MariaDB 10.11 e SQLite) |
 | Fila | Driver `database` | Não exige Redis. Em VPS troca-se para `redis` só no `.env` |
 | Cache / sessões | Driver `database` | Idem |
 | Armazenamento | Disco `private` (local) ou `s3` | Ficheiros fora de `public/`; servidos por controlador com verificação de permissões ou URL temporário assinado |

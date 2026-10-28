@@ -1,0 +1,422 @@
+openapi: 3.1.0
+info:
+  title: ObraConnect API
+  version: 0.1.0
+  description: |
+    API REST v1 do ObraConnect (fase 1 — fundação).
+
+    **Autenticação.** A SPA usa sessão por cookie (Laravel Sanctum): `GET /sanctum/csrf-cookie`,
+    depois `POST /auth/login` com o cabeçalho `X-XSRF-TOKEN`. Integrações futuras usarão tokens Bearer (Sanctum).
+
+    **Empresa ativa.** As rotas de empresa usam sempre a empresa ativa da conta (`users.current_tenant_id`),
+    validada no servidor. Nenhum parâmetro ou cabeçalho escolhe a empresa. Para mudar: `POST /api/v1/me/tenants/{id}/switch`.
+
+    **Erros.** `{"message": "...", "code": "CODIGO"}`. Validação (422): `{"message", "errors": {"campo": ["..."]}}`.
+    Códigos: `NO_TENANT`, `TENANT_SUSPENDED` (423), `TENANT_READ_ONLY` (423), `MFA_REQUIRED`, `PLAN_LIMIT_REACHED` (402),
+    `ROLE_ESCALATION`, `LAST_ADMIN`, `ALREADY_MEMBER`, `INVITATION_PENDING`, `INVITATION_INVALID`, `ROLE_LOCKED`,
+    `ROLE_IN_USE`, `PLATFORM_ONLY`, `PLATFORM_ROLE`, `SUPPORT_GRANT_INVALID`, `SUPPORT_READ_ONLY`, `EXPORT_RUNNING`.
+  license:
+    name: Proprietária
+servers:
+  - url: https://app.exemplo.pt
+security:
+  - sessionCookie: []
+tags:
+  - name: Autenticação
+  - name: Conta
+  - name: Empresa
+  - name: Utilizadores
+  - name: Perfis
+  - name: Auditoria
+  - name: Subscrição
+  - name: Suporte
+  - name: Exportação
+  - name: Plataforma
+paths:
+  /api/v1/health:
+    get:
+      tags: [Conta]
+      summary: Estado do serviço
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  version: { type: string }
+                  database: { type: string, enum: [ok, error] }
+        "503": { description: Base de dados indisponível }
+  /api/v1/plans:
+    get:
+      tags: [Subscrição]
+      summary: Planos públicos (preços sem IVA)
+      security: []
+      responses:
+        "200":
+          description: Lista de planos
+          content:
+            application/json:
+              schema: { type: object, properties: { data: { type: array, items: { $ref: "#/components/schemas/Plan" } } } }
+
+  /auth/register:
+    post:
+      tags: [Autenticação]
+      summary: Registar conta (cria empresa, ou junta-se a uma empresa com convite)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation, accept_terms]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 10, description: Letras e números }
+                password_confirmation: { type: string }
+                accept_terms: { type: boolean }
+                company_name: { type: string, description: Obrigatório sem convite }
+                nif: { type: string, description: NIF português (validado) }
+                invitation_token: { type: string, minLength: 64, maxLength: 64 }
+      responses:
+        "201": { description: Conta criada e sessão iniciada }
+        "422": { $ref: "#/components/responses/Validation" }
+  /auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Iniciar sessão
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+                remember: { type: boolean }
+      responses:
+        "200":
+          description: "`two_factor: true` se for preciso o código 2FA em /auth/two-factor-challenge"
+          content:
+            application/json:
+              schema: { type: object, properties: { two_factor: { type: boolean } } }
+        "422": { $ref: "#/components/responses/Validation" }
+        "429": { description: Demasiadas tentativas }
+  /auth/two-factor-challenge:
+    post:
+      tags: [Autenticação]
+      summary: Código 2FA ou código de recuperação
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code: { type: string }
+                recovery_code: { type: string }
+      responses:
+        "204": { description: Sessão iniciada }
+        "422": { $ref: "#/components/responses/Validation" }
+  /auth/logout:
+    post: { tags: [Autenticação], summary: Terminar sessão, responses: { "204": { description: OK } } }
+  /auth/forgot-password:
+    post:
+      tags: [Autenticação]
+      summary: Pedir ligação de recuperação (resposta idêntica exista ou não o email)
+      security: []
+      requestBody: { content: { application/json: { schema: { type: object, properties: { email: { type: string } } } } } }
+      responses: { "200": { description: Mensagem neutra } }
+  /auth/reset-password:
+    post:
+      tags: [Autenticação]
+      summary: Definir nova password com o token recebido por email
+      security: []
+      responses: { "200": { description: OK }, "422": { $ref: "#/components/responses/Validation" } }
+  /auth/user/two-factor-authentication:
+    post: { tags: [Autenticação], summary: Ativar 2FA (exige password confirmada), responses: { "200": { description: OK }, "423": { description: Confirmar password primeiro } } }
+    delete: { tags: [Autenticação], summary: Desativar 2FA, responses: { "200": { description: OK } } }
+  /auth/user/confirmed-two-factor-authentication:
+    post: { tags: [Autenticação], summary: Confirmar 2FA com um código, responses: { "200": { description: OK } } }
+
+  /api/v1/me:
+    get:
+      tags: [Conta]
+      summary: Sessão atual (utilizador, empresas, empresa ativa, permissões, sessão de suporte)
+      responses:
+        "200":
+          description: OK
+          content: { application/json: { schema: { type: object, properties: { data: { $ref: "#/components/schemas/Me" } } } } }
+        "401": { description: Sem sessão }
+  /api/v1/me/tenants/{tenantId}/switch:
+    post:
+      tags: [Conta]
+      summary: Mudar a empresa ativa (só empresas onde o utilizador tem associação ativa)
+      parameters: [{ name: tenantId, in: path, required: true, schema: { type: integer } }]
+      responses:
+        "200": { description: OK }
+        "403": { description: NOT_A_MEMBER }
+        "423": { description: TENANT_SUSPENDED }
+  /api/v1/invitations/lookup/{token}:
+    get:
+      tags: [Utilizadores]
+      summary: Dados públicos mínimos de um convite
+      security: []
+      parameters: [{ name: token, in: path, required: true, schema: { type: string } }]
+      responses: { "200": { description: Empresa, perfil, email, validade }, "404": { description: INVITATION_INVALID } }
+  /api/v1/invitations/accept:
+    post:
+      tags: [Utilizadores]
+      summary: Aceitar convite (o email da conta tem de coincidir)
+      requestBody: { content: { application/json: { schema: { type: object, properties: { token: { type: string } } } } } }
+      responses: { "200": { description: OK }, "403": { description: INVITATION_EMAIL_MISMATCH }, "422": { description: INVITATION_INVALID } }
+
+  /api/v1/company:
+    get:
+      tags: [Empresa]
+      summary: Dados da empresa ativa (company.view)
+      responses: { "200": { description: OK, content: { application/json: { schema: { type: object, properties: { data: { $ref: "#/components/schemas/Company" } } } } } } }
+    put:
+      tags: [Empresa]
+      summary: Atualizar dados (company.update)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, country_code]
+              properties:
+                name: { type: string }
+                legal_name: { type: string }
+                nif: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                website: { type: string }
+                address_line1: { type: string }
+                address_line2: { type: string }
+                postal_code: { type: string, example: "4000-123" }
+                city: { type: string }
+                country_code: { type: string, example: PT }
+                timezone: { type: string, example: Europe/Lisbon }
+      responses: { "200": { description: OK }, "403": { description: Sem permissão }, "422": { $ref: "#/components/responses/Validation" } }
+  /api/v1/company/security:
+    put:
+      tags: [Empresa]
+      summary: Exigir 2FA a todos os membros (security.manage; quem ativa tem de ter 2FA)
+      requestBody: { content: { application/json: { schema: { type: object, properties: { require_mfa: { type: boolean } } } } } }
+      responses: { "200": { description: OK }, "422": { description: MFA_REQUIRED_FOR_ADMIN } }
+  /api/v1/company/logo:
+    get: { tags: [Empresa], summary: Logótipo (ficheiro privado), responses: { "200": { description: Imagem }, "404": { description: Sem logótipo } } }
+    post:
+      tags: [Empresa]
+      summary: Enviar logótipo PNG/JPG/WebP até 2 MB (company.update)
+      requestBody: { content: { multipart/form-data: { schema: { type: object, properties: { logo: { type: string, format: binary } } } } } }
+      responses: { "200": { description: OK } }
+    delete: { tags: [Empresa], summary: Remover logótipo, responses: { "200": { description: OK } } }
+
+  /api/v1/members:
+    get:
+      tags: [Utilizadores]
+      summary: Listar membros (members.view)
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [active, suspended] } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses: { "200": { description: Lista paginada de Member } }
+  /api/v1/members/{membership}:
+    patch:
+      tags: [Utilizadores]
+      summary: Alterar perfil, estado ou função (members.manage)
+      parameters: [{ name: membership, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role_id: { type: integer }
+                status: { type: string, enum: [active, suspended] }
+                job_title: { type: string }
+      responses: { "200": { description: OK }, "403": { description: ROLE_ESCALATION }, "404": { description: Não existe nesta empresa }, "422": { description: LAST_ADMIN / SELF_SUSPEND } }
+    delete:
+      tags: [Utilizadores]
+      summary: Remover da empresa (a conta pessoal mantém-se)
+      parameters: [{ name: membership, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: OK }, "422": { description: LAST_ADMIN } }
+  /api/v1/invitations:
+    get: { tags: [Utilizadores], summary: Convites (pending por omissão), responses: { "200": { description: Lista } } }
+    post:
+      tags: [Utilizadores]
+      summary: Convidar (members.invite; conta para o limite de utilizadores)
+      requestBody: { content: { application/json: { schema: { type: object, required: [email, role_id], properties: { email: { type: string }, role_id: { type: integer } } } } } }
+      responses: { "201": { description: Criado; email enviado em fila }, "402": { description: PLAN_LIMIT_REACHED }, "403": { description: ROLE_ESCALATION }, "409": { description: ALREADY_MEMBER / INVITATION_PENDING } }
+  /api/v1/invitations/{invitation}/resend:
+    post: { tags: [Utilizadores], summary: Reenviar com novo token, parameters: [{ name: invitation, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/invitations/{invitation}:
+    delete: { tags: [Utilizadores], summary: Anular, parameters: [{ name: invitation, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+
+  /api/v1/permissions:
+    get: { tags: [Perfis], summary: Catálogo de permissões por módulo (roles.view), responses: { "200": { description: OK } } }
+  /api/v1/roles:
+    get: { tags: [Perfis], summary: Perfis da empresa (roles.view, members.invite ou members.manage), responses: { "200": { description: Lista de Role } } }
+    post:
+      tags: [Perfis]
+      summary: Criar perfil (roles.manage; só com permissões que o próprio tem)
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/RoleInput" } } } }
+      responses: { "201": { description: Criado }, "403": { description: ROLE_ESCALATION } }
+  /api/v1/roles/{role}:
+    put:
+      tags: [Perfis]
+      summary: Editar perfil (o de administrador está bloqueado)
+      parameters: [{ name: role, in: path, required: true, schema: { type: integer } }]
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/RoleInput" } } } }
+      responses: { "200": { description: OK }, "403": { description: ROLE_LOCKED / ROLE_ESCALATION } }
+    delete:
+      tags: [Perfis]
+      summary: Apagar perfil sem utilizadores nem convites
+      parameters: [{ name: role, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: OK }, "409": { description: ROLE_IN_USE } }
+  /api/v1/roles/{role}/reset:
+    post: { tags: [Perfis], summary: Repor permissões do modelo, parameters: [{ name: role, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+
+  /api/v1/audit-logs:
+    get:
+      tags: [Auditoria]
+      summary: Auditoria da empresa (audit.view)
+      parameters:
+        - { name: event, in: query, description: Prefixo (ex. auth, membership), schema: { type: string } }
+        - { name: actor_user_id, in: query, schema: { type: integer } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+      responses: { "200": { description: Lista paginada } }
+  /api/v1/subscription:
+    get: { tags: [Subscrição], summary: Subscrição atual e utilização vs limites (subscription.view), responses: { "200": { description: OK } } }
+  /api/v1/support-grants:
+    get: { tags: [Suporte], summary: Autorizações dadas ao suporte (support.manage), responses: { "200": { description: Lista } } }
+    post:
+      tags: [Suporte]
+      summary: Autorizar acesso só de leitura (1–72 h)
+      requestBody: { content: { application/json: { schema: { type: object, required: [reason, hours], properties: { reason: { type: string, minLength: 10 }, hours: { type: integer, minimum: 1, maximum: 72 } } } } } }
+      responses: { "201": { description: Criada } }
+  /api/v1/support-grants/{supportAccessGrant}:
+    delete: { tags: [Suporte], summary: Revogar, parameters: [{ name: supportAccessGrant, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/exports:
+    get: { tags: [Exportação], summary: Exportações (data.export), responses: { "200": { description: Lista } } }
+    post: { tags: [Exportação], summary: Pedir exportação ZIP/JSON (também em modo só leitura), responses: { "201": { description: Em fila }, "409": { description: EXPORT_RUNNING } } }
+  /api/v1/exports/{tenantExport}/download:
+    get: { tags: [Exportação], summary: Descarregar (expira em 48 h; auditado), parameters: [{ name: tenantExport, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: application/zip }, "404": { description: Inexistente ou expirada } } }
+
+  /api/v1/platform/dashboard:
+    get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
+  /api/v1/platform/tenants:
+    get:
+      tags: [Plataforma]
+      summary: Empresas (metadados comerciais)
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [active, read_only, suspended] } }
+      responses: { "200": { description: Lista paginada } }
+  /api/v1/platform/tenants/{tenant}:
+    get: { tags: [Plataforma], summary: Detalhe comercial de uma empresa, parameters: [{ name: tenant, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/platform/tenants/{tenant}/suspend:
+    post: { tags: [Plataforma], summary: Suspender (super_admin), parameters: [{ name: tenant, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/platform/tenants/{tenant}/reactivate:
+    post: { tags: [Plataforma], summary: Reativar (super_admin), parameters: [{ name: tenant, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/platform/tenants/{tenant}/subscription:
+    put:
+      tags: [Plataforma]
+      summary: Alterar plano/estado/datas (billing). Mudança de plano cria novo registo
+      parameters: [{ name: tenant, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: OK } }
+  /api/v1/platform/plans:
+    get: { tags: [Plataforma], summary: Todos os planos, responses: { "200": { description: OK } } }
+    post: { tags: [Plataforma], summary: Criar plano (billing), responses: { "201": { description: Criado } } }
+  /api/v1/platform/plans/{plan}:
+    put: { tags: [Plataforma], summary: Editar plano (billing), parameters: [{ name: plan, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/platform/support-grants:
+    get: { tags: [Plataforma], summary: Autorizações ativas (support), responses: { "200": { description: OK } } }
+  /api/v1/platform/support-grants/{grantId}/enter:
+    post: { tags: [Plataforma], summary: Entrar em modo de suporte (só leitura, auditado), parameters: [{ name: grantId, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK }, "403": { description: SUPPORT_GRANT_INVALID } } }
+  /api/v1/platform/support/leave:
+    post: { tags: [Plataforma], summary: Sair do modo de suporte, responses: { "200": { description: OK } } }
+  /api/v1/platform/security-logs:
+    get: { tags: [Plataforma], summary: "Eventos auth.*, platform.* e support.*", responses: { "200": { description: Lista paginada } } }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: obraconnect-session
+      description: Cookie de sessão Laravel + cabeçalho X-XSRF-TOKEN nas escritas.
+  responses:
+    Validation:
+      description: Erro de validação
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+  schemas:
+    Plan:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        price_monthly_cents: { type: [integer, "null"] }
+        price_yearly_cents: { type: [integer, "null"] }
+        currency: { type: string }
+        prices_exclude_vat: { type: boolean }
+        trial_days: { type: integer }
+        limits: { type: object, additionalProperties: { type: [integer, "null"] } }
+        features: { type: array, items: { type: string } }
+    Company:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        legal_name: { type: [string, "null"] }
+        nif: { type: [string, "null"] }
+        status: { type: string, enum: [active, read_only, suspended] }
+        logo_url: { type: [string, "null"] }
+        settings: { type: object, properties: { timezone: { type: string }, require_mfa: { type: boolean } } }
+        storage_used_bytes: { type: integer }
+    Me:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id: { type: integer }
+            name: { type: string }
+            email: { type: string }
+            email_verified: { type: boolean }
+            two_factor_enabled: { type: boolean }
+            platform_role: { type: [string, "null"], enum: [super_admin, support, billing, null] }
+        tenants: { type: array, items: { type: object } }
+        current:
+          type: [object, "null"]
+          properties:
+            tenant: { type: object }
+            role: { type: object }
+            permissions: { type: array, items: { type: string } }
+            subscription: { type: [object, "null"] }
+        support_session: { type: [object, "null"] }
+    RoleInput:
+      type: object
+      required: [name, permissions]
+      properties:
+        name: { type: string }
+        description: { type: [string, "null"] }
+        permissions: { type: array, items: { type: string, example: members.view } }

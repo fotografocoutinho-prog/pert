@@ -1,5 +1,7 @@
 # Digital Signage Platform
 
+> **Também neste repositório:** [`obraconnect/`](obraconnect/) — OBRACONNECT, plataforma SaaS de gestão de obras e fiscalização (Laravel + Vue, MySQL, pronta para cPanel). Ver [`obraconnect/README.md`](obraconnect/README.md).
+
 A professional, self-hosted digital signage system — a from-scratch alternative to
 Yodeck / Screenly / Xibo. Manage screens, upload media, build playlists and layouts,
 and drive Raspberry Pi (or Windows/Linux) players in real time.
