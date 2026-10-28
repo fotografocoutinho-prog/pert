@@ -19,6 +19,17 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Chave fixa só para testes: os testes não dependem do .env. -->
+        <env name="APP_KEY" value="base64:b2JyYWNvbm5lY3QtY2hhdmUtc28tcGFyYS10ZXN0ZXM="/>
+        <env name="APP_URL" value="http://localhost"/>
+        <env name="FORCE_HTTPS" value="false"/>
+        <env name="SESSION_SECURE_COOKIE" value="false"/>
+        <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost"/>
+        <env name="PASSWORD_CHECK_UNCOMPROMISED" value="false"/>
+        <env name="PLATFORM_REQUIRES_MFA" value="true"/>
+        <env name="SETUP_TOKEN" value=""/>
+        <env name="TRUSTED_PROXIES" value=""/>
+        <env name="OBRA_PRIVATE_DISK" value="private"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

@@ -1,0 +1,19 @@
+# Proteção para o caso de a aplicação inteira ficar dentro de public_html por engano.
+# Configuração recomendada: a raiz do domínio aponta para a pasta public/ (ver docs/07-guia-cpanel.md),
+# e nesse caso este ficheiro nunca é lido.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Nunca servir ficheiros ocultos nem pastas internas.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|lang|resources|routes|storage|tests|vendor|deploy|scripts|docs)(/|$) - [F,L]
+    RewriteRule ^(composer\.(json|lock)|artisan|VERSION|package(-lock)?\.json|phpunit\.xml)$ - [F,L]
+
+    # Tudo o resto vai para public/.
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

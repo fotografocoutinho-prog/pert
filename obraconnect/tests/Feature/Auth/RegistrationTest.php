@@ -8,6 +8,7 @@ use App\Models\Invitation;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\TenantContext;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -164,7 +165,7 @@ class RegistrationTest extends TestCase
         $known->assertOk();
         $unknown->assertOk();
         $this->assertSame($known->json('message'), $unknown->json('message'));
-        Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class, function ($notification) use ($user) {
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
             return str_contains($notification->toMail($user)->actionUrl, '/repor-password/');
         });
     }
