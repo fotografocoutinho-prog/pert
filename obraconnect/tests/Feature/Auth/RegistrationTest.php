@@ -152,4 +152,20 @@ class RegistrationTest extends TestCase
         $this->actingAs($owner)->getJson('/api/v1/company')->assertForbidden();
         $this->actingAs($owner)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.user.email_verified', false);
     }
+
+    public function test_password_reset_does_not_reveal_unknown_emails(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        $known = $this->withHeaders($this->spaHeaders)->postJson('/auth/forgot-password', ['email' => $user->email]);
+        $unknown = $this->withHeaders($this->spaHeaders)->postJson('/auth/forgot-password', ['email' => 'ninguem@exemplo.pt']);
+
+        $known->assertOk();
+        $unknown->assertOk();
+        $this->assertSame($known->json('message'), $unknown->json('message'));
+        Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class, function ($notification) use ($user) {
+            return str_contains($notification->toMail($user)->actionUrl, '/repor-password/');
+        });
+    }
 }

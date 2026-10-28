@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiException;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePlatformStaff;
 use App\Http\Middleware\ForceHttps;
@@ -43,12 +44,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => '/entrar?redirect='.urlencode($request->getRequestUri()));
         $middleware->redirectUsersTo('/app');
 
-        $middleware->encryptCookies(except: []);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Erros de negócio esperados (403, 409, 422...) não são falhas da aplicação.
+        $exceptions->dontReport([ApiException::class]);
 
         // Erro de programação: regista com detalhe, responde sem expor informação.
         $exceptions->render(function (MissingTenantContextException $e, Request $request) {

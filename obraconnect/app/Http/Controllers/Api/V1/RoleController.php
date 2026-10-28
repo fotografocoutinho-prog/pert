@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -26,9 +27,10 @@ class RoleController extends Controller
         private readonly Auditor $auditor,
     ) {}
 
+    /** Quem convida ou gere utilizadores precisa da lista para escolher perfis. */
     public function index(): AnonymousResourceCollection
     {
-        $this->authorize('roles.view');
+        abort_unless(Gate::any(['roles.view', 'members.invite', 'members.manage']), 403);
 
         return RoleResource::collection(
             Role::query()->withCount('memberships')->with('permissions')->orderByDesc('is_locked')->orderBy('id')->get()
