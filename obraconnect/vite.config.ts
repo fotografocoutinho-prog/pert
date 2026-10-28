@@ -4,7 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+    // Build com URLs relativos: os ficheiros funcionam na raiz do domínio ou numa
+    // subpasta (ex.: www.coda.pt/obras/obraconnect) sem recompilar.
+    base: command === 'build' ? './' : undefined,
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],
@@ -32,4 +35,4 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
-});
+}));

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { onApiError } from '@/api/http';
+import { BASE_PATH } from '@/utils/base';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
 import AppShell from '@/components/layout/AppShell.vue';
@@ -66,7 +67,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 export const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory(`${BASE_PATH}/`),
     routes,
     scrollBehavior: () => ({ top: 0 }),
 });

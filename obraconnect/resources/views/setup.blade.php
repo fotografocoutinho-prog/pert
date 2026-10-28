@@ -36,7 +36,7 @@
     @if (!empty($done))
         <div class="alert success">
             Super administrador criado. <strong>Remova agora a linha <code>SETUP_TOKEN</code> do ficheiro <code>.env</code></strong>
-            e entre em <a href="/entrar">/entrar</a>. Na primeira entrada ser-lhe-á pedido que ative a autenticação de dois fatores.
+            e entre em <a href="{{ url('entrar') }}">{{ url('entrar') }}</a>. Na primeira entrada ser-lhe-á pedido que ative a autenticação de dois fatores.
         </div>
     @elseif (!empty($disabled))
         <div class="alert error">
@@ -79,7 +79,7 @@
                 @else
                     <p class="ok">Esquema atualizado.</p>
                 @endif
-                <form method="post" action="/instalar">
+                <form method="post" action="{{ url('instalar') }}">
                     <input type="hidden" name="action" value="migrate">
                     <label for="token-m">Token de instalação (SETUP_TOKEN)</label>
                     <input id="token-m" type="password" name="token" required autocomplete="off">
@@ -90,7 +90,7 @@
             @if ($database['pending'] === 0)
                 <section>
                     <h2>3. Super administrador da plataforma</h2>
-                    <form method="post" action="/instalar">
+                    <form method="post" action="{{ url('instalar') }}">
                         <input type="hidden" name="action" value="admin">
                         <label for="token-a">Token de instalação (SETUP_TOKEN)</label>
                         <input id="token-a" type="password" name="token" required autocomplete="off">

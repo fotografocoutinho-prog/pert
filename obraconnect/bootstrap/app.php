@@ -41,7 +41,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ResolveTenant::class);
 
         // A SPA volta ao endereço pedido depois do login (só caminhos relativos).
-        $middleware->redirectGuestsTo(fn (Request $request) => '/entrar?redirect='.urlencode($request->getRequestUri()));
+        $middleware->redirectGuestsTo(fn (Request $request) => url('entrar').'?redirect='.urlencode(
+            $request->getPathInfo().($request->getQueryString() ? '?'.$request->getQueryString() : '')
+        ));
         $middleware->redirectUsersTo('/app');
 
     })

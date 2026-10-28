@@ -17,13 +17,14 @@
 | Exportação de dados por empresa (ZIP/JSON) em fila | Testes |
 | Página `/instalar` para cPanel sem SSH | Testes + instalação a partir do ZIP |
 | Regras `.htaccess` (raiz em `public/`, app dentro da pasta pública, `index.php` adaptador) | Apache 2.4 real: segredos dão 403, registo pela SPA funciona nos 3 cenários |
+| Instalação em subpasta (ex.: `www.coda.pt/obras/obraconnect`) com site existente na raiz | Apache 2.4 real, symlink e cópia: site principal intacto, registo, login com regresso ao endereço, convites, exportação/download, `/instalar`; cookies e service worker limitados à subpasta; 3 testes automáticos |
 | SQL de instalação para phpMyAdmin gerado das migrações | Importado em MariaDB 10.11 (local) e MySQL 8.4 (CI); esquema igual ao das migrações |
 | ZIP de release | Gerado localmente e no CI; instalado e testado localmente |
 | PWA (manifesto, service worker do shell) | Service worker regista no build de produção |
 | Interface em pt-PT, responsiva | Capturas em 1280 px e 390 px |
 | CI GitHub Actions | Verde: Pint, tipos, build, testes SQLite + MySQL 8.4, SQL, ZIP |
 
-Total: **74 testes, 221 asserções**, a passar em SQLite, MariaDB 10.11 e MySQL 8.4.
+Total: **77 testes, 229 asserções**, a passar em SQLite, MariaDB 10.11 e MySQL 8.4.
 
 ### Não feito nesta fase (honestamente)
 

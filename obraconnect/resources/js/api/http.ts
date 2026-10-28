@@ -1,12 +1,14 @@
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios';
+import { BASE_PATH } from '@/utils/base';
 import type { ApiErrorBody } from './types';
 
 /**
  * Cliente HTTP da SPA. Sessão por cookie (Sanctum) no mesmo domínio:
  * nenhum token é guardado no browser. O Laravel lê o cookie XSRF-TOKEN.
+ * Os caminhos ('/api/...', '/auth/...') são relativos ao caminho base da instalação.
  */
 export const http = axios.create({
-    baseURL: '/',
+    baseURL: `${BASE_PATH}/`,
     withCredentials: true,
     withXSRFToken: true,
     headers: {

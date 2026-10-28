@@ -6,6 +6,7 @@ import { useForm } from '@/composables/useForm';
 import { useSessionStore } from '@/stores/session';
 import { homeFor } from '@/router';
 import { safeRedirect } from '@/utils/redirect';
+import { appUrl } from '@/utils/base';
 import AuthLayout from '@/components/layout/AuthLayout.vue';
 import AppAlert from '@/components/ui/AppAlert.vue';
 import AppButton from '@/components/ui/AppButton.vue';
@@ -26,7 +27,7 @@ async function submit(): Promise<void> {
     await session.refresh();
     const redirect = safeRedirect(route.query.redirect);
     if (redirect?.startsWith('/auth/')) {
-        window.location.href = redirect;
+        window.location.href = appUrl(redirect);
         return;
     }
     await router.push(redirect ?? homeFor(session));

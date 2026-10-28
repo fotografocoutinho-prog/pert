@@ -57,6 +57,28 @@ ln -s ~/obraconnect/public ~/public_html
 2. Substitua `public_html/index.php` por `obraconnect/deploy/cpanel/public_html/index.php`.
 3. Em cada atualização volte a copiar `obraconnect/public/build/` para `public_html/build/`.
 
+**Opção D — numa subpasta de um site existente (ex.: `www.coda.pt/obras/obraconnect`).**
+A aplicação fica em `/home/UTILIZADOR/obraconnect/` (fora de `public_html`) e o site existente não é alterado.
+
+- Com Terminal/SSH (recomendado, facilita as atualizações):
+  ```bash
+  mkdir -p ~/public_html/obras
+  ln -s ~/obraconnect/public ~/public_html/obras/obraconnect
+  ```
+- Sem Terminal: crie `public_html/obras/obraconnect/`, copie para lá o **conteúdo** de `obraconnect/public/` e substitua o `index.php` por `obraconnect/deploy/cpanel/public_html/index.php` (encontra a pasta da aplicação sozinho). Em cada atualização volte a copiar `public/build/`.
+
+No `.env` (passo 6), além do resto:
+```
+APP_URL=https://www.coda.pt/obras/obraconnect
+SESSION_PATH=/obras/obraconnect
+SANCTUM_STATEFUL_DOMAINS=www.coda.pt
+```
+Com `SESSION_PATH` os cookies ficam limitados à subpasta e não interferem com o site principal. O service worker da PWA também fica limitado a `/obras/obraconnect/`.
+
+**Versão do PHP numa subpasta.** A subpasta usa a versão de PHP do domínio (MultiPHP Manager é por domínio). O OBRACONNECT precisa de PHP 8.3+. Se o site principal estiver numa versão mais antiga, **não mude a versão do domínio sem confirmar que o site principal funciona em 8.3**: peça ao alojamento para definir PHP 8.3 só na subpasta (muitos cPanel aceitam uma linha `AddHandler` no `.htaccess` da subpasta), ou use um subdomínio (opção A).
+
+Testado com Apache 2.4 + mod_php 8.3, com um site existente na raiz com regras de reescrita do tipo WordPress, nas duas variantes (symlink e cópia com `index.php` adaptador): o site principal continua a responder, a aplicação funciona em `/obras/obraconnect/` (registo, login com regresso ao endereço pedido, convites, exportação e download, `/instalar`), e `.env` dá 403.
+
 Nunca coloque a pasta `obraconnect` inteira dentro de `public_html`. Se isso acontecer, o `.htaccess` incluído bloqueia `.env`, `vendor/`, `storage/` e encaminha para `public/`, mas é uma rede de segurança e não a configuração correta.
 
 ## 5. Criar as tabelas
@@ -83,7 +105,8 @@ Gestor de ficheiros → `obraconnect/` → copie `.env.example` para `.env` (ati
 | `APP_URL` | `https://app.suaempresa.pt` |
 | `DB_CONNECTION` | `mysql` (ou `mariadb` se o servidor for MariaDB; ambos funcionam) |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Os do passo 2 (com o prefixo da conta) |
-| `SANCTUM_STATEFUL_DOMAINS` | `app.suaempresa.pt` |
+| `SANCTUM_STATEFUL_DOMAINS` | `app.suaempresa.pt` (só o domínio, sem caminho) |
+| `SESSION_PATH` | `/` na raiz do domínio; o caminho da subpasta na opção D (ex.: `/obras/obraconnect`) |
 | `MAIL_*` | Conta de email criada no cPanel (ex.: `nao-responder@suaempresa.pt`, porta 465, `MAIL_SCHEME=smtps`) |
 | `SETUP_TOKEN` | Só sem SSH: texto aleatório com 32+ caracteres |
 

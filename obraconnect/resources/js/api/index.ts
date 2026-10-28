@@ -1,3 +1,4 @@
+import { appUrl } from '@/utils/base';
 import { ensureCsrfCookie, getData, http } from './http';
 import type {
     AuditEntry,
@@ -167,7 +168,7 @@ export const supportApi = {
 export const exportsApi = {
     list: () => getData<DataExport[]>('/api/v1/exports'),
     create: async () => (await http.post<{ data: DataExport }>('/api/v1/exports')).data.data,
-    downloadUrl: (id: number) => `/api/v1/exports/${id}/download`,
+    downloadUrl: (id: number) => appUrl(`/api/v1/exports/${id}/download`),
 };
 
 export const platformApi = {
