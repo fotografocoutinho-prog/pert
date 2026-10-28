@@ -28,3 +28,6 @@ Thumbs.db
 
 # Releases geradas por scripts/build-release.sh
 /dist
+
+# O .gitignore da raiz do repositório ignora "storage/"; aqui a estrutura do Laravel tem de existir.
+!/storage/
