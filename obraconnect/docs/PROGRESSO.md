@@ -15,7 +15,8 @@
 | Acesso do suporte autorizado pela empresa, temporário, só leitura, auditado | Testes + browser |
 | Auditoria append-only | Testes |
 | Exportação de dados por empresa (ZIP/JSON) em fila | Testes |
-| Página `/instalar` para cPanel sem SSH | Testes + instalação real a partir do ZIP |
+| Página `/instalar` para cPanel sem SSH | Testes + instalação a partir do ZIP |
+| Regras `.htaccess` (raiz em `public/`, app dentro da pasta pública, `index.php` adaptador) | Apache 2.4 real: segredos dão 403, registo pela SPA funciona nos 3 cenários |
 | SQL de instalação para phpMyAdmin gerado das migrações | Importado em MariaDB 10.11 (local) e MySQL 8.4 (CI); esquema igual ao das migrações |
 | ZIP de release | Gerado localmente e no CI; instalado e testado localmente |
 | PWA (manifesto, service worker do shell) | Service worker regista no build de produção |
@@ -26,7 +27,7 @@ Total: **74 testes, 221 asserções**, a passar em SQLite, MariaDB 10.11 e MySQL
 
 ### Não feito nesta fase (honestamente)
 
-- Instalação num cPanel real: testei com PHP embutido + MariaDB a partir do ZIP, não num servidor cPanel com Apache. As regras `.htaccess` não foram exercitadas por um Apache real.
+- Instalação num servidor cPanel real: testei com Apache 2.4 + mod_php 8.3 + MariaDB a partir do ZIP, nos três cenários de raiz web (bloqueio de `.env`/pastas internas, registo pela interface). Falta confirmar num alojamento cPanel concreto.
 - Envio real de email: só verificado com o driver `log`/`array`.
 - Testes Playwright não estão versionados nem no CI (foram scripts da sessão).
 - Mudança de plano/pagamento self-service, cupões, faturação (fase 6).

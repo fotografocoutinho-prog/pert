@@ -7,8 +7,8 @@
     <meta name="robots" content="noindex">
     <title>{{ config('app.name', 'ObraConnect') }}</title>
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" href="/pwa/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/pwa/icon-192.png">
     @vite(['resources/css/app.css', 'resources/js/app.ts'])
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">

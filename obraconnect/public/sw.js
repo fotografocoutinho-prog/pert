@@ -2,10 +2,11 @@
  * Service worker do ObraConnect (fase 1).
  * Guarda apenas o "shell" da aplicação e os ficheiros compilados para arranque rápido.
  * NUNCA guarda respostas da API, autenticação ou ficheiros das empresas.
+ * Ícones em /pwa/ (não /icons/: o Apache do cPanel tem um alias global para /icons/).
  * O registo offline de dados (fotografias, horas, diário) chega na fase 2.
  */
-const CACHE = 'obraconnect-shell-v1';
-const SHELL = ['/app', '/manifest.webmanifest', '/icons/icon.svg', '/icons/icon-192.png'];
+const CACHE = 'obraconnect-shell-v2';
+const SHELL = ['/app', '/manifest.webmanifest', '/pwa/icon.svg', '/pwa/icon-192.png'];
 const NEVER_CACHE = ['/api/', '/auth/', '/sanctum/', '/instalar', '/up'];
 
 self.addEventListener('install', (event) => {

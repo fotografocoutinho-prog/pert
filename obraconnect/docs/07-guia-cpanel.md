@@ -1,6 +1,6 @@
 # Guia de instalação em cPanel
 
-Testado localmente com PHP 8.3 e MariaDB 10.11 a partir do ZIP de release (importação do SQL, página `/instalar`, login). Os passos do painel cPanel em si (menus, nomes de botões) variam ligeiramente entre fornecedores e versões; ajuste os nomes se o seu painel for diferente.
+Testado localmente a partir do ZIP de release com Apache 2.4 + mod_php 8.3 + MariaDB 10.11, nos três cenários da secção 4 (raiz em `public/`, aplicação inteira dentro da pasta pública, e `index.php` adaptador em `public_html`): importação do SQL, página `/instalar`, registo de empresa pela interface, ficheiros secretos bloqueados. Não foi testado num servidor cPanel real; os nomes dos menus variam entre fornecedores e versões.
 
 ## 0. Requisitos do alojamento
 
@@ -152,3 +152,4 @@ Valores de PHP recomendados (MultiPHP INI Editor): ver `deploy/cpanel/user.ini`.
 | Emails não chegam | Cron não configurado, ou dados SMTP errados (ver `storage/logs/`) |
 | Página em branco após atualizar | Cache antiga: `php artisan optimize:clear` |
 | Imagens/CSS em falta (opção C) | Não copiou `public/build/` para `public_html/build/` |
+| Ícones da app em falta | Não use a pasta `/icons/`: o Apache do cPanel tem um alias global com esse nome. A aplicação usa `/pwa/` |
