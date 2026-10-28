@@ -27,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Instalação nova sem APP_KEY: a página /instalar tem de abrir para a gerar,
+        // e uma sessão cifrada precisaria da chave que ainda não existe.
+        if (blank(config('app.key'))) {
+            config(['session.encrypt' => false]);
+        }
+
         $this->app->scoped(TenantContext::class);
         $this->app->scoped(AccessResolver::class);
         $this->app->singleton(PlanLimits::class);

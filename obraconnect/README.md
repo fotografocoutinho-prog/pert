@@ -96,7 +96,7 @@ O CI (`.github/workflows/obraconnect.yml` na raiz do repositório) corre tudo is
 
 Resumo (detalhe em [`docs/07-guia-cpanel.md`](docs/07-guia-cpanel.md)):
 
-1. Gerar o ZIP (`scripts/build-release.sh`) ou descarregá-lo do CI.
+1. Gerar o ZIP (`scripts/build-release.sh`) ou descarregá-lo do CI. Para uma subpasta de um site existente: `scripts/build-subfolder-package.sh https://www.coda.pt/obras/obraconnect`.
 2. Extrair em `/home/UTILIZADOR/obraconnect` e apontar o domínio para `obraconnect/public`.
 3. Importar `database/sql/obraconnect-install.sql` no phpMyAdmin (ou `php artisan migrate --force`).
 4. Configurar `.env`.

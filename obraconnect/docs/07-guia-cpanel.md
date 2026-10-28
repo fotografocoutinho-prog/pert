@@ -58,6 +58,8 @@ ln -s ~/obraconnect/public ~/public_html
 3. Em cada atualização volte a copiar `obraconnect/public/build/` para `public_html/build/`.
 
 **Opção D — numa subpasta de um site existente (ex.: `www.coda.pt/obras/obraconnect`).**
+
+Atalho: `scripts/build-subfolder-package.sh https://www.coda.pt/obras/obraconnect` gera um ZIP que se extrai na pasta pessoal do cPanel, com a pasta da aplicação, a pasta pública já no sítio certo, o `.env` pré-preenchido para esse endereço (sem segredos) e um `LEIA-ME.txt` com os passos. Testado de ponta a ponta (extrair, importar SQL, gerar a chave e criar o administrador em `/instalar`, entrar).
 A aplicação fica em `/home/UTILIZADOR/obraconnect/` (fora de `public_html`) e o site existente não é alterado.
 
 - Com Terminal/SSH (recomendado, facilita as atualizações):
@@ -101,7 +103,7 @@ Gestor de ficheiros → `obraconnect/` → copie `.env.example` para `.env` (ati
 
 | Variável | Valor |
 | --- | --- |
-| `APP_KEY` | Com SSH: `php artisan key:generate`. Sem SSH: gere no seu computador com `php -r "echo 'base64:'.base64_encode(random_bytes(32)).PHP_EOL;"` e cole |
+| `APP_KEY` | Com SSH: `php artisan key:generate`. Sem SSH: deixe vazio e use o botão "Gerar APP_KEY" na página `/instalar` (passo 8) |
 | `APP_URL` | `https://app.suaempresa.pt` |
 | `DB_CONNECTION` | `mysql` (ou `mariadb` se o servidor for MariaDB; ambos funcionam) |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Os do passo 2 (com o prefixo da conta) |
@@ -123,7 +125,7 @@ Mantenha `APP_DEBUG=false` e `FORCE_HTTPS=true` em produção.
 php artisan obraconnect:create-platform-admin admin@suaempresa.pt --name="Nome Apelido"
 ```
 
-**Sem SSH:** abra `https://app.suaempresa.pt/instalar`, verifique os requisitos, introduza o `SETUP_TOKEN` e crie o administrador. A página desativa-se sozinha depois disso. **Apague a linha `SETUP_TOKEN` do `.env`.**
+**Sem SSH:** abra `https://app.suaempresa.pt/instalar`, carregue em "Gerar APP_KEY" se a chave ainda não existir, verifique os requisitos, introduza o `SETUP_TOKEN` e crie o administrador. A página desativa-se sozinha depois disso. **Apague a linha `SETUP_TOKEN` do `.env`.**
 
 No primeiro login é pedido que ative a autenticação de dois fatores (obrigatória para a equipa da plataforma).
 

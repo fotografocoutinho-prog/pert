@@ -66,6 +66,14 @@
                     @if ($database['ok'])<span class="ok">OK</span>@else<span class="bad">Erro</span>@endif
                 </li>
             </ul>
+            @if (!empty($app_key_missing))
+                <form method="post" action="{{ url('instalar') }}" style="margin-top: 12px">
+                    <input type="hidden" name="action" value="key">
+                    <label for="token-k">Token de instalação (SETUP_TOKEN)</label>
+                    <input id="token-k" type="password" name="token" required autocomplete="off">
+                    <button type="submit">Gerar APP_KEY</button>
+                </form>
+            @endif
             @if (!$database['ok'])
                 <div class="alert error">Verifique DB_HOST, DB_DATABASE, DB_USERNAME e DB_PASSWORD no .env. Detalhe: {{ \Illuminate\Support\Str::limit((string) $database['error'], 300) }}</div>
             @endif

@@ -3,11 +3,11 @@
 #   ls /opt/cpanel/ea-php8*/root/usr/bin/php     (EasyApache 4)
 #   ou: which php
 #
-# Exemplo com PHP 8.3 do EasyApache 4:
-* * * * * /opt/cpanel/ea-php83/root/usr/bin/php /home/UTILIZADOR/obraconnect/artisan schedule:run >> /dev/null 2>&1
+# Exemplo com PHP 8.4 do EasyApache 4 (troque 84 por 83 se usar PHP 8.3):
+* * * * * /opt/cpanel/ea-php84/root/usr/bin/php /home/UTILIZADOR/obraconnect/artisan schedule:run >> /dev/null 2>&1
 #
 # Alternativa comum:
-# * * * * * /usr/local/bin/ea-php83 /home/UTILIZADOR/obraconnect/artisan schedule:run >> /dev/null 2>&1
+# * * * * * /usr/local/bin/ea-php84 /home/UTILIZADOR/obraconnect/artisan schedule:run >> /dev/null 2>&1
 #
 # O agendador trata de: processar a fila (emails, exportações), ciclo das subscrições,
 # limpeza de exportações expiradas e de tokens. Ver routes/console.php.

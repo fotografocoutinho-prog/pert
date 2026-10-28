@@ -12,3 +12,5 @@ Fase 1: fundação SaaS multi-tenant.
 - Auditoria append-only; exportação de dados por empresa.
 - SPA Vue 3 + TypeScript + Tailwind em pt-PT, PWA instalável.
 - Instalação em cPanel: SQL para phpMyAdmin, página /instalar, ZIP de release, cron único.
+- Instalação em subpasta de um site existente (ex.: www.coda.pt/obras/obraconnect) e pacote pronto a extrair para esse caso.
+- /instalar gera a APP_KEY quando falta (instalação sem SSH).

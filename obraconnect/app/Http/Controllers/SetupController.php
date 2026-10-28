@@ -20,7 +20,8 @@ use Throwable;
 
 /**
  * Instalação para alojamentos cPanel sem SSH:
- * 1. verifica requisitos; 2. corre migrações e dados base; 3. cria o super administrador.
+ * 1. verifica requisitos (e gera a APP_KEY se faltar); 2. corre migrações e dados base;
+ * 3. cria o super administrador.
  *
  * Só funciona com SETUP_TOKEN (32+ caracteres) no .env e enquanto não existir
  * nenhum super administrador.
@@ -54,10 +55,43 @@ class SetupController extends Controller
         }
 
         return match ($request->input('action')) {
+            'key' => $this->generateKey(),
             'migrate' => $this->migrate(),
             'admin' => $this->createAdmin($request),
             default => response()->view('setup', $this->state(), 400),
         };
+    }
+
+    /**
+     * Grava uma APP_KEY nova no .env. Só quando ainda não existe: trocar uma chave
+     * em uso invalidaria sessões e segredos 2FA.
+     */
+    private function generateKey(): Response
+    {
+        if (filled(config('app.key'))) {
+            return response()->view('setup', $this->state() + ['message' => 'A APP_KEY já está definida.']);
+        }
+
+        $envPath = app()->environmentFilePath();
+
+        if (! is_file($envPath) || ! is_writable($envPath)) {
+            return response()->view('setup', $this->state() + [
+                'error' => 'O ficheiro .env não existe ou não tem permissão de escrita. Crie-o a partir do .env.example.',
+            ], 500);
+        }
+
+        $key = 'base64:'.base64_encode(random_bytes(32));
+        $contents = (string) file_get_contents($envPath);
+        $contents = preg_match('/^APP_KEY=.*$/m', $contents)
+            ? preg_replace_callback('/^APP_KEY=.*$/m', fn () => 'APP_KEY='.$key, $contents, 1)
+            : 'APP_KEY='.$key.PHP_EOL.$contents;
+
+        file_put_contents($envPath, $contents);
+        config(['app.key' => $key]);
+
+        Log::info('APP_KEY gerada pela página de instalação');
+
+        return response()->view('setup', $this->state() + ['message' => 'APP_KEY gerada e guardada no .env.']);
     }
 
     private function migrate(): Response
@@ -145,7 +179,7 @@ class SetupController extends Controller
             $database['error'] = $e->getMessage();
         }
 
-        return ['checks' => $checks, 'database' => $database];
+        return ['checks' => $checks, 'database' => $database, 'app_key_missing' => blank(config('app.key'))];
     }
 
     private function pendingMigrations(): int
