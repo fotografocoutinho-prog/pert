@@ -43,4 +43,13 @@ class SubdirectoryInstallTest extends TestCase
         // O destino é relativo à aplicação: a SPA acrescenta o caminho base.
         $this->assertStringContainsString('redirect='.urlencode('/auth/email/verify/1/abc'), $location);
     }
+
+    public function test_https_redirect_does_not_repeat_the_subdirectory(): void
+    {
+        config(['obraconnect.security.force_https' => true]);
+
+        $this->call('GET', '/obras/obraconnect/entrar?x=1', server: $this->inSubdirectory('/entrar?x=1'))
+            ->assertStatus(301)
+            ->assertHeader('Location', 'https://localhost/obras/obraconnect/entrar?x=1');
+    }
 }
