@@ -60,7 +60,8 @@ class Auditor
     {
         $new = $model->getChanges();
         unset($new['updated_at']);
-        $old = array_intersect_key($model->getOriginal(), $new);
+        // Chamado depois de save(): getOriginal() já tem os valores novos; getPrevious() guarda os antigos.
+        $old = array_intersect_key($model->getPrevious(), $new);
 
         return ['old' => $this->sanitize($old), 'new' => $this->sanitize($new)];
     }
