@@ -111,8 +111,8 @@ class RoleController extends Controller
         $this->authorize('roles.manage');
         $this->assertEditable($role);
 
-        if ($role->memberships()->exists() || $role->invitations()->pending()->exists()) {
-            throw ApiException::conflict('Este perfil está atribuído a utilizadores ou convites. Altere-os primeiro.', 'ROLE_IN_USE');
+        if ($role->memberships()->exists() || $role->invitations()->pending()->exists() || $role->projectMembers()->exists()) {
+            throw ApiException::conflict('Este perfil está atribuído a utilizadores, convites ou equipas de obra. Altere-os primeiro.', 'ROLE_IN_USE');
         }
 
         $this->auditor->record('role.deleted', $role, ['name' => $role->name]);

@@ -74,10 +74,10 @@ function percent(item: UsageItem): number {
             </ul>
         </AppCard>
 
-        <AppAlert class="mt-6" title="Fase 1 — Fundação">
-            Nesta versão estão disponíveis a gestão da empresa, utilizadores, perfis e permissões, auditoria, subscrição,
-            acesso controlado do suporte técnico e exportação de dados. Os módulos de obras, diário, documentos e fiscalização
-            chegam nas fases seguintes.
+        <AppAlert class="mt-6" title="Novo: obras e diário de obra">
+            Em <RouterLink to="/app/obras" class="font-semibold underline">Obras</RouterLink> pode criar obras, montar a equipa de
+            cada uma e escrever o diário de obra (tempo, trabalhos, mão de obra, equipamentos, materiais, ocorrências e visitas).
+            Fotografias, documentos e fiscalização chegam nas próximas versões.
         </AppAlert>
     </div>
 </template>

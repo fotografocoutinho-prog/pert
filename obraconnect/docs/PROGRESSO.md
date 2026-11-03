@@ -1,5 +1,31 @@
 # Registo de progresso
 
+## v0.2.0 — Fase 2, parte 1: obras e diário de obra (2026-11-03)
+
+### Implementado e verificado
+
+| Área | Verificação |
+| --- | --- |
+| Obras: CRUD, código automático por empresa e ano, estados, limite `max_active_projects` (só obras abertas contam) | Testes |
+| Equipa da obra com perfil por obra; permissões por obra em `AccessResolver` (`projects.all` ou perfil na equipa) | Testes de visibilidade, perfil diferente do da empresa, escalada, isolamento e FK composta |
+| Diário de obra: um registo por dia, sem dias futuros, linhas por tipo, rascunho → submetido imutável | Testes + fluxo no browser (criar, guardar, submeter, consulta, copiar do registo anterior) |
+| Obras e diário na exportação de dados; eventos de auditoria `project.*` e `diary.*` | Testes (ZIP real) |
+| Interface: lista de obras, obra com separadores Diário / Equipa / Dados, registo diário pensado para telemóvel | Browser em 375–540 px e 1280 px |
+| Agendador sem `proc_open`; HTTPS em subpasta; auditoria com valor antigo correto | Testes + produção (coda.pt) |
+
+Total: **101 testes, 404 asserções** (SQLite). O CI corre também em MySQL 8.4.
+
+### Não feito nesta parte
+
+- Fotografias no diário e documentos (precisam de armazenamento com quota, hash e miniaturas em fila).
+- Estrutura da obra (edifício → piso → zona → elemento), clientes, departamentos, calendários.
+- Modo obra offline (fila no telemóvel).
+- Relatório PDF do diário.
+
+### Próximo passo
+
+Fotografias do diário (armazenamento, quota por plano, miniaturas em fila), depois documentos com versões.
+
 ## v0.1.0 — Fase 1: fundação SaaS multi-tenant (2026-10-28)
 
 ### Implementado e verificado

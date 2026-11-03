@@ -10,9 +10,11 @@ withDefaults(
         required?: boolean;
         autocomplete?: string;
         placeholder?: string;
-        inputmode?: 'text' | 'numeric' | 'email' | 'tel' | 'url';
+        inputmode?: 'text' | 'numeric' | 'decimal' | 'email' | 'tel' | 'url';
         maxlength?: number;
         disabled?: boolean;
+        /** Para campos sem rótulo visível (ex.: linhas de uma tabela). */
+        ariaLabel?: string;
     }>(),
     { type: 'text' },
 );
@@ -36,6 +38,7 @@ const id = useId();
             :inputmode="inputmode"
             :maxlength="maxlength"
             :disabled="disabled"
+            :aria-label="ariaLabel"
             :aria-invalid="Boolean(error)"
             :aria-describedby="error || hint ? `${id}-help` : undefined"
             class="block w-full rounded-lg border px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-200 focus:outline-none disabled:bg-slate-100 sm:text-sm"

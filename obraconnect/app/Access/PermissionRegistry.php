@@ -11,6 +11,15 @@ namespace App\Access;
  */
 final class PermissionRegistry
 {
+    /** Dá às permissões de obra do perfil da empresa efeito em todas as obras. */
+    public const ALL_PROJECTS = 'projects.all';
+
+    /** Módulos cujas permissões valem obra a obra. */
+    private const PROJECT_SCOPED_MODULES = ['projects', 'diary'];
+
+    /** Exceções nesses módulos: valem para a empresa. */
+    private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
+
     /**
      * @return array<string, array{label: string, permissions: array<string, string>}>
      */
@@ -64,7 +73,36 @@ final class PermissionRegistry
                     'data.export' => 'Exportar todos os dados da empresa',
                 ],
             ],
+            'projects' => [
+                'label' => 'Obras',
+                'permissions' => [
+                    self::ALL_PROJECTS => 'Acesso a todas as obras (sem esta permissão, só às obras de cuja equipa faz parte)',
+                    'projects.view' => 'Ver obras',
+                    'projects.create' => 'Criar obras',
+                    'projects.update' => 'Editar os dados da obra',
+                    'projects.team' => 'Gerir a equipa da obra',
+                    'projects.archive' => 'Concluir, arquivar e reabrir obras',
+                ],
+            ],
+            'diary' => [
+                'label' => 'Diário de obra',
+                'permissions' => [
+                    'diary.view' => 'Consultar o diário de obra',
+                    'diary.write' => 'Escrever registos do diário (rascunho)',
+                    'diary.submit' => 'Submeter registos do diário (deixam de poder ser alterados)',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Permissão de obra: decidida pelo perfil na equipa da obra ou, com projects.all,
+     * pelo perfil da empresa (ver AccessResolver::permissionsForProject).
+     */
+    public static function isProjectScoped(string $key): bool
+    {
+        return in_array(self::moduleOf($key), self::PROJECT_SCOPED_MODULES, true)
+            && ! in_array($key, self::COMPANY_WIDE, true);
     }
 
     /** @return array<string, string> chave => descrição */

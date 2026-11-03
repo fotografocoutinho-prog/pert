@@ -243,3 +243,78 @@ export interface PlatformDashboard {
     subscriptions: { by_plan: { name: string; status: string; total: number }[]; trials_ending_7d: number };
     signups_30d: Record<string, number>;
 }
+
+export type ProjectStatus = 'planning' | 'active' | 'suspended' | 'completed' | 'archived';
+
+export interface Project {
+    id: number;
+    code: string;
+    name: string;
+    owner_name: string | null;
+    type: string | null;
+    type_label: string | null;
+    address: string | null;
+    postal_code: string | null;
+    city: string | null;
+    contract_value_cents: number | null;
+    starts_on: string | null;
+    planned_end_on: string | null;
+    status: ProjectStatus;
+    status_label: string;
+    description: string | null;
+    team_count?: number;
+    created_at: string | null;
+    /** O que o utilizador pode fazer nesta obra (só para a interface; o servidor decide). */
+    permissions: string[];
+}
+
+export interface ProjectMember {
+    id: number;
+    membership_id: number;
+    user: { id: number; name: string; email: string };
+    membership_status: 'active' | 'suspended';
+    job_title: string | null;
+    company_role: { id: number; name: string };
+    role: { id: number; key: string; name: string };
+    added_at: string | null;
+    is_me: boolean;
+}
+
+export type DiaryItemKind = 'workforce' | 'equipment' | 'material' | 'incident' | 'visit';
+
+export interface DiaryItem {
+    id?: number;
+    kind: DiaryItemKind;
+    kind_label?: string;
+    description: string;
+    quantity: number | null;
+    unit: string | null;
+    company: string | null;
+}
+
+export interface DiaryWeather {
+    morning?: string | null;
+    afternoon?: string | null;
+    temp_min?: number | null;
+    temp_max?: number | null;
+}
+
+export interface DiaryEntry {
+    id: number;
+    project_id: number;
+    entry_date: string;
+    status: 'draft' | 'submitted';
+    status_label: string;
+    weather: DiaryWeather | null;
+    work_summary: string | null;
+    notes: string | null;
+    items?: DiaryItem[];
+    items_count?: number;
+    workforce_total?: number;
+    created_by?: string | null;
+    updated_by?: string | null;
+    submitted_by?: string | null;
+    submitted_at: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+}

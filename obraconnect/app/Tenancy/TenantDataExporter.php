@@ -3,8 +3,10 @@
 namespace App\Tenancy;
 
 use App\Models\AuditLog;
+use App\Models\DiaryEntry;
 use App\Models\Invitation;
 use App\Models\Membership;
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
@@ -66,6 +68,42 @@ class TenantDataExporter
 
         $this->sections['support_access_grants'] = fn () => SupportAccessGrant::query()->get()
             ->map(fn (SupportAccessGrant $g) => $g->only(['reason', 'access_level', 'expires_at', 'revoked_at', 'last_used_at', 'created_at']));
+
+        $this->sections['projects'] = fn () => Project::query()->with(['members.membership.user:id,name,email', 'members.role:id,name'])->get()
+            ->map(fn (Project $p) => $p->only([
+                'code', 'name', 'owner_name', 'address', 'postal_code', 'city', 'contract_value_cents', 'description', 'created_at',
+            ]) + [
+                'type' => $p->type?->value,
+                'status' => $p->status->value,
+                'starts_on' => $p->starts_on?->toDateString(),
+                'planned_end_on' => $p->planned_end_on?->toDateString(),
+                'team' => $p->members->map(fn ($m) => [
+                    'name' => $m->membership->user->name,
+                    'email' => $m->membership->user->email,
+                    'role' => $m->role->name,
+                ]),
+            ]);
+
+        $this->sections['site_diary'] = fn () => DiaryEntry::query()->with(['project:id,code', 'items', 'createdBy:id,name', 'submittedBy:id,name'])
+            ->orderBy('project_id')->orderBy('entry_date')->lazy(500)
+            ->map(fn (DiaryEntry $e) => [
+                'project' => $e->project->code,
+                'date' => $e->entry_date->toDateString(),
+                'status' => $e->status->value,
+                'weather' => $e->weather,
+                'work_summary' => $e->work_summary,
+                'notes' => $e->notes,
+                'items' => $e->items->map(fn ($i) => [
+                    'kind' => $i->kind->value,
+                    'description' => $i->description,
+                    'quantity' => $i->quantity,
+                    'unit' => $i->unit,
+                    'company' => $i->company,
+                ]),
+                'created_by' => $e->createdBy?->name,
+                'submitted_by' => $e->submittedBy?->name,
+                'submitted_at' => $e->submitted_at?->toIso8601String(),
+            ]);
 
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)
             ->map(fn (AuditLog $log) => $log->only(['event', 'actor_type', 'actor_user_id', 'subject_type', 'subject_id', 'properties', 'ip_address', 'created_at']));

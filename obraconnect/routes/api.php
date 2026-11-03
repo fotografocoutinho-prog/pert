@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\DiaryEntryController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\Platform;
+use App\Http\Controllers\Api\V1\ProjectController;
+use App\Http\Controllers\Api\V1\ProjectMemberController;
 use App\Http\Controllers\Api\V1\PublicPlanController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
@@ -74,6 +77,28 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('exports', [ExportController::class, 'index'])->name('exports.index');
             Route::post('exports', [ExportController::class, 'store'])->middleware('throttle:exports')->name('exports.store');
             Route::get('exports/{tenantExport}/download', [ExportController::class, 'download'])->name('exports.download');
+
+            // Obras. O acesso a cada obra é decidido no controlador (perfil na empresa ou na equipa).
+            Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+            Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+            Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+            Route::put('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+
+            // Recursos dentro da obra: scopeBindings garante que pertencem à obra do endereço.
+            Route::scopeBindings()->prefix('projects/{project}')->name('projects.')->group(function () {
+                Route::get('members', [ProjectMemberController::class, 'index'])->name('members.index');
+                Route::get('members/options', [ProjectMemberController::class, 'options'])->name('members.options');
+                Route::post('members', [ProjectMemberController::class, 'store'])->name('members.store');
+                Route::patch('members/{member}', [ProjectMemberController::class, 'update'])->name('members.update');
+                Route::delete('members/{member}', [ProjectMemberController::class, 'destroy'])->name('members.destroy');
+
+                Route::get('diary', [DiaryEntryController::class, 'index'])->name('diary.index');
+                Route::post('diary', [DiaryEntryController::class, 'store'])->name('diary.store');
+                Route::get('diary/{diaryEntry}', [DiaryEntryController::class, 'show'])->name('diary.show');
+                Route::put('diary/{diaryEntry}', [DiaryEntryController::class, 'update'])->name('diary.update');
+                Route::delete('diary/{diaryEntry}', [DiaryEntryController::class, 'destroy'])->name('diary.destroy');
+                Route::post('diary/{diaryEntry}/submit', [DiaryEntryController::class, 'submit'])->name('diary.submit');
+            });
         });
 
         // Backoffice da plataforma (exige papel de plataforma e 2FA)

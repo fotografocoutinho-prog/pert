@@ -4,6 +4,7 @@ import type {
     AuditEntry,
     Company,
     DataExport,
+    DiaryEntry,
     Invitation,
     Member,
     MePayload,
@@ -13,6 +14,8 @@ import type {
     PlatformDashboard,
     PlatformTenant,
     PlatformTenantDetail,
+    Project,
+    ProjectMember,
     Role,
     Subscription,
     SupportGrant,
@@ -169,6 +172,39 @@ export const exportsApi = {
     list: () => getData<DataExport[]>('/api/v1/exports'),
     create: async () => (await http.post<{ data: DataExport }>('/api/v1/exports')).data.data,
     downloadUrl: (id: number) => appUrl(`/api/v1/exports/${id}/download`),
+};
+
+export const projectsApi = {
+    list: async (params: { search?: string; status?: string; page?: number }) =>
+        (await http.get<Paginated<Project>>('/api/v1/projects', { params })).data,
+    get: (id: number) => getData<Project>(`/api/v1/projects/${id}`),
+    create: async (payload: Record<string, unknown>) => (await http.post<{ data: Project }>('/api/v1/projects', payload)).data.data,
+    update: async (id: number, payload: Record<string, unknown>) =>
+        (await http.put<{ data: Project }>(`/api/v1/projects/${id}`, payload)).data.data,
+    members: (id: number) => getData<ProjectMember[]>(`/api/v1/projects/${id}/members`),
+    memberOptions: (id: number) =>
+        getData<{
+            members: { membership_id: number; name: string; email: string; company_role: { id: number; name: string } }[];
+            roles: { id: number; key: string; name: string }[];
+        }>(`/api/v1/projects/${id}/members/options`),
+    addMember: async (id: number, membershipId: number, roleId: number | null) =>
+        (await http.post<{ data: ProjectMember }>(`/api/v1/projects/${id}/members`, { membership_id: membershipId, role_id: roleId })).data.data,
+    updateMember: async (id: number, memberId: number, roleId: number) =>
+        (await http.patch<{ data: ProjectMember }>(`/api/v1/projects/${id}/members/${memberId}`, { role_id: roleId })).data.data,
+    removeMember: (id: number, memberId: number) => http.delete(`/api/v1/projects/${id}/members/${memberId}`),
+};
+
+export const diaryApi = {
+    list: async (projectId: number, params: { month?: string; page?: number }) =>
+        (await http.get<Paginated<DiaryEntry>>(`/api/v1/projects/${projectId}/diary`, { params })).data,
+    get: (projectId: number, entryId: number) => getData<DiaryEntry>(`/api/v1/projects/${projectId}/diary/${entryId}`),
+    create: async (projectId: number, payload: Record<string, unknown>) =>
+        (await http.post<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary`, payload)).data.data,
+    update: async (projectId: number, entryId: number, payload: Record<string, unknown>) =>
+        (await http.put<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary/${entryId}`, payload)).data.data,
+    remove: (projectId: number, entryId: number) => http.delete(`/api/v1/projects/${projectId}/diary/${entryId}`),
+    submit: async (projectId: number, entryId: number) =>
+        (await http.post<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary/${entryId}/submit`)).data.data,
 };
 
 export const platformApi = {

@@ -154,6 +154,9 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 
 ### Obras (fase 2)
 
+**Implementado na 0.2.0:** `projects` (sem `client_id`, `lat/lng` e `contract_days`, que chegam com clientes e planeamento), `project_members` (FKs compostas para obra, associação e perfil; `memberships` ganhou `UNIQUE(tenant_id, id)`), `site_diary_entries` (`UNIQUE(tenant_id, project_id, entry_date)`, estado rascunho/submetido) e `site_diary_items`. As linhas do diário usam colunas próprias (`kind`, `description`, `quantity DECIMAL(14,3)`, `unit`, `company`) em vez de `payload` JSON, para poderem ser filtradas e somadas.
+
+
 | Tabela | Campos principais | Relações |
 | --- | --- | --- |
 | `projects` | code, name, client_id, owner_name, type, address, lat, lng, contract_value_cents, initial_budget_cents, starts_on, planned_end_on, contract_days, status, deleted_at | cliente |

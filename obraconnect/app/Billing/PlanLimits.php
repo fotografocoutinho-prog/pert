@@ -3,8 +3,10 @@
 namespace App\Billing;
 
 use App\Exceptions\ApiException;
+use App\Models\Project;
 use App\Models\Subscription;
 use App\Models\Tenant;
+use App\Tenancy\TenantScope;
 use Closure;
 
 /**
@@ -30,9 +32,16 @@ class PlanLimits
             + $tenant->invitations()->pending()->count();
 
         $this->counters['storage_mb'] = fn (Tenant $tenant): int => (int) ceil($tenant->storage_used_bytes / 1048576);
+
+        // Obras em preparação, em curso ou suspensas (concluídas e arquivadas não contam).
+        // Filtro explícito: também é chamado no backoffice, fora do contexto da empresa.
+        $this->counters['max_active_projects'] = fn (Tenant $tenant): int => Project::withoutGlobalScope(TenantScope::class)
+            ->where('tenant_id', $tenant->getKey())
+            ->countingAsActive()
+            ->count();
     }
 
-    /** Módulos futuros registam aqui o seu contador (ex.: max_active_projects na fase 2). */
+    /** Módulos futuros registam aqui o seu contador. */
     public function registerCounter(string $limit, Closure $counter): void
     {
         $this->counters[$limit] = $counter;

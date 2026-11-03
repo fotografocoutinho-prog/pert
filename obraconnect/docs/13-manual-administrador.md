@@ -1,4 +1,4 @@
-# Manual do administrador (versão 0.1.0)
+# Manual do administrador (versão 0.2.0)
 
 Dois tipos de administrador: **da empresa** (cliente) e **da plataforma** (equipa ObraConnect).
 
@@ -17,7 +17,8 @@ Dois tipos de administrador: **da empresa** (cliente) e **da plataforma** (equip
 - A empresa começa com 14 perfis (Administrador, Diretor técnico, Diretor de obra, Encarregado, Preparador, Medidor-orçamentista, Fiscal, Coordenador de segurança, Técnico de qualidade, Administrativo, Trabalhador, Subempreiteiro, Fornecedor, Dono de obra).
 - Pode editar qualquer perfil exceto o de Administrador, criar perfis novos e repor um perfil ao modelo original.
 - Ninguém consegue dar a outra pessoa mais permissões do que as que tem.
-- Na versão atual as permissões aplicam-se à empresa inteira. As permissões por obra chegam com o módulo de obras.
+- **Permissões de obra** (Obras e Diário de obra) funcionam obra a obra. Um perfil com **Acesso a todas as obras** aplica-as em todas; sem essa permissão, a pessoa só as tem nas obras de cuja equipa faz parte, com o **perfil que lhe for dado nessa obra** (separador Equipa da obra). Assim um encarregado pode ser diretor de obra numa obra concreta sem ganhar acesso às outras.
+- Os perfis externos (subempreiteiro, fornecedor, dono de obra) têm "Ver obras" mas, sem acesso a todas as obras, só veem aquelas para onde forem chamados.
 
 ### Utilizadores
 

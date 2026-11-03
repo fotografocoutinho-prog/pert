@@ -6,8 +6,10 @@ namespace App\Access;
  * Perfis-modelo copiados para cada empresa nova. Cada empresa pode depois
  * editar os seus perfis ou repô-los a partir daqui.
  *
- * Os perfis externos (subempreiteiro, fornecedor, dono de obra) começam sem
- * permissões internas: o acesso deles é dado por obra a partir da fase 2.
+ * Permissões de obra (projects.*, diary.*) só valem em todas as obras para perfis
+ * com projects.all; nos outros valem apenas nas obras de cuja equipa a pessoa faz
+ * parte. Por isso os perfis externos (subempreiteiro, fornecedor, dono de obra)
+ * podem ter "ver obras" sem verem nada além das obras para onde forem chamados.
  */
 final class RoleTemplates
 {
@@ -25,67 +27,74 @@ final class RoleTemplates
             'diretor_tecnico' => [
                 'name' => 'Diretor técnico',
                 'description' => 'Responsável técnico da empresa.',
-                'permissions' => ['company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view'],
+                'permissions' => [
+                    'company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view',
+                    'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive',
+                    'diary.view', 'diary.write', 'diary.submit',
+                ],
             ],
             'diretor_obra' => [
                 'name' => 'Diretor de obra',
                 'description' => 'Gestão das obras atribuídas.',
-                'permissions' => ['company.view', 'members.view', 'members.invite'],
+                'permissions' => [
+                    'company.view', 'members.view', 'members.invite',
+                    'projects.view', 'projects.update', 'projects.team', 'diary.view', 'diary.write', 'diary.submit',
+                ],
             ],
             'encarregado' => [
                 'name' => 'Encarregado',
                 'description' => 'Coordenação das equipas no terreno.',
-                'permissions' => ['company.view', 'members.view'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'diary.view', 'diary.write', 'diary.submit'],
             ],
             'preparador' => [
                 'name' => 'Preparador de obra',
                 'description' => 'Preparação, compras e planeamento.',
-                'permissions' => ['company.view', 'members.view'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'diary.view'],
             ],
             'medidor_orcamentista' => [
                 'name' => 'Medidor-orçamentista',
                 'description' => 'Medições e orçamentos.',
-                'permissions' => ['company.view', 'members.view'],
+                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view'],
             ],
             'fiscal' => [
                 'name' => 'Fiscal',
                 'description' => 'Fiscalização e aprovações.',
-                'permissions' => ['company.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view'],
             ],
             'coordenador_seguranca' => [
                 'name' => 'Coordenador de segurança',
                 'description' => 'Segurança e saúde em obra.',
-                'permissions' => ['company.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view'],
             ],
             'tecnico_qualidade' => [
                 'name' => 'Técnico de qualidade',
                 'description' => 'Controlo de qualidade e não conformidades.',
-                'permissions' => ['company.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view'],
             ],
             'administrativo' => [
                 'name' => 'Administrativo',
                 'description' => 'Gestão administrativa e documental.',
-                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view'],
+                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'projects.all', 'projects.view'],
             ],
             'trabalhador' => [
                 'name' => 'Trabalhador',
                 'description' => 'Registo de trabalho no terreno.',
-                'permissions' => ['company.view'],
+                'permissions' => ['company.view', 'projects.view'],
             ],
             'subempreiteiro' => [
                 'name' => 'Subempreiteiro',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => [],
+                'permissions' => ['projects.view'],
             ],
             'fornecedor' => [
                 'name' => 'Fornecedor',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => [],
+                'permissions' => ['projects.view'],
             ],
             'dono_obra' => [
                 'name' => 'Dono de obra',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => [],
+                'permissions' => ['projects.view', 'diary.view'],
             ],
         ];
     }

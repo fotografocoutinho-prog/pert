@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.1.0
+  version: 0.2.0
   description: |
-    API REST v1 do ObraConnect (fase 1 — fundação).
+    API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
     **Autenticação.** A SPA usa sessão por cookie (Laravel Sanctum): `GET /sanctum/csrf-cookie`,
     depois `POST /auth/login` com o cabeçalho `X-XSRF-TOKEN`. Integrações futuras usarão tokens Bearer (Sanctum).
@@ -14,7 +14,12 @@ info:
     **Erros.** `{"message": "...", "code": "CODIGO"}`. Validação (422): `{"message", "errors": {"campo": ["..."]}}`.
     Códigos: `NO_TENANT`, `TENANT_SUSPENDED` (423), `TENANT_READ_ONLY` (423), `MFA_REQUIRED`, `PLAN_LIMIT_REACHED` (402),
     `ROLE_ESCALATION`, `LAST_ADMIN`, `ALREADY_MEMBER`, `INVITATION_PENDING`, `INVITATION_INVALID`, `ROLE_LOCKED`,
-    `ROLE_IN_USE`, `PLATFORM_ONLY`, `PLATFORM_ROLE`, `SUPPORT_GRANT_INVALID`, `SUPPORT_READ_ONLY`, `EXPORT_RUNNING`.
+    `ROLE_IN_USE`, `PLATFORM_ONLY`, `PLATFORM_ROLE`, `SUPPORT_GRANT_INVALID`, `SUPPORT_READ_ONLY`, `EXPORT_RUNNING`,
+    `PROJECT_ARCHIVED` (409), `ALREADY_IN_TEAM` (409), `MEMBERSHIP_INACTIVE`, `DIARY_SUBMITTED` (409).
+
+    **Permissões de obra.** `projects.*` e `diary.*` (exceto `projects.all` e `projects.create`) decidem-se obra a obra:
+    valem em todas as obras se o perfil na empresa tiver `projects.all`; senão, só nas obras de cuja equipa a pessoa faz
+    parte, com o perfil que tem nessa equipa. Cada obra devolve em `permissions` o que quem pede pode fazer nela.
   license:
     name: Proprietária
 servers:
@@ -31,6 +36,8 @@ tags:
   - name: Subscrição
   - name: Suporte
   - name: Exportação
+  - name: Obras
+  - name: Diário de obra
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -314,6 +321,69 @@ paths:
   /api/v1/exports/{tenantExport}/download:
     get: { tags: [Exportação], summary: Descarregar (expira em 48 h; auditado), parameters: [{ name: tenantExport, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: application/zip }, "404": { description: Inexistente ou expirada } } }
 
+  /api/v1/projects:
+    get:
+      tags: [Obras]
+      summary: Obras visíveis (todas com projects.all; senão, as da equipa)
+      parameters:
+        - { name: search, in: query, description: "Nome, código ou localidade", schema: { type: string } }
+        - { name: status, in: query, description: "open (preparação, em curso, suspensa) ou um estado", schema: { type: string, enum: [open, planning, active, suspended, completed, archived] } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses: { "200": { description: Lista paginada de Project } }
+    post:
+      tags: [Obras]
+      summary: Criar obra (projects.create; quem cria entra na equipa; código OB-AAAA-NNN se vazio)
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/ProjectInput" } } } }
+      responses: { "201": { description: Criada }, "402": { description: PLAN_LIMIT_REACHED (max_active_projects) } }
+  /api/v1/projects/{project}:
+    get: { tags: [Obras], summary: Obra (projects.view nesta obra), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: Project com permissions }, "403": { description: Fora da equipa }, "404": { description: Não existe nesta empresa } } }
+    put:
+      tags: [Obras]
+      summary: Editar (projects.update); concluir, arquivar ou reabrir exige projects.archive
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }]
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/ProjectInput" } } } }
+      responses: { "200": { description: OK }, "402": { description: Reabrir acima do limite }, "409": { description: PROJECT_ARCHIVED } }
+  /api/v1/projects/{project}/members:
+    get: { tags: [Obras], summary: Equipa da obra (projects.view), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: Lista de ProjectMember } } }
+    post:
+      tags: [Obras]
+      summary: Adicionar à equipa (projects.team); role_id vazio = perfil da empresa
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }]
+      requestBody: { content: { application/json: { schema: { type: object, required: [membership_id], properties: { membership_id: { type: integer }, role_id: { type: integer } } } } } }
+      responses: { "201": { description: Adicionado }, "403": { description: ROLE_ESCALATION }, "409": { description: ALREADY_IN_TEAM / PROJECT_ARCHIVED }, "422": { description: MEMBERSHIP_INACTIVE } }
+  /api/v1/projects/{project}/members/options:
+    get: { tags: [Obras], summary: Quem pode entrar e perfis que quem pede pode atribuir (projects.team), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{members, roles}" } } }
+  /api/v1/projects/{project}/members/{member}:
+    patch: { tags: [Obras], summary: Mudar o perfil na obra (projects.team), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: member, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [role_id], properties: { role_id: { type: integer } } } } } }, responses: { "200": { description: OK }, "403": { description: ROLE_ESCALATION } } }
+    delete: { tags: [Obras], summary: Retirar da equipa (projects.team), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: member, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "403": { description: ROLE_ESCALATION } } }
+
+  /api/v1/projects/{project}/diary:
+    get:
+      tags: [Diário de obra]
+      summary: Registos (diary.view), do mais recente para o mais antigo
+      parameters:
+        - { name: project, in: path, required: true, schema: { type: integer } }
+        - { name: month, in: query, description: AAAA-MM, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses: { "200": { description: Lista paginada (com items_count e workforce_total) } }
+    post:
+      tags: [Diário de obra]
+      summary: Novo registo em rascunho (diary.write); um por dia, nunca no futuro
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }]
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/DiaryEntryInput" } } } }
+      responses: { "201": { description: Criado }, "409": { description: PROJECT_ARCHIVED }, "422": { description: Dia já registado ou futuro } }
+  /api/v1/projects/{project}/diary/{diaryEntry}:
+    get: { tags: [Diário de obra], summary: Registo com linhas (diary.view), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: diaryEntry, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK }, "404": { description: Não pertence a esta obra } } }
+    put:
+      tags: [Diário de obra]
+      summary: Alterar rascunho (diary.write); items, se vierem, substituem as linhas; a data não muda
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: diaryEntry, in: path, required: true, schema: { type: integer } }]
+      requestBody: { content: { application/json: { schema: { $ref: "#/components/schemas/DiaryEntryInput" } } } }
+      responses: { "200": { description: OK }, "409": { description: DIARY_SUBMITTED } }
+    delete: { tags: [Diário de obra], summary: Apagar rascunho (diary.write), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: diaryEntry, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: DIARY_SUBMITTED } } }
+  /api/v1/projects/{project}/diary/{diaryEntry}/submit:
+    post: { tags: [Diário de obra], summary: Submeter (diary.submit); deixa de poder ser alterado, parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: diaryEntry, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK }, "409": { description: DIARY_SUBMITTED } } }
+
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
   /api/v1/platform/tenants:
@@ -420,3 +490,43 @@ components:
         name: { type: string }
         description: { type: [string, "null"] }
         permissions: { type: array, items: { type: string, example: members.view } }
+    ProjectInput:
+      type: object
+      properties:
+        name: { type: string, maxLength: 150 }
+        code: { type: [string, "null"], maxLength: 30, description: Vazio na criação = OB-AAAA-NNN }
+        owner_name: { type: [string, "null"] }
+        type: { type: [string, "null"], enum: [new_build, renovation, extension, demolition, infrastructure, maintenance, other, null] }
+        address: { type: [string, "null"] }
+        postal_code: { type: [string, "null"] }
+        city: { type: [string, "null"] }
+        contract_value_cents: { type: [integer, "null"], description: "Sem IVA, em cêntimos" }
+        starts_on: { type: [string, "null"], format: date }
+        planned_end_on: { type: [string, "null"], format: date }
+        status: { type: string, enum: [planning, active, suspended, completed, archived] }
+        description: { type: [string, "null"] }
+    DiaryEntryInput:
+      type: object
+      properties:
+        entry_date: { type: string, format: date, description: Só na criação }
+        weather:
+          type: [object, "null"]
+          properties:
+            morning: { type: [string, "null"], enum: [limpo, nublado, chuva, chuva_forte, vento, nevoeiro, geada, neve, null] }
+            afternoon: { type: [string, "null"] }
+            temp_min: { type: [integer, "null"] }
+            temp_max: { type: [integer, "null"] }
+        work_summary: { type: [string, "null"] }
+        notes: { type: [string, "null"] }
+        items:
+          type: array
+          maxItems: 200
+          items:
+            type: object
+            required: [kind, description]
+            properties:
+              kind: { type: string, enum: [workforce, equipment, material, incident, visit] }
+              description: { type: string }
+              quantity: { type: [number, "null"] }
+              unit: { type: [string, "null"] }
+              company: { type: [string, "null"] }

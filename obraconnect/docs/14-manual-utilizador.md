@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.1.0)
+# Manual do utilizador (versão 0.2.0)
 
 ## Entrar
 
@@ -23,6 +23,24 @@ Se pertence a mais de uma empresa, escolha a empresa ativa no seletor no topo do
 ## O que vê depende do seu perfil
 
 O menu mostra apenas as áreas a que o seu perfil dá acesso. Se precisar de mais acesso, fale com o administrador da empresa.
+
+## Obras
+
+Em **Obras** vê as obras a que tem acesso. Quem tem acesso a todas as obras (por omissão: administrador, diretor técnico, medidor-orçamentista e administrativo) vê todas; os restantes veem só as obras de cuja equipa fazem parte.
+
+- **Nova obra**: só o nome é obrigatório. O código é criado automaticamente (ex.: OB-2026-001) se o deixar vazio. Quem cria a obra fica na equipa.
+- **Equipa**: quem trabalha na obra e com que **perfil nessa obra**. Por omissão é o perfil que a pessoa tem na empresa, mas pode ser outro (por exemplo, um trabalhador que é encarregado só numa obra). Pessoas de fora (subempreiteiros, fiscalização, dono de obra) são convidadas primeiro em **Utilizadores** e depois adicionadas à equipa.
+- **Estado**: em preparação → em curso → concluída → arquivada (também pode suspender e retomar). Concluir, arquivar e reabrir exigem uma permissão própria. Obras concluídas e arquivadas não contam para o limite do plano. Uma obra arquivada fica só para consulta.
+
+## Diário de obra
+
+Um registo por dia em cada obra, no separador **Diário** da obra.
+
+1. **Novo registo** (ou **Registar agora**, se ainda não há registo de hoje).
+2. Preencha o tempo (manhã, tarde, temperaturas), os trabalhos executados e as linhas de **mão de obra**, **equipamentos**, **materiais recebidos**, **ocorrências** e **visitas**. Num registo novo, **Copiar mão de obra e equipamentos do último registo** poupa trabalho quando as equipas se repetem.
+3. **Guardar rascunho** para continuar mais tarde, ou **Guardar e submeter** para fechar o registo. Um registo submetido **não pode ser alterado nem apagado**.
+
+Não é possível registar dias futuros. Quem só tem consulta (por exemplo, fiscal ou dono de obra) vê os registos mas não os altera.
 
 ## No telemóvel
 

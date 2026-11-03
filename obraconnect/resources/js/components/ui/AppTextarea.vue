@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useId } from 'vue';
 
-defineProps<{ label?: string; error?: string; rows?: number; required?: boolean; maxlength?: number; hint?: string }>();
+defineProps<{ label?: string; error?: string; rows?: number; required?: boolean; maxlength?: number; hint?: string; ariaLabel?: string }>();
 
 const model = defineModel<string | null>();
 const id = useId();
@@ -18,6 +18,7 @@ const id = useId();
             :rows="rows ?? 3"
             :required="required"
             :maxlength="maxlength"
+            :aria-label="ariaLabel"
             class="block w-full rounded-lg border px-3 py-2.5 text-base text-slate-900 shadow-sm focus:border-brand-600 focus:ring-2 focus:ring-brand-200 focus:outline-none sm:text-sm"
             :class="error ? 'border-red-500' : 'border-slate-300'"
         />

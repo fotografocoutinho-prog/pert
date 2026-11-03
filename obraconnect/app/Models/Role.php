@@ -41,6 +41,12 @@ class Role extends Model
         return $this->hasMany(Invitation::class);
     }
 
+    /** Equipas de obra onde este é o perfil na obra. */
+    public function projectMembers(): HasMany
+    {
+        return $this->hasMany(ProjectMember::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->key === self::ADMIN;

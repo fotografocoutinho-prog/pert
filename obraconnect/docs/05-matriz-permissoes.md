@@ -5,7 +5,7 @@ Todos os perfis são editáveis pela empresa, exceto o **Administrador**, que te
 
 Abreviaturas: ADM Administrador · DT Diretor técnico · DO Diretor de obra · ENC Encarregado · PRE Preparador · MED Medidor-orçamentista · FIS Fiscal · CSO Coordenador de segurança · TQ Técnico de qualidade · ADV Administrativo · TRB Trabalhador · SUB Subempreiteiro · FOR Fornecedor · DON Dono de obra
 
-## 1. Implementado na fase 1
+## 1. Implementado
 
 Estas são as permissões reais em `app/Access/PermissionRegistry.php` e os valores por omissão em `app/Access/RoleTemplates.php`.
 
@@ -33,7 +33,27 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 - Suporte técnico autorizado: só permissões `*.view`, só pedidos de leitura.
 - Utilizadores externos (SUB, FOR, DON) começam sem permissões; o acesso deles é dado por obra.
 
-## 2. Planeado (fases 2 a 6)
+### Obras e diário (fase 2, implementado na 0.2.0)
+
+**●** = no perfil da empresa com efeito em **todas** as obras (o perfil tem `projects.all`); **○** = no perfil, mas só vale nas obras de cuja equipa a pessoa faz parte.
+
+| Permissão | Descrição | ADM | DT | DO | ENC | PRE | MED | FIS | CSO | TQ | ADV | TRB | SUB | FOR | DON |
+| --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| `projects.all` | Acesso a todas as obras | ● | ● | | | | ● | | | | ● | | | | |
+| `projects.view` | Ver obras | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ○ |
+| `projects.create` | Criar obras (de empresa) | ● | ● | | | | | | | | | | | | |
+| `projects.update` | Editar dados da obra | ● | ● | ○ | | ○ | | | | | | | | | |
+| `projects.team` | Gerir a equipa da obra | ● | ● | ○ | | | | | | | | | | | |
+| `projects.archive` | Concluir, arquivar e reabrir | ● | ● | | | | | | | | | | | | |
+| `diary.view` | Consultar o diário | ● | ● | ○ | ○ | ○ | | ○ | ○ | ○ | | | | | ○ |
+| `diary.write` | Escrever rascunhos | ● | ● | ○ | ○ | | | | | | | | | | |
+| `diary.submit` | Submeter (fecha o registo) | ● | ● | ○ | ○ | | | | | | | | | | |
+
+Diferenças em relação à proposta (secção 2): o preparador passa a ver só as obras da equipa (a proposta dava-lhe todas para ver e só as da equipa para editar, o que um único perfil não consegue exprimir); o diretor técnico escreve e submete o diário (sem isso deixaria de poder convidar diretores de obra, pela regra contra escalada); `projects.team` é nova.
+
+Resolução numa obra concreta (`AccessResolver::permissionsForProject`): permissões do perfil da empresa, se este tiver `projects.all`, **mais** as do perfil na equipa dessa obra, se a pessoa estiver na equipa. Quem cria uma obra entra na equipa com o perfil da empresa. A gestão da equipa segue a regra contra escalada: só se atribui, altera ou retira um perfil contido nas próprias permissões.
+
+## 2. Planeado (fases 2 a 6; as linhas de obras e diário já estão implementadas acima)
 
 Proposta de valores por omissão. Cada linha passa a existir no catálogo quando o módulo for implementado.
 

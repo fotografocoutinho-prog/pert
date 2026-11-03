@@ -36,6 +36,10 @@ const routes: RouteRecordRaw[] = [
         meta: { auth: true },
         children: [
             { path: '', component: () => import('@/pages/app/DashboardPage.vue'), meta: { tenant: true, title: 'Painel' } },
+            { path: 'obras', component: () => import('@/pages/app/projects/ProjectsPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Obras' } },
+            { path: 'obras/:id', component: () => import('@/pages/app/projects/ProjectPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Obra' } },
+            { path: 'obras/:id/diario/novo', component: () => import('@/pages/app/projects/DiaryEntryPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Diário de obra' } },
+            { path: 'obras/:id/diario/:entryId', component: () => import('@/pages/app/projects/DiaryEntryPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Diário de obra' } },
             { path: 'empresa', component: () => import('@/pages/app/CompanyPage.vue'), meta: { tenant: true, permission: 'company.view', title: 'Empresa' } },
             { path: 'utilizadores', component: () => import('@/pages/app/MembersPage.vue'), meta: { tenant: true, permission: 'members.view', title: 'Utilizadores' } },
             { path: 'perfis', component: () => import('@/pages/app/RolesPage.vue'), meta: { tenant: true, permission: 'roles.view', title: 'Perfis e permissões' } },
