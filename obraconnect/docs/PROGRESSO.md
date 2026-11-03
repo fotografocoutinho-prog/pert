@@ -1,5 +1,24 @@
 # Registo de progresso
 
+## v0.7.0 — Fase 2, parte 6: modo sem rede (2026-11-08)
+
+| Área | Verificação |
+| --- | --- |
+| `client_uuid` em registos e fotografias; reenvio devolve o existente (sem duplicar nem contar duas vezes na quota); mesmo dia de outro aparelho = 422 | Testes |
+| Fila no IndexedDB (resources/js/offline): envio passo a passo e retomável, submissão depois do envio, conflitos guardados | Ensaio real no browser com o servidor desligado |
+| Abrir sem rede: shell + todos os ficheiros do build no service worker; sessão, obra, estrutura e diário em cópia local apagada ao sair | Ensaio real: recarregar com o servidor desligado |
+| Indicadores e lista do diário com registos só no telemóvel; conflito com "Tentar outra vez"/"Descartar" | Ensaio real |
+
+Ensaio feito: com rede abriu-se a obra; desligou-se o servidor; abriu-se do zero o "Novo registo" de 30/10, escreveu-se texto e uma linha ligada ao P1, guardou-se e juntou-se uma fotografia; recarregou-se (tudo lá, "1 por enviar"); religou-se o servidor: ao abrir, o registo chegou com a linha ligada ao P1 e a fotografia processada, sem duplicados. Conflito simulado no dia 2/11: "Com problema", texto local visível, descartado sem tocar no servidor.
+
+Total: **129 testes**.
+
+### Limitações
+
+- Só o diário (texto e fotografias) funciona sem rede; documentos, estrutura e equipa precisam de rede.
+- Os dados ficam no browser do telemóvel: limpar os dados do site apaga o que estiver por enviar.
+- A cópia de leitura é a última vista: um mês nunca aberto com rede aparece só com o que está no telemóvel.
+
 ## v0.6.0 — Fase 2, parte 5: ligar à estrutura (2026-11-07)
 
 | Área | Verificação |

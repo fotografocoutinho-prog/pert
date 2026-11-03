@@ -27,7 +27,7 @@ class MediaStorage
     ) {}
 
     /** $mime vem do conteúdo (getimagesize), não do que o cliente declara. */
-    public function storeDiaryPhoto(Project $project, DiaryEntry $entry, UploadedFile $file, string $mime, ?string $caption, User $by): Media
+    public function storeDiaryPhoto(Project $project, DiaryEntry $entry, UploadedFile $file, string $mime, ?string $caption, User $by, ?string $clientUuid = null): Media
     {
         $tenant = $this->tenants->tenantOrFail();
         $this->limits->assertCanAdd($tenant, 'storage_mb', (int) ceil($file->getSize() / 1048576));
@@ -52,6 +52,7 @@ class MediaStorage
             'size_bytes' => $file->getSize(),
             'sha256' => hash_file('sha256', $file->getRealPath()),
             'uploaded_by_user_id' => $by->id,
+            'client_uuid' => $clientUuid,
         ])->save();
 
         $this->usage->add($tenant, $media->size_bytes);

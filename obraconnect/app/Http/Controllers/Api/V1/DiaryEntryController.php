@@ -54,6 +54,12 @@ class DiaryEntryController extends Controller
     public function store(Request $request, Project $project): DiaryEntryResource
     {
         $this->authorize('diary.write', $project);
+
+        // Reenvio de um registo feito sem rede (a resposta pode ter-se perdido): devolve o que já existe.
+        if ($existing = $this->findByClientUuid($request, $project)) {
+            return new DiaryEntryResource($existing->load(self::RELATIONS));
+        }
+
         $this->assertProjectOpen($project);
 
         $data = $this->validated($request, $project, creating: true);
@@ -63,6 +69,7 @@ class DiaryEntryController extends Controller
             $entry = $project->diaryEntries()->make($this->entryFields($data));
             $entry->created_by_user_id = $request->user()->id;
             $entry->updated_by_user_id = $request->user()->id;
+            $entry->client_uuid = $request->input('client_uuid');
             $entry->save();
 
             $this->syncItems($project, $entry, $data['items'] ?? []);
@@ -223,6 +230,21 @@ class DiaryEntryController extends Controller
                 'sort_order' => $i,
             ]);
         }
+    }
+
+    private function findByClientUuid(Request $request, Project $project): ?DiaryEntry
+    {
+        $uuid = $request->validate(['client_uuid' => ['nullable', 'uuid']])['client_uuid'] ?? null;
+        if ($uuid === null) {
+            return null;
+        }
+
+        $existing = DiaryEntry::query()->where('client_uuid', $uuid)->first();
+        if ($existing !== null && $existing->project_id !== $project->id) {
+            throw ValidationException::withMessages(['client_uuid' => 'Identificador já usado noutra obra.']);
+        }
+
+        return $existing;
     }
 
     /** whereDate funciona igual em MySQL e SQLite (onde a data fica guardada com hora). */

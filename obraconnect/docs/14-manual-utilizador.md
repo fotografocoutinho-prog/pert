@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.6.0)
+# Manual do utilizador (versão 0.7.0)
 
 ## Entrar
 
@@ -69,7 +69,15 @@ No separador **Documentos** da obra:
 
 ## No telemóvel
 
-A aplicação funciona no browser do telemóvel e pode ser instalada no ecrã inicial (Android: menu do Chrome → **Instalar aplicação**; iPhone: Safari → Partilhar → **Adicionar ao ecrã principal**). Nesta versão é preciso ligação à internet para trabalhar; o registo offline chega com o módulo de obra.
+A aplicação funciona no browser do telemóvel e pode ser instalada no ecrã inicial (Android: menu do Chrome → **Instalar aplicação**; iPhone: Safari → Partilhar → **Adicionar ao ecrã principal**).
+
+### Sem rede (diário de obra)
+
+- Abra a aplicação e a obra **uma vez com rede** (por exemplo, no escritório ou no estaleiro com wi-fi). A partir daí ela abre sem rede, com a última cópia da obra, da estrutura e do diário.
+- Sem rede, **Guardar rascunho** (ou **Guardar e submeter**) guarda o registo **neste telemóvel**, e as fotografias também. No topo aparece **Sem rede** e **N por enviar**.
+- Quando houver rede, tudo é enviado sozinho (também pode tocar em **N por enviar**). Nada é enviado duas vezes, mesmo que a rede falhe a meio.
+- Se o mesmo dia tiver sido registado entretanto noutro aparelho, o que escreveu fica guardado com o aviso **Com problema**: abra o registo, junte a informação à mão e use **Tentar outra vez** ou **Descartar**.
+- Ao **sair da conta**, as cópias de leitura são apagadas; o que está por enviar fica guardado e segue quando voltar a entrar.
 
 ## Mensagens comuns
 

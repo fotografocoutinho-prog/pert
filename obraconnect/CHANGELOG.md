@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.7.0 — 2026-11-08
+
+Fase 2, sexta parte: modo sem rede no diário de obra.
+
+- Sem rede, o registo do diário (texto, linhas, "onde") e as fotografias ficam guardados no telemóvel (IndexedDB) e são enviados sozinhos quando houver rede: ao abrir a aplicação, quando a rede volta e de minuto a minuto. "Guardar e submeter" sem rede submete depois de enviar.
+- Envio passo a passo e retomável (registo, cada fotografia, submissão), idempotente: o servidor aceita `client_uuid` no registo e em cada fotografia e devolve o que já existe num reenvio — nada fica duplicado nem conta duas vezes na quota.
+- Conflitos (o mesmo dia criado noutro aparelho, registo entretanto submetido) não perdem nada: ficam no telemóvel com o motivo, "Tentar outra vez" e "Descartar".
+- A aplicação abre sem rede: o service worker guarda todos os ecrãs compilados (lidos de `build/manifest.json`) e atualiza o shell a cada versão; a última sessão, obra, estrutura e diário vistos ficam numa cópia local, apagada ao sair da conta. O service worker continua a não guardar respostas da API.
+- Indicadores "Sem rede", "N por enviar" e "N com problema"; registos só no telemóvel aparecem na lista do diário.
+
 ## 0.6.0 — 2026-11-07
 
 Fase 2, quinta parte: ligar o diário, as fotografias e os documentos à estrutura.

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useSessionStore } from '@/stores/session';
+import { useSyncStore } from '@/stores/sync';
 import { useToastStore } from '@/stores/toast';
 import { platformApi } from '@/api';
 import { daysUntil, formatDateTime } from '@/utils/format';
@@ -15,6 +16,8 @@ interface NavItem {
 }
 
 const session = useSessionStore();
+const sync = useSyncStore();
+onMounted(() => sync.start());
 const route = useRoute();
 const router = useRouter();
 const menuOpen = ref(false);
@@ -60,6 +63,10 @@ async function leaveSupport(): Promise<void> {
 }
 
 async function logout(): Promise<void> {
+    await sync.refresh();
+    if (sync.pending.length && !window.confirm(`Há ${sync.pending.length} registo(s) do diário guardados neste telemóvel por enviar. Ficam guardados e são enviados quando voltar a entrar. Sair?`)) {
+        return;
+    }
     await session.logout();
     await router.push('/entrar');
 }
@@ -136,8 +143,23 @@ async function logout(): Promise<void> {
                     <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
                 </button>
                 <div class="min-w-0 flex-1"><TenantSwitcher /></div>
+                <button
+                    v-if="!sync.online || sync.pending.length"
+                    type="button"
+                    class="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+                    :class="sync.conflicts.length ? 'bg-red-100 text-red-800' : !sync.online ? 'bg-slate-800 text-white' : 'bg-amber-100 text-amber-900'"
+                    :title="sync.conflicts.length ? 'Há registos que não foi possível enviar' : 'Enviar agora'"
+                    @click="sync.sync()"
+                >
+                    <span v-if="!sync.online">Sem rede</span>
+                    <span v-if="sync.waiting.length">{{ sync.syncing ? 'A enviar…' : `${sync.waiting.length} por enviar` }}</span>
+                    <span v-if="sync.conflicts.length">{{ sync.conflicts.length }} com problema</span>
+                </button>
                 <span class="hidden text-sm text-slate-600 sm:inline">{{ session.user?.name }}</span>
             </header>
+            <div v-if="session.offlineSession" class="bg-slate-800 px-4 py-2 text-sm text-white sm:px-6">
+                Sem ligação ao servidor: está a ver a última cópia guardada neste telemóvel. O que escrever no diário fica guardado e é enviado quando houver rede.
+            </div>
 
             <!-- Avisos de contexto -->
             <div v-if="session.supportSession" class="bg-slate-900 px-4 py-2 text-sm text-white sm:px-6">

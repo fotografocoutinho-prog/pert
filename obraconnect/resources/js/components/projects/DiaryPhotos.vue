@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { diaryApi } from '@/api';
 import { ApiError } from '@/api/http';
+import { isNetworkError } from '@/offline/cache';
 import type { MediaItem } from '@/api/types';
 import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useToastStore } from '@/stores/toast';
@@ -11,6 +12,8 @@ import AppButton from '@/components/ui/AppButton.vue';
 import AppModal from '@/components/ui/AppModal.vue';
 
 const props = defineProps<{ projectId: number; entryId: number; photos: MediaItem[]; editable: boolean }>();
+// Sem rede: as fotografias passam para a fila do telemóvel (ver DiaryEntryPage).
+const emit = defineEmits<{ queue: [files: File[]] }>();
 
 const toast = useToastStore();
 const { placeOptions, hasStructure, toValue, toIds, labelOf, load: loadPlaces } = useStructurePlaces(props.projectId);
@@ -45,8 +48,15 @@ async function onFiles(event: Event): Promise<void> {
     }
     input.value = '';
 
+    const offline: File[] = [];
     for (const [key, file] of files) {
         const job = { key };
+        if (offline.length) {
+            // Já se viu que não há rede: as restantes vão diretamente para a fila.
+            offline.push(file);
+            queue.value = queue.value.filter((q) => q.key !== key);
+            continue;
+        }
         try {
             const item = await diaryApi.uploadPhoto(props.projectId, props.entryId, file, (p) => {
                 const live = queue.value.find((q) => q.key === job.key);
@@ -55,10 +65,16 @@ async function onFiles(event: Event): Promise<void> {
             list.value.push(item);
             queue.value = queue.value.filter((q) => q.key !== job.key);
         } catch (e) {
+            if (isNetworkError(e)) {
+                offline.push(file);
+                queue.value = queue.value.filter((q) => q.key !== job.key);
+                continue;
+            }
             const live = queue.value.find((q) => q.key === job.key);
             if (live) live.error = e instanceof ApiError ? (e.firstError('photo') ?? e.message) : 'Falhou o envio.';
         }
     }
+    if (offline.length) emit('queue', offline);
     schedulePoll();
 }
 

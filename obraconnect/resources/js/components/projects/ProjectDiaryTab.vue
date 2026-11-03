@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { diaryApi } from '@/api';
 import type { DiaryEntry, Project } from '@/api/types';
 import { useSessionStore } from '@/stores/session';
+import { isNetworkError } from '@/offline/cache';
+import { useSyncStore } from '@/stores/sync';
 import { formatLongDate, todayIso, weatherLabel } from '@/utils/projects';
 import AppBadge from '@/components/ui/AppBadge.vue';
 import AppButton from '@/components/ui/AppButton.vue';
@@ -14,6 +16,8 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 const props = defineProps<{ project: Project }>();
 
 const session = useSessionStore();
+const sync = useSyncStore();
+sync.refresh();
 const route = useRoute();
 const router = useRouter();
 
@@ -28,12 +32,23 @@ const monthLabel = computed(() => {
     return label.charAt(0).toUpperCase() + label.slice(1);
 });
 const isCurrentMonth = computed(() => month.value === todayIso().slice(0, 7));
-const todayMissing = computed(() => isCurrentMonth.value && !entries.value.some((e) => e.entry_date === todayIso()));
+/** Registos deste mês guardados neste telemóvel (modo sem rede). */
+const localThisMonth = computed(() => sync.pending.filter((p) => p.projectId === props.project.id && p.date.startsWith(month.value)));
+const pendingFor = (entry: DiaryEntry) => localThisMonth.value.find((p) => p.entryId === entry.id || p.date === entry.entry_date);
+/** Só no telemóvel (ainda não chegaram ao servidor). */
+const localOnly = computed(() => localThisMonth.value.filter((p) => !entries.value.some((e) => e.id === p.entryId || e.entry_date === p.date)));
+const todayMissing = computed(
+    () => isCurrentMonth.value && !entries.value.some((e) => e.entry_date === todayIso()) && !localOnly.value.some((p) => p.date === todayIso()),
+);
 
 async function load(): Promise<void> {
     loading.value = true;
     try {
         entries.value = (await diaryApi.list(props.project.id, { month: month.value })).data;
+    } catch (e) {
+        // Sem rede e sem cópia deste mês: mostra só o que está guardado no telemóvel.
+        if (!isNetworkError(e)) throw e;
+        entries.value = [];
     } finally {
         loading.value = false;
     }
@@ -76,8 +91,22 @@ function weatherSummary(entry: DiaryEntry): string {
         </div>
 
         <div v-if="loading" class="flex justify-center py-10"><AppSpinner class="h-6 w-6 text-brand-700" /></div>
-        <EmptyState v-else-if="entries.length === 0" title="Sem registos neste mês" />
+        <EmptyState v-else-if="entries.length === 0 && localOnly.length === 0" title="Sem registos neste mês" />
         <ul v-else class="divide-y divide-slate-100">
+            <li v-for="p in localOnly" :key="p.key">
+                <RouterLink
+                    :to="p.entryId ? `/app/obras/${project.id}/diario/${p.entryId}` : `/app/obras/${project.id}/diario/novo?data=${p.date}`"
+                    class="-mx-2 flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-3 hover:bg-slate-50"
+                >
+                    <div>
+                        <p class="font-semibold text-slate-900 first-letter:uppercase">{{ formatLongDate(p.date) }}</p>
+                        <p class="text-sm text-slate-500">
+                            Guardado neste telemóvel{{ p.photos.length ? ` · ${p.photos.length} ${p.photos.length === 1 ? 'foto' : 'fotos'}` : '' }}
+                        </p>
+                    </div>
+                    <AppBadge :color="p.status === 'conflict' ? 'red' : 'blue'">{{ p.status === 'conflict' ? 'Com problema' : 'No telemóvel' }}</AppBadge>
+                </RouterLink>
+            </li>
             <li v-for="entry in entries" :key="entry.id">
                 <RouterLink
                     :to="`/app/obras/${project.id}/diario/${entry.id}`"
@@ -89,7 +118,12 @@ function weatherSummary(entry: DiaryEntry): string {
                             {{ [weatherSummary(entry), entry.workforce_total ? `${entry.workforce_total} ${entry.workforce_total === 1 ? 'pessoa' : 'pessoas'}` : null, entry.photos_count ? `${entry.photos_count} ${entry.photos_count === 1 ? 'foto' : 'fotos'}` : null, entry.created_by].filter(Boolean).join(' · ') || '—' }}
                         </p>
                     </div>
-                    <AppBadge :color="entry.status === 'submitted' ? 'green' : 'amber'">{{ entry.status_label }}</AppBadge>
+                    <span class="flex items-center gap-1.5">
+                        <AppBadge v-if="pendingFor(entry)" :color="pendingFor(entry)!.status === 'conflict' ? 'red' : 'blue'">
+                            {{ pendingFor(entry)!.status === 'conflict' ? 'Com problema' : 'Por enviar' }}
+                        </AppBadge>
+                        <AppBadge :color="entry.status === 'submitted' ? 'green' : 'amber'">{{ entry.status_label }}</AppBadge>
+                    </span>
                 </RouterLink>
             </li>
         </ul>

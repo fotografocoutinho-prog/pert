@@ -33,6 +33,13 @@ class DiaryPhotoController extends Controller
     public function store(Request $request, Project $project, DiaryEntry $diaryEntry): MediaResource
     {
         $this->authorize('diary.write', $project);
+
+        // Reenvio de uma fotografia tirada sem rede: devolve a que já existe (não duplica nem conta duas vezes).
+        $uuid = $request->validate(['client_uuid' => ['nullable', 'uuid']])['client_uuid'] ?? null;
+        if ($uuid !== null && ($existing = $diaryEntry->photos()->where('client_uuid', $uuid)->first())) {
+            return new MediaResource($existing->load('uploadedBy:id,name'));
+        }
+
         $this->assertProjectOpen($project);
         $this->assertDraft($diaryEntry);
 
@@ -57,7 +64,7 @@ class DiaryPhotoController extends Controller
             throw ValidationException::withMessages(['photo' => "Cada registo pode ter no máximo {$limit} fotografias."]);
         }
 
-        $photo = $this->media->storeDiaryPhoto($project, $diaryEntry, $request->file('photo'), $info['mime'], $request->input('caption'), $request->user());
+        $photo = $this->media->storeDiaryPhoto($project, $diaryEntry, $request->file('photo'), $info['mime'], $request->input('caption'), $request->user(), $uuid);
         $photo->update(Place::normalize($project, $request->only(['location_id', 'element_id'])));
 
         $this->auditor->record('diary.photo_added', $diaryEntry, [

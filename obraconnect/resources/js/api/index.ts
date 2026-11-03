@@ -1,4 +1,5 @@
 import { appUrl } from '@/utils/base';
+import { cachedRead } from '@/offline/cache';
 import { ensureCsrfCookie, getData, http } from './http';
 import type {
     AuditEntry,
@@ -180,9 +181,10 @@ export const exportsApi = {
 };
 
 export const projectsApi = {
-    list: async (params: { search?: string; status?: string; page?: number }) =>
-        (await http.get<Paginated<Project>>('/api/v1/projects', { params })).data,
-    get: (id: number) => getData<Project>(`/api/v1/projects/${id}`),
+    // Leituras com cópia local: abrem sem rede com o que foi visto da última vez.
+    list: (params: { search?: string; status?: string; page?: number }) =>
+        cachedRead(`projects:${JSON.stringify(params)}`, async () => (await http.get<Paginated<Project>>('/api/v1/projects', { params })).data),
+    get: (id: number) => cachedRead(`project:${id}`, () => getData<Project>(`/api/v1/projects/${id}`)),
     create: async (payload: Record<string, unknown>) => (await http.post<{ data: Project }>('/api/v1/projects', payload)).data.data,
     update: async (id: number, payload: Record<string, unknown>) =>
         (await http.put<{ data: Project }>(`/api/v1/projects/${id}`, payload)).data.data,
@@ -200,9 +202,11 @@ export const projectsApi = {
 };
 
 export const diaryApi = {
-    list: async (projectId: number, params: { month?: string; page?: number }) =>
-        (await http.get<Paginated<DiaryEntry>>(`/api/v1/projects/${projectId}/diary`, { params })).data,
-    get: (projectId: number, entryId: number) => getData<DiaryEntry>(`/api/v1/projects/${projectId}/diary/${entryId}`),
+    list: (projectId: number, params: { month?: string; page?: number }) =>
+        cachedRead(`diary:${projectId}:${JSON.stringify(params)}`, async () =>
+            (await http.get<Paginated<DiaryEntry>>(`/api/v1/projects/${projectId}/diary`, { params })).data),
+    get: (projectId: number, entryId: number) =>
+        cachedRead(`diary-entry:${projectId}:${entryId}`, () => getData<DiaryEntry>(`/api/v1/projects/${projectId}/diary/${entryId}`)),
     create: async (projectId: number, payload: Record<string, unknown>) =>
         (await http.post<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary`, payload)).data.data,
     update: async (projectId: number, entryId: number, payload: Record<string, unknown>) =>
@@ -210,9 +214,17 @@ export const diaryApi = {
     remove: (projectId: number, entryId: number) => http.delete(`/api/v1/projects/${projectId}/diary/${entryId}`),
     submit: async (projectId: number, entryId: number) =>
         (await http.post<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary/${entryId}/submit`)).data.data,
-    uploadPhoto: async (projectId: number, entryId: number, file: File, onProgress?: (percent: number) => void) => {
+    uploadPhoto: async (
+        projectId: number,
+        entryId: number,
+        file: File,
+        onProgress?: (percent: number) => void,
+        extra: Record<string, string | number> = {},
+    ) => {
         const form = new FormData();
         form.append('photo', file);
+        // client_uuid (fila sem rede) e local/elemento.
+        for (const [k, v] of Object.entries(extra)) form.append(k, String(v));
         const { data } = await http.post<{ data: MediaItem }>(`/api/v1/projects/${projectId}/diary/${entryId}/photos`, form, {
             // Fotografias de telemóvel em rede móvel demoram mais do que os 30 s por omissão.
             timeout: 300_000,
@@ -270,7 +282,7 @@ export const documentsApi = {
 };
 
 export const structureApi = {
-    get: (projectId: number) => getData<ProjectStructure>(`/api/v1/projects/${projectId}/structure`),
+    get: (projectId: number) => cachedRead(`structure:${projectId}`, () => getData<ProjectStructure>(`/api/v1/projects/${projectId}/structure`)),
     createLocation: (projectId: number, payload: { kind: string; name: string; parent_id: number | null }) =>
         http.post(`/api/v1/projects/${projectId}/locations`, payload),
     updateLocation: (projectId: number, id: number, payload: { name?: string; sort_order?: number }) =>
