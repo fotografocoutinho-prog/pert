@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.4.0)
+# Manual do utilizador (versão 0.5.0)
 
 ## Entrar
 
@@ -43,6 +43,16 @@ Um registo por dia em cada obra, no separador **Diário** da obra.
 **Fotografias.** Num rascunho já guardado, use **Tirar fotografia** (abre a câmara no telemóvel) ou **Escolher fotografias** (várias de uma vez). Pode escrever uma legenda em cada uma. Aceita JPEG, PNG e WebP até 20 MB, no máximo 30 por registo. As miniaturas aparecem ao fim de alguns segundos (até cerca de um minuto). Toque numa fotografia para a ver em grande ou **descarregar o original**, que é guardado exatamente como foi enviado. As fotografias ocupam o espaço do plano e ficam fechadas quando o registo é submetido.
 
 Não é possível registar dias futuros. Quem só tem consulta (por exemplo, fiscal ou dono de obra) vê os registos mas não os altera.
+
+## Estrutura da obra
+
+No separador **Estrutura** da obra descreve-se a obra em **edifícios**, **pisos** e **zonas**, e os **elementos construtivos** de cada um.
+
+- **+ Edifício** cria um edifício (numa obra de um só corpo, um edifício com o nome da obra).
+- **+ Pisos** num edifício cria vários de uma vez: escreva, por exemplo, `-1 a 3`.
+- **+ Zona** cria uma zona num piso (ou diretamente no edifício, para arranjos exteriores).
+- **+ Elemento** junta um pilar, viga, laje, etc. Se deixar o código vazio, é numerado sozinho por tipo (P1, P2, V1, L1...). Toque num elemento para o corrigir, mudar de localização ou apagar.
+- Só se apaga um edifício, piso ou zona vazio.
 
 ## Documentos da obra
 

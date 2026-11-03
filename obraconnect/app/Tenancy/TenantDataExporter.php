@@ -144,6 +144,19 @@ class TenantDataExporter
                 ]),
             ]);
 
+        $this->sections['structure'] = fn () => Project::query()->with(['locations', 'elements'])->orderBy('id')->get()
+            ->map(fn (Project $p) => [
+                'project' => $p->code,
+                'locations' => $p->locations->map(fn ($l) => ['id' => $l->id, 'parent_id' => $l->parent_id, 'kind' => $l->kind->value, 'name' => $l->name]),
+                'elements' => $p->elements->map(fn ($e) => [
+                    'location_id' => $e->location_id,
+                    'type' => $e->element_type->value,
+                    'code' => $e->code,
+                    'name' => $e->name,
+                    'notes' => $e->notes,
+                ]),
+            ]);
+
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)
             ->map(fn (AuditLog $log) => $log->only(['event', 'actor_type', 'actor_user_id', 'subject_type', 'subject_id', 'properties', 'ip_address', 'created_at']));
     }

@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectMemberController;
 use App\Http\Controllers\Api\V1\PublicPlanController;
 use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\StructureController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
 use Illuminate\Support\Facades\Route;
@@ -125,6 +126,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                     ->middleware('throttle:uploads')->name('documents.versions.store');
                 Route::get('documents/{document}/versions/{version}/download', [DocumentController::class, 'download'])
                     ->name('documents.versions.download');
+
+                Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
+                Route::post('locations', [StructureController::class, 'storeLocation'])->name('locations.store');
+                Route::patch('locations/{location}', [StructureController::class, 'updateLocation'])->name('locations.update');
+                Route::delete('locations/{location}', [StructureController::class, 'destroyLocation'])->name('locations.destroy');
+                Route::post('elements', [StructureController::class, 'storeElement'])->name('elements.store');
+                Route::patch('elements/{element}', [StructureController::class, 'updateElement'])->name('elements.update');
+                Route::delete('elements/{element}', [StructureController::class, 'destroyElement'])->name('elements.destroy');
             });
         });
 

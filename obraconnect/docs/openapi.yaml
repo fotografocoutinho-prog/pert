@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.4.0
+  version: 0.5.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -42,6 +42,7 @@ tags:
   - name: Obras
   - name: Diário de obra
   - name: Documentos
+  - name: Estrutura
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -459,6 +460,18 @@ paths:
   /api/v1/projects/{project}/folders/{folder}:
     patch: { tags: [Documentos], summary: Renomear (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: folder, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
     delete: { tags: [Documentos], summary: Apagar pasta vazia (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: folder, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: FOLDER_NOT_EMPTY } } }
+  /api/v1/projects/{project}/structure:
+    get: { tags: [Estrutura], summary: "Localizações e elementos em listas planas, e tipos de elemento (projects.view)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{locations, elements, element_types}" } } }
+  /api/v1/projects/{project}/locations:
+    post: { tags: [Estrutura], summary: "Edifício (raiz), piso (num edifício) ou zona (num piso ou edifício) (structure.manage)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [kind, name], properties: { kind: { type: string, enum: [building, floor, zone] }, name: { type: string }, parent_id: { type: integer } } } } } }, responses: { "201": { description: Criada }, "422": { description: Encadeamento inválido }, "409": { description: PROJECT_ARCHIVED } } }
+  /api/v1/projects/{project}/locations/{location}:
+    patch: { tags: [Estrutura], summary: Nome ou ordem (structure.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: location, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Estrutura], summary: Apagar se vazia (structure.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: location, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: LOCATION_NOT_EMPTY } } }
+  /api/v1/projects/{project}/elements:
+    post: { tags: [Estrutura], summary: "Elemento construtivo; code vazio = automático por tipo (P1, V1...) (structure.manage)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [location_id, element_type], properties: { location_id: { type: integer }, element_type: { type: string, enum: [footing, column, beam, slab, wall, stair, retaining_wall, roof, other] }, code: { type: string }, name: { type: string }, notes: { type: string } } } } } }, responses: { "201": { description: Criado }, "422": { description: Código repetido na obra } } }
+  /api/v1/projects/{project}/elements/{element}:
+    patch: { tags: [Estrutura], summary: "Corrigir ou mudar de localização (structure.manage)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Estrutura], summary: Apagar (structure.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
   /api/v1/platform/tenants:

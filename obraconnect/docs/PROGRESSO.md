@@ -1,5 +1,21 @@
 # Registo de progresso
 
+## v0.5.0 — Fase 2, parte 4: estrutura da obra (2026-11-06)
+
+| Área | Verificação |
+| --- | --- |
+| Hierarquia edifício → piso → zona com regras de encadeamento; localizações de outra obra recusadas; só se apagam vazias | Testes |
+| Elementos com código automático por prefixo (PA1 não conta para P), únicos por obra; mover entre localizações | Testes + browser |
+| `structure.manage` por obra (diretor de obra sim, encarregado não), fora da equipa 403, outra empresa 404, obra arquivada 409 | Testes |
+| Interface em árvore, criar pisos "-1 a 2" de uma vez, formulário de elementos | Browser (540 px) |
+
+Total: **122 testes, 606 asserções**.
+
+### Não feito
+
+- Atividades (WBS, quantidades, dependências) — chegam com o planeamento.
+- Ligar o diário, fotografias e documentos a localizações/elementos; especialidades.
+
 ## v0.4.0 — Fase 2, parte 3: documentos da obra (2026-11-05)
 
 | Área | Verificação |

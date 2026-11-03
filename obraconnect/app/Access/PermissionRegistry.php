@@ -15,7 +15,7 @@ final class PermissionRegistry
     public const ALL_PROJECTS = 'projects.all';
 
     /** Módulos cujas permissões valem obra a obra. */
-    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents'];
+    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure'];
 
     /** Exceções nesses módulos: valem para a empresa. */
     private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
@@ -82,6 +82,12 @@ final class PermissionRegistry
                     'projects.update' => 'Editar os dados da obra',
                     'projects.team' => 'Gerir a equipa da obra',
                     'projects.archive' => 'Concluir, arquivar e reabrir obras',
+                ],
+            ],
+            'structure' => [
+                'label' => 'Estrutura da obra',
+                'permissions' => [
+                    'structure.manage' => 'Gerir edifícios, pisos, zonas e elementos construtivos',
                 ],
             ],
             'diary' => [

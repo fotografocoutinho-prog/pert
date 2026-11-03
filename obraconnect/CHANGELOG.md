@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.5.0 — 2026-11-06
+
+Fase 2, quarta parte: estrutura da obra.
+
+- Edifícios, pisos e zonas numa hierarquia (piso dentro de edifício; zona dentro de piso ou diretamente no edifício).
+- Criar vários pisos de uma vez ("-1 a 3").
+- Elementos construtivos (sapata, pilar, viga, laje, parede, escada, muro de suporte, cobertura, outro) em cada localização, com código automático por tipo (S1, P1, V1, L1, PA1...) e único na obra.
+- Permissão nova `structure.manage` (diretor técnico, diretor de obra, preparador, medidor-orçamentista); quem vê a obra vê a estrutura.
+- Só se apaga uma localização vazia; elementos podem mudar de localização. Estrutura na exportação de dados.
+
 ## 0.4.0 — 2026-11-05
 
 Fase 2, terceira parte: documentos da obra.

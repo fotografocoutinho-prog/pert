@@ -63,6 +63,16 @@ class Project extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function locations(): HasMany
+    {
+        return $this->hasMany(ProjectLocation::class);
+    }
+
+    public function elements(): HasMany
+    {
+        return $this->hasMany(ConstructionElement::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

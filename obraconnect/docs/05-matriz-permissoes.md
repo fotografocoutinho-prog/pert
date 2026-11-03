@@ -53,6 +53,10 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 | `documents.upload` | Enviar (e versões dos seus) | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ● | | ○ | ○ | |
 | `documents.manage` | Pastas, mover, apagar, versões de todos | ● | ● | ○ | | ○ | | | | | ● | | | | |
 
+| `structure.manage` | Edifícios, pisos, zonas e elementos | ● | ● | ○ | | ○ | ● | | | | | | | | |
+
+Estrutura (0.5.0): ver a estrutura só exige `projects.view`. O medidor-orçamentista gere a estrutura em todas as obras (tem `projects.all`).
+
 Documentos (0.4.0): o medidor-orçamentista tem acesso a todas as obras, por isso consulta e envia em todas (a proposta tinha ○).
 
 Diferenças em relação à proposta (secção 2): o preparador passa a ver só as obras da equipa (a proposta dava-lhe todas para ver e só as da equipa para editar, o que um único perfil não consegue exprimir); o diretor técnico escreve e submete o diário (sem isso deixaria de poder convidar diretores de obra, pela regra contra escalada); `projects.team` é nova.

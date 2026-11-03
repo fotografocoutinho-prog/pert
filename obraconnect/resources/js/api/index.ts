@@ -19,6 +19,7 @@ import type {
     Project,
     ProjectDocument,
     ProjectMember,
+    ProjectStructure,
     Role,
     Subscription,
     SupportGrant,
@@ -257,6 +258,19 @@ export const documentsApi = {
         http.post(`/api/v1/projects/${projectId}/folders`, { name, parent_id: parentId }),
     renameFolder: (projectId: number, id: number, name: string) => http.patch(`/api/v1/projects/${projectId}/folders/${id}`, { name }),
     removeFolder: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/folders/${id}`),
+};
+
+export const structureApi = {
+    get: (projectId: number) => getData<ProjectStructure>(`/api/v1/projects/${projectId}/structure`),
+    createLocation: (projectId: number, payload: { kind: string; name: string; parent_id: number | null }) =>
+        http.post(`/api/v1/projects/${projectId}/locations`, payload),
+    updateLocation: (projectId: number, id: number, payload: { name?: string; sort_order?: number }) =>
+        http.patch(`/api/v1/projects/${projectId}/locations/${id}`, payload),
+    removeLocation: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/locations/${id}`),
+    createElement: (projectId: number, payload: Record<string, unknown>) => http.post(`/api/v1/projects/${projectId}/elements`, payload),
+    updateElement: (projectId: number, id: number, payload: Record<string, unknown>) =>
+        http.patch(`/api/v1/projects/${projectId}/elements/${id}`, payload),
+    removeElement: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/elements/${id}`),
 };
 
 export const platformApi = {

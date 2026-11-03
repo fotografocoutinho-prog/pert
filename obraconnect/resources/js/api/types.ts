@@ -381,3 +381,30 @@ export interface DocumentListing {
     documents: ProjectDocument[];
     tree?: DocumentFolderRef[];
 }
+
+export type LocationKind = 'building' | 'floor' | 'zone';
+
+export interface ProjectLocationItem {
+    id: number;
+    parent_id: number | null;
+    kind: LocationKind;
+    kind_label: string;
+    name: string;
+    sort_order: number;
+}
+
+export interface ConstructionElementItem {
+    id: number;
+    location_id: number;
+    element_type: string;
+    element_type_label: string;
+    code: string;
+    name: string | null;
+    notes: string | null;
+}
+
+export interface ProjectStructure {
+    locations: ProjectLocationItem[];
+    elements: ConstructionElementItem[];
+    element_types: { value: string; label: string; prefix: string }[];
+}

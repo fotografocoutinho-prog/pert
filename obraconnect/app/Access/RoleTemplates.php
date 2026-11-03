@@ -29,7 +29,7 @@ final class RoleTemplates
                 'description' => 'Responsável técnico da empresa.',
                 'permissions' => [
                     'company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view',
-                    'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive',
+                    'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive', 'structure.manage',
                     'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
                 ],
@@ -39,7 +39,7 @@ final class RoleTemplates
                 'description' => 'Gestão das obras atribuídas.',
                 'permissions' => [
                     'company.view', 'members.view', 'members.invite',
-                    'projects.view', 'projects.update', 'projects.team', 'diary.view', 'diary.write', 'diary.submit',
+                    'projects.view', 'projects.update', 'projects.team', 'structure.manage', 'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
                 ],
             ],
@@ -51,12 +51,12 @@ final class RoleTemplates
             'preparador' => [
                 'name' => 'Preparador de obra',
                 'description' => 'Preparação, compras e planeamento.',
-                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'structure.manage', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'medidor_orcamentista' => [
                 'name' => 'Medidor-orçamentista',
                 'description' => 'Medições e orçamentos.',
-                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view', 'documents.view', 'documents.upload'],
+                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view', 'structure.manage', 'documents.view', 'documents.upload'],
             ],
             'fiscal' => [
                 'name' => 'Fiscal',

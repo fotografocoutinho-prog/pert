@@ -162,8 +162,8 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 | `projects` | code, name, client_id, owner_name, type, address, lat, lng, contract_value_cents, initial_budget_cents, starts_on, planned_end_on, contract_days, status, deleted_at | cliente |
 | `project_members` | project_id, membership_id, role_id (perfil na obra) | FK compostas |
 | `project_contract_revisions` | project_id, number, value_delta_cents, days_delta, reason, approved_at | obra |
-| `buildings` → `floors` → `zones` | project_id / building_id / floor_id, name, sort_order | hierarquia |
-| `construction_elements` | zone_id, element_type (sapata, pilar, viga, laje, parede...), code, name, specialty_id | zona |
+| `buildings` → `floors` → `zones` (**0.5.0:** uma só tabela `project_locations` com `kind` e auto-relação composta) | project_id / building_id / floor_id, name, sort_order | hierarquia |
+| `construction_elements` (**0.5.0:** com `location_id` para qualquer nível, `code` único na obra; `specialty_id` fica para as especialidades) | zone_id, element_type (sapata, pilar, viga, laje, parede...), code, name, specialty_id | zona |
 | `activities` | project_id, element_id (opcional), wbs_code, name, unit, planned_qty, status | elemento |
 | `activity_dependencies` | predecessor_id, successor_id, type (FS/SS/FF/SF), lag_days | atividades |
 | `schedules` | project_id, version, is_baseline, created_at | obra |
