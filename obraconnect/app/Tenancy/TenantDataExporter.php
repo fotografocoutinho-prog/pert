@@ -4,6 +4,7 @@ namespace App\Tenancy;
 
 use App\Models\AuditLog;
 use App\Models\DiaryEntry;
+use App\Models\Document;
 use App\Models\Invitation;
 use App\Models\Media;
 use App\Models\Membership;
@@ -120,6 +121,27 @@ class TenantDataExporter
                 'taken_at' => $m->taken_at?->toIso8601String(),
                 'uploaded_by' => $m->uploadedBy?->name,
                 'uploaded_at' => $m->created_at?->toIso8601String(),
+            ]);
+
+        // Como nas fotografias: a lista e o SHA-256 de cada versão, sem os ficheiros.
+        $this->sections['documents'] = fn () => Document::query()
+            ->with(['project:id,code', 'folder:id,name', 'versions.uploadedBy:id,name'])
+            ->orderBy('id')->lazy(200)
+            ->map(fn (Document $d) => [
+                'project' => $d->project->code,
+                'folder' => $d->folder?->name,
+                'title' => $d->title,
+                'description' => $d->description,
+                'versions' => $d->versions->map(fn ($v) => [
+                    'number' => $v->number,
+                    'original_name' => $v->original_name,
+                    'mime' => $v->mime,
+                    'size_bytes' => $v->size_bytes,
+                    'sha256' => $v->sha256,
+                    'note' => $v->note,
+                    'uploaded_by' => $v->uploadedBy?->name,
+                    'uploaded_at' => $v->created_at?->toIso8601String(),
+                ]),
             ]);
 
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)

@@ -49,6 +49,12 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 | `diary.write` | Escrever rascunhos | ● | ● | ○ | ○ | | | | | | | | | | |
 | `diary.submit` | Submeter (fecha o registo) | ● | ● | ○ | ○ | | | | | | | | | | |
 
+| `documents.view` | Consultar e descarregar | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ○ |
+| `documents.upload` | Enviar (e versões dos seus) | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ● | | ○ | ○ | |
+| `documents.manage` | Pastas, mover, apagar, versões de todos | ● | ● | ○ | | ○ | | | | | ● | | | | |
+
+Documentos (0.4.0): o medidor-orçamentista tem acesso a todas as obras, por isso consulta e envia em todas (a proposta tinha ○).
+
 Diferenças em relação à proposta (secção 2): o preparador passa a ver só as obras da equipa (a proposta dava-lhe todas para ver e só as da equipa para editar, o que um único perfil não consegue exprimir); o diretor técnico escreve e submete o diário (sem isso deixaria de poder convidar diretores de obra, pela regra contra escalada); `projects.team` é nova.
 
 Resolução numa obra concreta (`AccessResolver::permissionsForProject`): permissões do perfil da empresa, se este tiver `projects.all`, **mais** as do perfil na equipa dessa obra, se a pessoa estiver na equipa. Quem cria uma obra entra na equipa com o perfil da empresa. A gestão da equipa segue a regra contra escalada: só se atribui, altera ou retira um perfil contido nas próprias permissões.

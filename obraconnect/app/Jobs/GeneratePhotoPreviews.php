@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Billing\StorageUsage;
 use App\Enums\MediaStatus;
-use App\Media\MediaStorage;
 use App\Models\Media;
 use App\Tenancy\MissingTenantContextException;
 use App\Tenancy\TenantContext;
@@ -33,7 +33,7 @@ class GeneratePhotoPreviews implements ShouldQueue
 
     public function __construct(public readonly int $mediaId) {}
 
-    public function handle(TenantContext $tenants, MediaStorage $storage): void
+    public function handle(TenantContext $tenants, StorageUsage $usage): void
     {
         if (! $tenants->hasTenant()) {
             throw new MissingTenantContextException('GeneratePhotoPreviews sem empresa no contexto.');
@@ -72,7 +72,7 @@ class GeneratePhotoPreviews implements ShouldQueue
                 'derived_bytes' => $derived,
             ])->save();
 
-            $storage->addUsage($tenants->tenantOrFail(), $derived);
+            $usage->add($tenants->tenantOrFail(), $derived);
         } catch (Throwable $e) {
             // O original continua disponível; só não há versões reduzidas.
             $media->forceFill(['status' => MediaStatus::Failed])->save();

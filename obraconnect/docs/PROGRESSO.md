@@ -1,5 +1,22 @@
 # Registo de progresso
 
+## v0.4.0 — Fase 2, parte 3: documentos da obra (2026-11-05)
+
+| Área | Verificação |
+| --- | --- |
+| Pastas (aninhadas, nome único sem distinguir maiúsculas, só apagam vazias), navegação e pesquisa em toda a obra | Testes + browser |
+| Versões imutáveis numeradas com bloqueio contra envios simultâneos; v1 intacta depois da v2 (SHA-256) | Testes + browser |
+| Abrir (PDF/imagens, inline) e descarregar (resto como binário); registo de cada descarga | Testes + browser |
+| Permissões por obra: encarregado envia e versiona os seus mas não os de outros; trabalhador só consulta; fora da equipa 403; outra empresa 404 | Testes |
+| Extensões fora da lista (exe, php, html, svg) recusadas; quota; obra arquivada; apagar liberta espaço e ficheiros | Testes |
+
+Total: **117 testes, 555 asserções**.
+
+### Não feito
+
+- Antivírus (ClamAV não existe no alojamento partilhado).
+- Especialidades e etiquetas nos documentos; partilha com externos fora da equipa; pré-visualização de DWG/IFC.
+
 ## v0.3.0 — Fase 2, parte 2: fotografias no diário (2026-11-04)
 
 | Área | Verificação |

@@ -3,28 +3,27 @@
 namespace App\Media;
 
 use App\Billing\PlanLimits;
+use App\Billing\StorageUsage;
 use App\Jobs\GeneratePhotoPreviews;
 use App\Models\DiaryEntry;
 use App\Models\Media;
 use App\Models\Project;
-use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\TenantContext;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Guarda e apaga fotografias, mantendo tenants.storage_used_bytes certo
- * (original + versões reduzidas). Atualizações atómicas: vários envios em
- * simultâneo não perdem contagens.
+ * Guarda e apaga fotografias, mantendo o espaço ocupado da empresa certo
+ * (original + versões reduzidas).
  */
 class MediaStorage
 {
     public function __construct(
         private readonly TenantContext $tenants,
         private readonly PlanLimits $limits,
+        private readonly StorageUsage $usage,
     ) {}
 
     /** $mime vem do conteúdo (getimagesize), não do que o cliente declara. */
@@ -55,7 +54,7 @@ class MediaStorage
             'uploaded_by_user_id' => $by->id,
         ])->save();
 
-        $this->addUsage($tenant, $media->size_bytes);
+        $this->usage->add($tenant, $media->size_bytes);
 
         GeneratePhotoPreviews::dispatch($media->id);
 
@@ -67,25 +66,6 @@ class MediaStorage
         Storage::disk($media->disk)->deleteDirectory($media->directory());
         $media->delete();
 
-        $this->addUsage($this->tenants->tenantOrFail(), -($media->size_bytes + $media->derived_bytes));
-    }
-
-    /** Positivo soma, negativo subtrai (nunca abaixo de zero). */
-    public function addUsage(Tenant $tenant, int $bytes): void
-    {
-        if ($bytes === 0) {
-            return;
-        }
-
-        $query = DB::table('tenants')->where('id', $tenant->id);
-
-        $bytes > 0
-            ? $query->increment('storage_used_bytes', $bytes)
-            : $query->update(['storage_used_bytes' => DB::raw(sprintf(
-                'case when storage_used_bytes > %1$d then storage_used_bytes - %1$d else 0 end',
-                -$bytes,
-            ))]);
-
-        $tenant->refresh();
+        $this->usage->add($this->tenants->tenantOrFail(), -($media->size_bytes + $media->derived_bytes));
     }
 }

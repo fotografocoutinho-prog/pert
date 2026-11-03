@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.4.0 — 2026-11-05
+
+Fase 2, terceira parte: documentos da obra.
+
+- Pastas e subpastas por obra; pesquisa em todas as pastas (título e nome do ficheiro).
+- Documentos com versões imutáveis (v1, v2, …) e nota do que mudou; SHA-256 de cada versão; a versão atual é a mais recente.
+- PDF e imagens abrem no browser; os restantes tipos são sempre descarregados como binário. Cada abertura e descarga fica registada.
+- Tipos aceites: PDF, DWG, DXF, IFC, Office, OpenDocument, TXT, CSV, imagens e ZIP, até 50 MB.
+- Permissões novas `documents.view`, `documents.upload` (inclui versões dos documentos que a própria pessoa enviou) e `documents.manage` (pastas, mover, apagar, versões de qualquer documento), obra a obra.
+- Quota de armazenamento; apagar um documento apaga todas as versões e liberta o espaço. Lista na exportação de dados.
+
 ## 0.3.0 — 2026-11-04
 
 Fase 2, segunda parte: fotografias no diário de obra.

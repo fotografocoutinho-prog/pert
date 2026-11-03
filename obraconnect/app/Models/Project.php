@@ -53,6 +53,16 @@ class Project extends Model
         return $this->hasMany(Media::class);
     }
 
+    public function folders(): HasMany
+    {
+        return $this->hasMany(DocumentFolder::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

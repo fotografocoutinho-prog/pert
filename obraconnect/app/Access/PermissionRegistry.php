@@ -15,7 +15,7 @@ final class PermissionRegistry
     public const ALL_PROJECTS = 'projects.all';
 
     /** Módulos cujas permissões valem obra a obra. */
-    private const PROJECT_SCOPED_MODULES = ['projects', 'diary'];
+    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents'];
 
     /** Exceções nesses módulos: valem para a empresa. */
     private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
@@ -90,6 +90,14 @@ final class PermissionRegistry
                     'diary.view' => 'Consultar o diário de obra',
                     'diary.write' => 'Escrever registos do diário (rascunho)',
                     'diary.submit' => 'Submeter registos do diário (deixam de poder ser alterados)',
+                ],
+            ],
+            'documents' => [
+                'label' => 'Documentos da obra',
+                'permissions' => [
+                    'documents.view' => 'Consultar e descarregar documentos',
+                    'documents.upload' => 'Enviar documentos (e novas versões dos que enviou)',
+                    'documents.manage' => 'Gerir pastas, mover e apagar documentos, novas versões de qualquer documento',
                 ],
             ],
         ];

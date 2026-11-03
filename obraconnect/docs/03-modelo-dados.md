@@ -173,6 +173,8 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 
 ### Documentos e media (fase 2)
 
+**Implementado na 0.4.0:** `document_folders` (auto-relação composta `(tenant_id, parent_id)`; só se apagam vazias), `documents` (sem `current_version_id`: a atual é a versão de número mais alto; sem `specialty_id` e etiquetas, que chegam com as especialidades), `document_versions` (`UNIQUE(document_id, number)`, imutáveis, `sha256`, `mime` pelo conteúdo) e `document_downloads` (o `download_logs` do modelo). Sem antivírus: os ficheiros nunca são executados nem servidos como HTML (só PDF e imagens abrem no browser; o resto vai como `application/octet-stream`).
+
 **Implementado na 0.3.0:** `media` só para fotografias do diário. Em vez de `attachables` polimórfico, cada dono tem a sua coluna com FK composta (hoje `diary_entry_id`), para a base de dados garantir que a fotografia é da mesma empresa e obra. Colunas: `original_path` (intacto), `preview_path` e `thumb_path` (JPEG gerados em fila), `sha256`, `size_bytes` + `derived_bytes` (somados a `tenants.storage_used_bytes`), `width`/`height` depois da orientação EXIF, `taken_at`, `caption`, `status` (processing/ready/failed). EXIF e GPS não são guardados à parte.
 
 | Tabela | Campos principais |

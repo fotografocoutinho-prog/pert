@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\DiaryEntryController;
 use App\Http\Controllers\Api\V1\DiaryPhotoController;
+use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\DocumentFolderController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
@@ -108,6 +110,21 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
                 Route::get('media/{media}/{variant}', [MediaController::class, 'show'])
                     ->whereIn('variant', ['thumb', 'preview', 'original'])->name('media.show');
+
+                Route::post('folders', [DocumentFolderController::class, 'store'])->name('folders.store');
+                Route::patch('folders/{folder}', [DocumentFolderController::class, 'update'])->name('folders.update');
+                Route::delete('folders/{folder}', [DocumentFolderController::class, 'destroy'])->name('folders.destroy');
+
+                Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
+                Route::post('documents', [DocumentController::class, 'store'])
+                    ->middleware('throttle:uploads')->name('documents.store');
+                Route::get('documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
+                Route::patch('documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
+                Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+                Route::post('documents/{document}/versions', [DocumentController::class, 'storeVersion'])
+                    ->middleware('throttle:uploads')->name('documents.versions.store');
+                Route::get('documents/{document}/versions/{version}/download', [DocumentController::class, 'download'])
+                    ->name('documents.versions.download');
             });
         });
 

@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.3.0)
+# Manual do utilizador (versão 0.4.0)
 
 ## Entrar
 
@@ -43,6 +43,16 @@ Um registo por dia em cada obra, no separador **Diário** da obra.
 **Fotografias.** Num rascunho já guardado, use **Tirar fotografia** (abre a câmara no telemóvel) ou **Escolher fotografias** (várias de uma vez). Pode escrever uma legenda em cada uma. Aceita JPEG, PNG e WebP até 20 MB, no máximo 30 por registo. As miniaturas aparecem ao fim de alguns segundos (até cerca de um minuto). Toque numa fotografia para a ver em grande ou **descarregar o original**, que é guardado exatamente como foi enviado. As fotografias ocupam o espaço do plano e ficam fechadas quando o registo é submetido.
 
 Não é possível registar dias futuros. Quem só tem consulta (por exemplo, fiscal ou dono de obra) vê os registos mas não os altera.
+
+## Documentos da obra
+
+No separador **Documentos** da obra:
+
+- **Enviar documentos** (vários de uma vez) para a pasta aberta. Aceita PDF, DWG, DXF, IFC, Word, Excel, PowerPoint, OpenDocument, TXT, CSV, imagens e ZIP, até 50 MB cada.
+- **Nova pasta**, **Renomear** e **Apagar** (só pastas vazias) para quem gere os documentos.
+- Toque num documento para ver as **versões**. **Enviar nova versão** guarda a anterior sem alterações; escreva o que mudou. **Abrir** mostra PDF e imagens no browser; **Descarregar** guarda o ficheiro.
+- Quem enviou um documento pode mudar o título e juntar versões; mover, apagar e versões de documentos de outras pessoas ficam para quem gere os documentos.
+- Cada abertura ou descarga fica registada (o número aparece em cada versão).
 
 ## No telemóvel
 

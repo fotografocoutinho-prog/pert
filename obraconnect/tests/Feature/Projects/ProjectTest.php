@@ -80,7 +80,7 @@ class ProjectTest extends TestCase
 
         $this->actingAs($director)->getJson('/api/v1/projects')->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.id', $mine);
         $this->actingAs($director)->getJson("/api/v1/projects/{$mine}")->assertOk()
-            ->assertJsonPath('data.permissions', ['projects.view', 'projects.update', 'projects.team', 'diary.view', 'diary.write', 'diary.submit']);
+            ->assertJsonPath('data.permissions', ['projects.view', 'projects.update', 'projects.team', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload', 'documents.manage']);
         $this->actingAs($director)->getJson("/api/v1/projects/{$other}")->assertForbidden();
         $this->actingAs($director)->putJson("/api/v1/projects/{$other}", ['name' => 'Tentativa'])->assertForbidden();
         $this->actingAs($director)->putJson("/api/v1/projects/{$mine}", ['name' => 'Novo nome'])->assertOk();
@@ -95,7 +95,7 @@ class ProjectTest extends TestCase
 
         $this->actingAs($measurer)->getJson('/api/v1/projects')->assertJsonPath('meta.total', 2);
         // Vê, mas o perfil não tem projects.update nem diário.
-        $this->actingAs($measurer)->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view']);
+        $this->actingAs($measurer)->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view', 'documents.view', 'documents.upload']);
         $this->actingAs($measurer)->putJson("/api/v1/projects/{$id}", ['name' => 'X'])->assertForbidden();
         $this->actingAs($measurer)->postJson('/api/v1/projects', ['name' => 'X'])->assertForbidden();
     }
@@ -113,7 +113,7 @@ class ProjectTest extends TestCase
         ])->assertCreated();
 
         $this->actingAs($worker)->getJson("/api/v1/projects/{$id}")
-            ->assertJsonPath('data.permissions', ['projects.view', 'diary.view', 'diary.write', 'diary.submit']);
+            ->assertJsonPath('data.permissions', ['projects.view', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload']);
         $this->actingAs($worker)->postJson("/api/v1/projects/{$id}/diary", ['entry_date' => now()->toDateString()])->assertCreated();
     }
 
@@ -287,7 +287,7 @@ class ProjectTest extends TestCase
         $asSupport()->postJson("/api/v1/platform/support-grants/{$grant}/enter")->assertOk();
 
         $asSupport()->getJson('/api/v1/projects')->assertJsonPath('meta.total', 1);
-        $asSupport()->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view', 'diary.view']);
+        $asSupport()->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view', 'diary.view', 'documents.view']);
         $asSupport()->getJson("/api/v1/projects/{$id}/diary")->assertOk();
         $asSupport()->putJson("/api/v1/projects/{$id}", ['name' => 'X'])->assertForbidden();
     }

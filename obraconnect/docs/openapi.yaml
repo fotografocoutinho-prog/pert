@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -41,6 +41,7 @@ tags:
   - name: Exportação
   - name: Obras
   - name: Diário de obra
+  - name: Documentos
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -414,6 +415,50 @@ paths:
         - { name: media, in: path, required: true, schema: { type: integer } }
         - { name: variant, in: path, required: true, schema: { type: string, enum: [thumb, preview, original] } }
       responses: { "200": { description: "image/jpeg (thumb, preview) ou o original como anexo" }, "403": { description: Sem acesso ao diário da obra }, "404": { description: Ainda sem versão reduzida ou de outra obra } }
+  /api/v1/projects/{project}/documents:
+    get:
+      tags: [Documentos]
+      summary: Conteúdo de uma pasta (ou raiz), ou pesquisa em toda a obra (documents.view)
+      parameters:
+        - { name: project, in: path, required: true, schema: { type: integer } }
+        - { name: folder_id, in: query, schema: { type: integer } }
+        - { name: search, in: query, description: "Título ou nome do ficheiro, em todas as pastas", schema: { type: string } }
+        - { name: tree, in: query, description: "1 = inclui todas as pastas da obra (para mover)", schema: { type: integer } }
+      responses: { "200": { description: "{folder, path, folders, documents, tree?}" } }
+    post:
+      tags: [Documentos]
+      summary: Enviar documento, cria a v1 (documents.upload); multipart
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, format: binary, description: "pdf, dwg, dxf, ifc, Office, OpenDocument, txt, csv, imagens, zip; até 50 MB" }
+                title: { type: string, description: "Por omissão, o nome do ficheiro" }
+                folder_id: { type: integer }
+                description: { type: string }
+                note: { type: string }
+      responses: { "201": { description: Documento com versões }, "402": { description: PLAN_LIMIT_REACHED (storage_mb) }, "409": { description: PROJECT_ARCHIVED }, "422": { description: Tipo ou tamanho } }
+  /api/v1/projects/{project}/documents/{document}:
+    get: { tags: [Documentos], summary: Documento com todas as versões e descargas por versão (documents.view), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: document, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    patch: { tags: [Documentos], summary: "Título, descrição ou pasta (documents.manage; ou documents.upload para quem enviou)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: document, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK }, "403": { description: DOCUMENT_NOT_OWNER } } }
+    delete: { tags: [Documentos], summary: Apagar documento e todas as versões (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: document, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/projects/{project}/documents/{document}/versions:
+    post: { tags: [Documentos], summary: "Nova versão (documents.manage; ou documents.upload para quem enviou); multipart file + note", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: document, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: Documento atualizado }, "403": { description: DOCUMENT_NOT_OWNER } } }
+  /api/v1/projects/{project}/documents/{document}/versions/{version}/download:
+    get:
+      tags: [Documentos]
+      summary: "Abrir (PDF e imagens, inline) ou descarregar (?download=1); fica registado (documents.view)"
+      parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: document, in: path, required: true, schema: { type: integer } }, { name: version, in: path, required: true, schema: { type: integer } }, { name: download, in: query, schema: { type: integer } }]
+      responses: { "200": { description: "Ficheiro; tipos não visualizáveis como application/octet-stream" }, "404": { description: Versão de outro documento } }
+  /api/v1/projects/{project}/folders:
+    post: { tags: [Documentos], summary: Nova pasta (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string }, parent_id: { type: integer } } } } } }, responses: { "201": { description: Criada }, "422": { description: Nome repetido nessa pasta } } }
+  /api/v1/projects/{project}/folders/{folder}:
+    patch: { tags: [Documentos], summary: Renomear (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: folder, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Documentos], summary: Apagar pasta vazia (documents.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: folder, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: FOLDER_NOT_EMPTY } } }
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
   /api/v1/platform/tenants:

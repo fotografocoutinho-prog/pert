@@ -39,6 +39,12 @@ return [
         'photo_thumb_px' => 400,
         // Acima disto o GD não cabe na memória de um alojamento partilhado: fica sem miniatura.
         'photo_max_megapixels' => 50,
+        // Documentos da obra (projetos, peças desenhadas, cadernos de encargos...).
+        'document_max_mb' => (int) env('OBRA_DOCUMENT_MAX_MB', 50),
+        'document_extensions' => [
+            'pdf', 'dwg', 'dxf', 'ifc', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods',
+            'txt', 'csv', 'jpg', 'jpeg', 'png', 'webp', 'zip',
+        ],
     ],
 
     'exports' => [

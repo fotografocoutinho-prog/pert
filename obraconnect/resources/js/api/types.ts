@@ -338,3 +338,46 @@ export interface DiaryEntry {
     created_at: string | null;
     updated_at: string | null;
 }
+
+export interface DocumentVersion {
+    id: number;
+    number: number;
+    original_name: string;
+    mime: string;
+    size_bytes: number;
+    sha256: string;
+    note: string | null;
+    uploaded_by?: string | null;
+    created_at: string | null;
+    downloads_count?: number;
+    /** Caminhos da API (usar appUrl). open só para PDF e imagens. */
+    urls: { open: string | null; download: string };
+}
+
+export interface ProjectDocument {
+    id: number;
+    title: string;
+    description: string | null;
+    folder_id: number | null;
+    created_by?: string | null;
+    created_by_me: boolean;
+    created_at: string | null;
+    updated_at: string | null;
+    versions_count?: number;
+    current_version?: DocumentVersion | null;
+    versions?: DocumentVersion[];
+}
+
+export interface DocumentFolderRef {
+    id: number;
+    name: string;
+    parent_id?: number | null;
+}
+
+export interface DocumentListing {
+    folder: DocumentFolderRef | null;
+    path: DocumentFolderRef[];
+    folders: { id: number; name: string; items_count: number }[];
+    documents: ProjectDocument[];
+    tree?: DocumentFolderRef[];
+}

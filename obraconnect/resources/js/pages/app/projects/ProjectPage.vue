@@ -10,6 +10,7 @@ import AppBadge from '@/components/ui/AppBadge.vue';
 import AppSpinner from '@/components/ui/AppSpinner.vue';
 import ProjectDetailsTab from '@/components/projects/ProjectDetailsTab.vue';
 import ProjectDiaryTab from '@/components/projects/ProjectDiaryTab.vue';
+import ProjectDocumentsTab from '@/components/projects/ProjectDocumentsTab.vue';
 import ProjectTeamTab from '@/components/projects/ProjectTeamTab.vue';
 
 const route = useRoute();
@@ -21,6 +22,7 @@ const error = ref<string | null>(null);
 const tabs = computed(() =>
     [
         { key: 'diario', label: 'Diário', show: project.value?.permissions.includes('diary.view') },
+        { key: 'documentos', label: 'Documentos', show: project.value?.permissions.includes('documents.view') },
         { key: 'equipa', label: 'Equipa', show: true },
         { key: 'dados', label: 'Dados da obra', show: true },
     ].filter((t) => t.show),
@@ -82,6 +84,7 @@ function select(key: string): void {
             </nav>
 
             <ProjectDiaryTab v-if="tab === 'diario'" :project="project" />
+            <ProjectDocumentsTab v-else-if="tab === 'documentos'" :project="project" />
             <ProjectTeamTab v-else-if="tab === 'equipa'" :project="project" @changed="load" />
             <ProjectDetailsTab v-else :project="project" @updated="(p) => (project = p)" />
         </template>

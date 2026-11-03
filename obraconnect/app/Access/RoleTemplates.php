@@ -31,6 +31,7 @@ final class RoleTemplates
                     'company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view',
                     'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive',
                     'diary.view', 'diary.write', 'diary.submit',
+                    'documents.view', 'documents.upload', 'documents.manage',
                 ],
             ],
             'diretor_obra' => [
@@ -39,62 +40,63 @@ final class RoleTemplates
                 'permissions' => [
                     'company.view', 'members.view', 'members.invite',
                     'projects.view', 'projects.update', 'projects.team', 'diary.view', 'diary.write', 'diary.submit',
+                    'documents.view', 'documents.upload', 'documents.manage',
                 ],
             ],
             'encarregado' => [
                 'name' => 'Encarregado',
                 'description' => 'Coordenação das equipas no terreno.',
-                'permissions' => ['company.view', 'members.view', 'projects.view', 'diary.view', 'diary.write', 'diary.submit'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload'],
             ],
             'preparador' => [
                 'name' => 'Preparador de obra',
                 'description' => 'Preparação, compras e planeamento.',
-                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'diary.view'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'medidor_orcamentista' => [
                 'name' => 'Medidor-orçamentista',
                 'description' => 'Medições e orçamentos.',
-                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view'],
+                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view', 'documents.view', 'documents.upload'],
             ],
             'fiscal' => [
                 'name' => 'Fiscal',
                 'description' => 'Fiscalização e aprovações.',
-                'permissions' => ['company.view', 'projects.view', 'diary.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload'],
             ],
             'coordenador_seguranca' => [
                 'name' => 'Coordenador de segurança',
                 'description' => 'Segurança e saúde em obra.',
-                'permissions' => ['company.view', 'projects.view', 'diary.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload'],
             ],
             'tecnico_qualidade' => [
                 'name' => 'Técnico de qualidade',
                 'description' => 'Controlo de qualidade e não conformidades.',
-                'permissions' => ['company.view', 'projects.view', 'diary.view'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload'],
             ],
             'administrativo' => [
                 'name' => 'Administrativo',
                 'description' => 'Gestão administrativa e documental.',
-                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'projects.all', 'projects.view'],
+                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'trabalhador' => [
                 'name' => 'Trabalhador',
                 'description' => 'Registo de trabalho no terreno.',
-                'permissions' => ['company.view', 'projects.view'],
+                'permissions' => ['company.view', 'projects.view', 'documents.view'],
             ],
             'subempreiteiro' => [
                 'name' => 'Subempreiteiro',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => ['projects.view'],
+                'permissions' => ['projects.view', 'documents.view', 'documents.upload'],
             ],
             'fornecedor' => [
                 'name' => 'Fornecedor',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => ['projects.view'],
+                'permissions' => ['projects.view', 'documents.view', 'documents.upload'],
             ],
             'dono_obra' => [
                 'name' => 'Dono de obra',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => ['projects.view', 'diary.view'],
+                'permissions' => ['projects.view', 'diary.view', 'documents.view'],
             ],
         ];
     }
