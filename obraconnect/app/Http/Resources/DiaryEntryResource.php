@@ -31,6 +31,8 @@ class DiaryEntryResource extends JsonResource
                 'company' => $item->company,
             ])),
             'items_count' => $this->whenCounted('items'),
+            'photos' => MediaResource::collection($this->whenLoaded('photos')),
+            'photos_count' => $this->whenCounted('photos'),
             'workforce_total' => $this->when(isset($this->workforce_total), fn () => (float) $this->workforce_total),
             'created_by' => $this->whenLoaded('createdBy', fn () => $this->createdBy?->name),
             'updated_by' => $this->whenLoaded('updatedBy', fn () => $this->updatedBy?->name),

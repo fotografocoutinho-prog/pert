@@ -86,7 +86,7 @@ function weatherSummary(entry: DiaryEntry): string {
                     <div>
                         <p class="font-semibold text-slate-900 first-letter:uppercase">{{ formatLongDate(entry.entry_date) }}</p>
                         <p class="text-sm text-slate-500">
-                            {{ [weatherSummary(entry), entry.workforce_total ? `${entry.workforce_total} ${entry.workforce_total === 1 ? 'pessoa' : 'pessoas'}` : null, entry.created_by].filter(Boolean).join(' · ') || '—' }}
+                            {{ [weatherSummary(entry), entry.workforce_total ? `${entry.workforce_total} ${entry.workforce_total === 1 ? 'pessoa' : 'pessoas'}` : null, entry.photos_count ? `${entry.photos_count} ${entry.photos_count === 1 ? 'foto' : 'fotos'}` : null, entry.created_by].filter(Boolean).join(' · ') || '—' }}
                         </p>
                     </div>
                     <AppBadge :color="entry.status === 'submitted' ? 'green' : 'amber'">{{ entry.status_label }}</AppBadge>

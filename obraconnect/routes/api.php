@@ -3,11 +3,13 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\DiaryEntryController;
+use App\Http\Controllers\Api\V1\DiaryPhotoController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\MeController;
+use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\Platform;
@@ -98,6 +100,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::put('diary/{diaryEntry}', [DiaryEntryController::class, 'update'])->name('diary.update');
                 Route::delete('diary/{diaryEntry}', [DiaryEntryController::class, 'destroy'])->name('diary.destroy');
                 Route::post('diary/{diaryEntry}/submit', [DiaryEntryController::class, 'submit'])->name('diary.submit');
+
+                Route::post('diary/{diaryEntry}/photos', [DiaryPhotoController::class, 'store'])
+                    ->middleware('throttle:uploads')->name('diary.photos.store');
+                Route::patch('diary/{diaryEntry}/photos/{photo}', [DiaryPhotoController::class, 'update'])->name('diary.photos.update');
+                Route::delete('diary/{diaryEntry}/photos/{photo}', [DiaryPhotoController::class, 'destroy'])->name('diary.photos.destroy');
+
+                Route::get('media/{media}/{variant}', [MediaController::class, 'show'])
+                    ->whereIn('variant', ['thumb', 'preview', 'original'])->name('media.show');
             });
         });
 

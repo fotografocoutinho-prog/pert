@@ -138,5 +138,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('invitation-lookup', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
 
         RateLimiter::for('exports', fn (Request $request) => Limit::perHour(5)->by('exp:'.($request->user()?->current_tenant_id ?: $request->ip())));
+
+        // Fotografias: um dia de obra pode ter dezenas, mas não milhares por hora.
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(300)->by('up:'.($request->user()?->id ?: $request->ip())));
     }
 }

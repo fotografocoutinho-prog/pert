@@ -6,6 +6,7 @@ import type {
     DataExport,
     DiaryEntry,
     Invitation,
+    MediaItem,
     Member,
     MePayload,
     Paginated,
@@ -205,6 +206,20 @@ export const diaryApi = {
     remove: (projectId: number, entryId: number) => http.delete(`/api/v1/projects/${projectId}/diary/${entryId}`),
     submit: async (projectId: number, entryId: number) =>
         (await http.post<{ data: DiaryEntry }>(`/api/v1/projects/${projectId}/diary/${entryId}/submit`)).data.data,
+    uploadPhoto: async (projectId: number, entryId: number, file: File, onProgress?: (percent: number) => void) => {
+        const form = new FormData();
+        form.append('photo', file);
+        const { data } = await http.post<{ data: MediaItem }>(`/api/v1/projects/${projectId}/diary/${entryId}/photos`, form, {
+            // Fotografias de telemóvel em rede móvel demoram mais do que os 30 s por omissão.
+            timeout: 300_000,
+            onUploadProgress: (e) => onProgress?.(e.total ? Math.round((e.loaded * 100) / e.total) : 0),
+        });
+        return data.data;
+    },
+    updatePhoto: async (projectId: number, entryId: number, photoId: number, caption: string | null) =>
+        (await http.patch<{ data: MediaItem }>(`/api/v1/projects/${projectId}/diary/${entryId}/photos/${photoId}`, { caption })).data.data,
+    removePhoto: (projectId: number, entryId: number, photoId: number) =>
+        http.delete(`/api/v1/projects/${projectId}/diary/${entryId}/photos/${photoId}`),
 };
 
 export const platformApi = {

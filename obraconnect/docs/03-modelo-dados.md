@@ -173,6 +173,8 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 
 ### Documentos e media (fase 2)
 
+**Implementado na 0.3.0:** `media` só para fotografias do diário. Em vez de `attachables` polimórfico, cada dono tem a sua coluna com FK composta (hoje `diary_entry_id`), para a base de dados garantir que a fotografia é da mesma empresa e obra. Colunas: `original_path` (intacto), `preview_path` e `thumb_path` (JPEG gerados em fila), `sha256`, `size_bytes` + `derived_bytes` (somados a `tenants.storage_used_bytes`), `width`/`height` depois da orientação EXIF, `taken_at`, `caption`, `status` (processing/ready/failed). EXIF e GPS não são guardados à parte.
+
 | Tabela | Campos principais |
 | --- | --- |
 | `folders` | project_id, parent_id, name |

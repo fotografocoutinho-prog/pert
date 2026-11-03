@@ -48,6 +48,11 @@ class Project extends Model
         return $this->hasMany(DiaryEntry::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

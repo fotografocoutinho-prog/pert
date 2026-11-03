@@ -32,6 +32,13 @@ return [
     'files' => [
         'disk' => env('OBRA_PRIVATE_DISK', 'private'),
         'logo_max_kb' => 2048,
+        // Fotografias de obra: o original fica intacto; as versões reduzidas são geradas em fila.
+        'photo_max_mb' => (int) env('OBRA_PHOTO_MAX_MB', 20),
+        'photos_per_entry' => 30,
+        'photo_preview_px' => 1600,
+        'photo_thumb_px' => 400,
+        // Acima disto o GD não cabe na memória de um alojamento partilhado: fica sem miniatura.
+        'photo_max_megapixels' => 50,
     ],
 
     'exports' => [

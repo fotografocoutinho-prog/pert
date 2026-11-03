@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.2.0)
+# Manual do utilizador (versão 0.3.0)
 
 ## Entrar
 
@@ -39,6 +39,8 @@ Um registo por dia em cada obra, no separador **Diário** da obra.
 1. **Novo registo** (ou **Registar agora**, se ainda não há registo de hoje).
 2. Preencha o tempo (manhã, tarde, temperaturas), os trabalhos executados e as linhas de **mão de obra**, **equipamentos**, **materiais recebidos**, **ocorrências** e **visitas**. Num registo novo, **Copiar mão de obra e equipamentos do último registo** poupa trabalho quando as equipas se repetem.
 3. **Guardar rascunho** para continuar mais tarde, ou **Guardar e submeter** para fechar o registo. Um registo submetido **não pode ser alterado nem apagado**.
+
+**Fotografias.** Num rascunho já guardado, use **Tirar fotografia** (abre a câmara no telemóvel) ou **Escolher fotografias** (várias de uma vez). Pode escrever uma legenda em cada uma. Aceita JPEG, PNG e WebP até 20 MB, no máximo 30 por registo. As miniaturas aparecem ao fim de alguns segundos (até cerca de um minuto). Toque numa fotografia para a ver em grande ou **descarregar o original**, que é guardado exatamente como foi enviado. As fotografias ocupam o espaço do plano e ficam fechadas quando o registo é submetido.
 
 Não é possível registar dias futuros. Quem só tem consulta (por exemplo, fiscal ou dono de obra) vê os registos mas não os altera.
 

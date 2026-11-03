@@ -55,6 +55,11 @@ class DiaryEntry extends Model
         return $this->hasMany(DiaryItem::class, 'entry_id')->orderBy('sort_order')->orderBy('id');
     }
 
+    public function photos(): HasMany
+    {
+        return $this->hasMany(Media::class)->orderBy('sort_order')->orderBy('id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

@@ -1,5 +1,22 @@
 # Registo de progresso
 
+## v0.3.0 — Fase 2, parte 2: fotografias no diário (2026-11-04)
+
+| Área | Verificação |
+| --- | --- |
+| Envio de fotografias para registos em rascunho; tipo verificado pelo conteúdo (getimagesize), 20 MB, 30 por registo, limite de envios por hora | Testes |
+| Original intacto (SHA-256 igual ao enviado); pré-visualização 1600 px e miniatura 400 px em fila (GD); orientação e data do EXIF | Testes (JPEG com EXIF construído no teste: orientação 6, DateTimeOriginal) + browser |
+| Quota `storage_mb` (original + versões) com contagem atómica; apagar fotografia ou rascunho liberta ficheiros e espaço | Testes (bytes exatos) + browser (268 231 B = 2 originais + 4 versões) |
+| Ficheiros só por API com sessão: diary.view na obra; outra empresa 404; `Cache-Control: private` | Testes |
+| Interface: tirar fotografia / escolher várias, progresso, legenda, ver em grande, descarregar original; contagem na lista | Browser (375–540 px) |
+
+Total: **110 testes, 470 asserções**.
+
+### Não feito
+
+- As fotografias não entram no ZIP da exportação (só a lista com SHA-256): podem somar gigabytes.
+- HEIC (o iPhone converte para JPEG ao enviar pelo browser), vídeos, galeria da obra, fila offline.
+
 ## v0.2.0 — Fase 2, parte 1: obras e diário de obra (2026-11-03)
 
 ### Implementado e verificado

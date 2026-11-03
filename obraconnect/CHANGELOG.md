@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.3.0 — 2026-11-04
+
+Fase 2, segunda parte: fotografias no diário de obra.
+
+- Fotografias em cada registo do diário (tirar com a câmara do telemóvel ou escolher da galeria), com legenda.
+- O original é guardado sem alterações, com SHA-256; pré-visualização (1600 px) e miniatura (400 px) geradas em fila, com a orientação do telemóvel corrigida e a data da fotografia lida do EXIF. As versões reduzidas não levam metadados (nem GPS).
+- Só JPEG, PNG e WebP, verificados pelo conteúdo; até 20 MB e 30 fotografias por registo.
+- Quota de armazenamento do plano (original + versões reduzidas); ficheiros servidos só a quem pode consultar o diário da obra.
+- Fotografias seguem o registo: só se juntam ou apagam em rascunho; apagar o rascunho apaga os ficheiros.
+- Lista das fotografias (com SHA-256) na exportação de dados.
+
 ## 0.2.0 — 2026-11-03
 
 Fase 2, primeira parte: obras e diário de obra.

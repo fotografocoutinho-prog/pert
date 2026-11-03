@@ -299,6 +299,24 @@ export interface DiaryWeather {
     temp_max?: number | null;
 }
 
+export interface MediaItem {
+    id: number;
+    status: 'processing' | 'ready' | 'failed';
+    status_label: string;
+    caption: string | null;
+    original_name: string;
+    mime: string;
+    size_bytes: number;
+    sha256: string;
+    width: number | null;
+    height: number | null;
+    taken_at: string | null;
+    uploaded_by?: string | null;
+    created_at: string | null;
+    /** Caminhos da API, relativos à instalação (usar appUrl). */
+    urls: { thumb: string | null; preview: string | null; original: string };
+}
+
 export interface DiaryEntry {
     id: number;
     project_id: number;
@@ -311,6 +329,8 @@ export interface DiaryEntry {
     items?: DiaryItem[];
     items_count?: number;
     workforce_total?: number;
+    photos?: MediaItem[];
+    photos_count?: number;
     created_by?: string | null;
     updated_by?: string | null;
     submitted_by?: string | null;

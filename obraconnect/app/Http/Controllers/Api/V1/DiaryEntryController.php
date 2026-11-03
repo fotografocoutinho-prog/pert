@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Audit\Auditor;
 use App\Enums\DiaryEntryStatus;
 use App\Enums\DiaryItemKind;
-use App\Exceptions\ApiException;
+use App\Http\Controllers\Api\V1\Concerns\GuardsDiaryWrites;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DiaryEntryResource;
+use App\Media\MediaStorage;
 use App\Models\DiaryEntry;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -23,9 +24,14 @@ use Illuminate\Validation\ValidationException;
  */
 class DiaryEntryController extends Controller
 {
-    private const RELATIONS = ['items', 'createdBy:id,name', 'updatedBy:id,name', 'submittedBy:id,name'];
+    use GuardsDiaryWrites;
 
-    public function __construct(private readonly Auditor $auditor) {}
+    private const RELATIONS = ['items', 'photos.uploadedBy:id,name', 'createdBy:id,name', 'updatedBy:id,name', 'submittedBy:id,name'];
+
+    public function __construct(
+        private readonly Auditor $auditor,
+        private readonly MediaStorage $media,
+    ) {}
 
     public function index(Request $request, Project $project): AnonymousResourceCollection
     {
@@ -35,7 +41,7 @@ class DiaryEntryController extends Controller
 
         $entries = $project->diaryEntries()
             ->with(['createdBy:id,name', 'submittedBy:id,name'])
-            ->withCount('items')
+            ->withCount(['items', 'photos'])
             ->withSum(['items as workforce_total' => fn ($q) => $q->where('kind', DiaryItemKind::Workforce->value)], 'quantity')
             ->when($month, fn ($q) => $q->whereYear('entry_date', (int) $month[1])->whereMonth('entry_date', (int) $month[2]))
             ->orderByDesc('entry_date')
@@ -108,6 +114,8 @@ class DiaryEntryController extends Controller
         $this->assertDraft($diaryEntry);
 
         $date = $diaryEntry->entry_date->toDateString();
+        // Os ficheiros não seguem a cascata da base de dados: apagam-se primeiro.
+        $diaryEntry->photos->each(fn ($photo) => $this->media->delete($photo));
         $diaryEntry->delete();
 
         $this->auditor->record('diary.deleted', $project, ['date' => $date]);
@@ -219,20 +227,6 @@ class DiaryEntryController extends Controller
     {
         if ($project->diaryEntries()->whereDate('entry_date', $date)->exists()) {
             throw ValidationException::withMessages(['entry_date' => 'Já existe um registo do diário para este dia.']);
-        }
-    }
-
-    private function assertDraft(DiaryEntry $entry): void
-    {
-        if (! $entry->isDraft()) {
-            throw ApiException::conflict('Este registo já foi submetido e não pode ser alterado.', 'DIARY_SUBMITTED');
-        }
-    }
-
-    private function assertProjectOpen(Project $project): void
-    {
-        if ($project->isArchived()) {
-            throw ApiException::conflict('A obra está arquivada. Reabra-a para escrever no diário.', 'PROJECT_ARCHIVED');
         }
     }
 }

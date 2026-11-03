@@ -5,6 +5,7 @@ namespace App\Tenancy;
 use App\Models\AuditLog;
 use App\Models\DiaryEntry;
 use App\Models\Invitation;
+use App\Models\Media;
 use App\Models\Membership;
 use App\Models\Project;
 use App\Models\Role;
@@ -103,6 +104,22 @@ class TenantDataExporter
                 'created_by' => $e->createdBy?->name,
                 'submitted_by' => $e->submittedBy?->name,
                 'submitted_at' => $e->submitted_at?->toIso8601String(),
+            ]);
+
+        // Só a lista (com o SHA-256 de cada original): os ficheiros podem somar gigabytes e não entram no ZIP.
+        $this->sections['photos'] = fn () => Media::query()->with(['project:id,code', 'diaryEntry:id,entry_date', 'uploadedBy:id,name'])
+            ->orderBy('id')->lazy(500)
+            ->map(fn (Media $m) => [
+                'project' => $m->project->code,
+                'diary_date' => $m->diaryEntry?->entry_date->toDateString(),
+                'original_name' => $m->original_name,
+                'mime' => $m->mime,
+                'size_bytes' => $m->size_bytes,
+                'sha256' => $m->sha256,
+                'caption' => $m->caption,
+                'taken_at' => $m->taken_at?->toIso8601String(),
+                'uploaded_by' => $m->uploadedBy?->name,
+                'uploaded_at' => $m->created_at?->toIso8601String(),
             ]);
 
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)

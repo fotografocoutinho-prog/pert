@@ -17,6 +17,7 @@ import AppInput from '@/components/ui/AppInput.vue';
 import AppSelect from '@/components/ui/AppSelect.vue';
 import AppSpinner from '@/components/ui/AppSpinner.vue';
 import AppTextarea from '@/components/ui/AppTextarea.vue';
+import DiaryPhotos from '@/components/projects/DiaryPhotos.vue';
 
 /** Linha em edição: números como texto para aceitar "12,5". */
 interface ItemRow {
@@ -226,6 +227,14 @@ const quantityText = (i: DiaryItem) => (i.quantity === null ? '' : `${String(i.q
                     <AppTextarea v-model="form.data.work_summary" aria-label="Trabalhos executados" :rows="4" :maxlength="10000" :error="form.errors.value.work_summary" />
                 </AppCard>
 
+                <AppCard title="Fotografias">
+                    <DiaryPhotos v-if="entry" :project-id="project.id" :entry-id="entry.id" :photos="entry.photos ?? []" editable />
+                    <template v-else>
+                        <p class="mb-3 text-sm text-slate-600">As fotografias ficam ligadas ao registo: guarde o rascunho primeiro.</p>
+                        <AppButton type="submit" variant="secondary" :loading="form.processing.value">Guardar rascunho e juntar fotografias</AppButton>
+                    </template>
+                </AppCard>
+
                 <AppCard v-for="section in DIARY_SECTIONS" :key="section.kind" :title="section.label">
                     <template v-if="section.kind === 'workforce' && isNew">
                         <AppButton size="sm" variant="secondary" class="mb-3" :loading="copying" @click="copyFromLast">
@@ -277,6 +286,9 @@ const quantityText = (i: DiaryItem) => (i.quantity === null ? '' : `${String(i.q
                 </AppCard>
                 <AppCard title="Trabalhos executados">
                     <p class="text-sm whitespace-pre-line">{{ entry.work_summary || '—' }}</p>
+                </AppCard>
+                <AppCard v-if="entry.photos?.length" title="Fotografias">
+                    <DiaryPhotos :project-id="project.id" :entry-id="entry.id" :photos="entry.photos" :editable="false" />
                 </AppCard>
                 <AppCard v-for="section in DIARY_SECTIONS.filter((s) => itemsOf(s.kind).length)" :key="section.kind" :title="section.label">
                     <ul class="divide-y divide-slate-100 text-sm">
