@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['kind', 'description', 'quantity', 'unit', 'company', 'sort_order'])]
+#[Fillable(['kind', 'description', 'quantity', 'unit', 'company', 'sort_order', 'location_id', 'element_id'])]
 class DiaryItem extends Model
 {
     use BelongsToTenant;
@@ -26,5 +26,15 @@ class DiaryItem extends Model
     public function entry(): BelongsTo
     {
         return $this->belongsTo(DiaryEntry::class, 'entry_id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(ProjectLocation::class, 'location_id');
+    }
+
+    public function element(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionElement::class, 'element_id');
     }
 }

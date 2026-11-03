@@ -134,6 +134,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('elements', [StructureController::class, 'storeElement'])->name('elements.store');
                 Route::patch('elements/{element}', [StructureController::class, 'updateElement'])->name('elements.update');
                 Route::delete('elements/{element}', [StructureController::class, 'destroyElement'])->name('elements.destroy');
+                Route::get('elements/{element}/links', [StructureController::class, 'elementLinks'])->name('elements.links');
+                Route::get('locations/{location}/links', [StructureController::class, 'locationLinks'])->name('locations.links');
             });
         });
 

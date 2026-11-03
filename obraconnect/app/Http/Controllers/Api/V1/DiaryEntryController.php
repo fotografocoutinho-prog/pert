@@ -11,6 +11,7 @@ use App\Http\Resources\DiaryEntryResource;
 use App\Media\MediaStorage;
 use App\Models\DiaryEntry;
 use App\Models\Project;
+use App\Structure\Place;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -55,7 +56,7 @@ class DiaryEntryController extends Controller
         $this->authorize('diary.write', $project);
         $this->assertProjectOpen($project);
 
-        $data = $this->validated($request, creating: true);
+        $data = $this->validated($request, $project, creating: true);
         $this->assertDateIsFree($project, $data['entry_date']);
 
         $entry = DB::transaction(function () use ($project, $data, $request): DiaryEntry {
@@ -64,7 +65,7 @@ class DiaryEntryController extends Controller
             $entry->updated_by_user_id = $request->user()->id;
             $entry->save();
 
-            $this->syncItems($entry, $data['items'] ?? []);
+            $this->syncItems($project, $entry, $data['items'] ?? []);
 
             return $entry;
         });
@@ -87,15 +88,15 @@ class DiaryEntryController extends Controller
         $this->assertProjectOpen($project);
         $this->assertDraft($diaryEntry);
 
-        $data = $this->validated($request, creating: false);
+        $data = $this->validated($request, $project, creating: false);
 
-        DB::transaction(function () use ($diaryEntry, $data, $request): void {
+        DB::transaction(function () use ($project, $diaryEntry, $data, $request): void {
             $diaryEntry->fill($this->entryFields($data));
             $diaryEntry->updated_by_user_id = $request->user()->id;
             $diaryEntry->save();
 
             if (array_key_exists('items', $data)) {
-                $this->syncItems($diaryEntry, $data['items'] ?? []);
+                $this->syncItems($project, $diaryEntry, $data['items'] ?? []);
             }
         });
 
@@ -144,7 +145,7 @@ class DiaryEntryController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function validated(Request $request, bool $creating): array
+    private function validated(Request $request, Project $project, bool $creating): array
     {
         $tenant = $this->tenantContext()->tenantOrFail();
         $today = now($tenant->settings['timezone'] ?? 'Europe/Lisbon')->toDateString();
@@ -166,7 +167,7 @@ class DiaryEntryController extends Controller
             'items.*.quantity' => ['nullable', 'numeric', 'min:0', 'max:99999999999'],
             'items.*.unit' => ['nullable', 'string', 'max:20'],
             'items.*.company' => ['nullable', 'string', 'max:150'],
-        ], [
+        ] + Place::rules($project, 'items.*.'), [
             'entry_date.before_or_equal' => 'Não é possível registar dias futuros.',
         ], [
             'entry_date' => 'data',
@@ -206,17 +207,19 @@ class DiaryEntryController extends Controller
     }
 
     /** @param  list<array<string, mixed>>  $items */
-    private function syncItems(DiaryEntry $entry, array $items): void
+    private function syncItems(Project $project, DiaryEntry $entry, array $items): void
     {
         $entry->items()->delete();
 
-        foreach (array_values($items) as $i => $item) {
+        foreach (Place::normalizeMany($project, array_values($items)) as $i => $item) {
             $entry->items()->create([
                 'kind' => $item['kind'],
                 'description' => $item['description'],
                 'quantity' => $item['quantity'] ?? null,
                 'unit' => $item['unit'] ?? null,
                 'company' => $item['company'] ?? null,
+                'location_id' => $item['location_id'] ?? null,
+                'element_id' => $item['element_id'] ?? null,
                 'sort_order' => $i,
             ]);
         }

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * depois de verificar o acesso. Criar e apagar passa sempre por App\Media\MediaStorage,
  * que mantém o espaço ocupado da empresa certo.
  */
-#[Fillable(['caption', 'sort_order'])]
+#[Fillable(['caption', 'sort_order', 'location_id', 'element_id'])]
 class Media extends Model
 {
     use BelongsToTenant;
@@ -45,6 +45,16 @@ class Media extends Model
     public function diaryEntry(): BelongsTo
     {
         return $this->belongsTo(DiaryEntry::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(ProjectLocation::class, 'location_id');
+    }
+
+    public function element(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionElement::class, 'element_id');
     }
 
     public function uploadedBy(): BelongsTo

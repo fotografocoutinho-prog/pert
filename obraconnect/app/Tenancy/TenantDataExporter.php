@@ -97,6 +97,8 @@ class TenantDataExporter
                 'notes' => $e->notes,
                 'items' => $e->items->map(fn ($i) => [
                     'kind' => $i->kind->value,
+                    'location_id' => $i->location_id,
+                    'element_id' => $i->element_id,
                     'description' => $i->description,
                     'quantity' => $i->quantity,
                     'unit' => $i->unit,
@@ -118,6 +120,8 @@ class TenantDataExporter
                 'size_bytes' => $m->size_bytes,
                 'sha256' => $m->sha256,
                 'caption' => $m->caption,
+                'location_id' => $m->location_id,
+                'element_id' => $m->element_id,
                 'taken_at' => $m->taken_at?->toIso8601String(),
                 'uploaded_by' => $m->uploadedBy?->name,
                 'uploaded_at' => $m->created_at?->toIso8601String(),
@@ -132,6 +136,8 @@ class TenantDataExporter
                 'folder' => $d->folder?->name,
                 'title' => $d->title,
                 'description' => $d->description,
+                'location_id' => $d->location_id,
+                'element_id' => $d->element_id,
                 'versions' => $d->versions->map(fn ($v) => [
                     'number' => $v->number,
                     'original_name' => $v->original_name,

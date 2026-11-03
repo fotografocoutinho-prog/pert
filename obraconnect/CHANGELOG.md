@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.6.0 — 2026-11-07
+
+Fase 2, quinta parte: ligar o diário, as fotografias e os documentos à estrutura.
+
+- Cada linha do diário, fotografia e documento pode indicar "onde": um edifício, piso, zona ou elemento (P1, L1...). Com elemento, o local vem dele e acompanha-o se o elemento mudar de sítio.
+- Na Estrutura, o histórico de um elemento ou local mostra as linhas do diário (com ligação ao dia), as fotografias e os documentos ligados; num local inclui o que está dentro dele.
+- O histórico respeita as permissões: diário e fotografias só para quem consulta o diário; documentos só para quem os consulta.
+- Não se apagam locais nem elementos com ligações (para não perder histórico).
+- Ligações sempre dentro da mesma obra (validação) e da mesma empresa (chaves estrangeiras compostas).
+
 ## 0.5.0 — 2026-11-06
 
 Fase 2, quarta parte: estrutura da obra.

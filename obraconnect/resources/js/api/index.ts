@@ -21,6 +21,7 @@ import type {
     ProjectMember,
     ProjectStructure,
     Role,
+    StructureLinks,
     Subscription,
     SupportGrant,
     UsageItem,
@@ -219,8 +220,12 @@ export const diaryApi = {
         });
         return data.data;
     },
-    updatePhoto: async (projectId: number, entryId: number, photoId: number, caption: string | null) =>
-        (await http.patch<{ data: MediaItem }>(`/api/v1/projects/${projectId}/diary/${entryId}/photos/${photoId}`, { caption })).data.data,
+    updatePhoto: async (
+        projectId: number,
+        entryId: number,
+        photoId: number,
+        payload: { caption?: string | null; location_id?: number | null; element_id?: number | null },
+    ) => (await http.patch<{ data: MediaItem }>(`/api/v1/projects/${projectId}/diary/${entryId}/photos/${photoId}`, payload)).data.data,
     removePhoto: (projectId: number, entryId: number, photoId: number) =>
         http.delete(`/api/v1/projects/${projectId}/diary/${entryId}/photos/${photoId}`),
 };
@@ -251,7 +256,11 @@ export const documentsApi = {
         if (note) form.append('note', note);
         return upload<ProjectDocument>(`/api/v1/projects/${projectId}/documents/${id}/versions`, form, onProgress);
     },
-    update: async (projectId: number, id: number, payload: { title?: string; description?: string | null; folder_id?: number | null }) =>
+    update: async (
+        projectId: number,
+        id: number,
+        payload: { title?: string; description?: string | null; folder_id?: number | null; location_id?: number | null; element_id?: number | null },
+    ) =>
         (await http.patch<{ data: ProjectDocument }>(`/api/v1/projects/${projectId}/documents/${id}`, payload)).data.data,
     remove: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/documents/${id}`),
     createFolder: (projectId: number, name: string, parentId: number | null) =>
@@ -271,6 +280,8 @@ export const structureApi = {
     updateElement: (projectId: number, id: number, payload: Record<string, unknown>) =>
         http.patch(`/api/v1/projects/${projectId}/elements/${id}`, payload),
     removeElement: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/elements/${id}`),
+    elementLinks: (projectId: number, id: number) => getData<StructureLinks>(`/api/v1/projects/${projectId}/elements/${id}/links`),
+    locationLinks: (projectId: number, id: number) => getData<StructureLinks>(`/api/v1/projects/${projectId}/locations/${id}/links`),
 };
 
 export const platformApi = {

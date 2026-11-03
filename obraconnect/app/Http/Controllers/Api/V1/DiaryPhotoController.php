@@ -10,6 +10,7 @@ use App\Media\MediaStorage;
 use App\Models\DiaryEntry;
 use App\Models\Media;
 use App\Models\Project;
+use App\Structure\Place;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +41,7 @@ class DiaryPhotoController extends Controller
             // Pelo conteúdo, não pela extensão. HEIC fica de fora: o iPhone converte para JPEG ao enviar.
             'photo' => ['required', 'file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:'.($maxMb * 1024)],
             'caption' => ['nullable', 'string', 'max:255'],
-        ], [
+        ] + Place::rules($project), [
             'photo.mimetypes' => 'Só são aceites fotografias JPEG, PNG ou WebP.',
             'photo.max' => "A fotografia não pode ter mais de {$maxMb} MB.",
         ], ['photo' => 'fotografia', 'caption' => 'legenda']);
@@ -57,6 +58,7 @@ class DiaryPhotoController extends Controller
         }
 
         $photo = $this->media->storeDiaryPhoto($project, $diaryEntry, $request->file('photo'), $info['mime'], $request->input('caption'), $request->user());
+        $photo->update(Place::normalize($project, $request->only(['location_id', 'element_id'])));
 
         $this->auditor->record('diary.photo_added', $diaryEntry, [
             'project' => $project->code,
@@ -74,7 +76,8 @@ class DiaryPhotoController extends Controller
         $this->assertProjectOpen($project);
         $this->assertDraft($diaryEntry);
 
-        $photo->update($request->validate(['caption' => ['nullable', 'string', 'max:255']], [], ['caption' => 'legenda']));
+        $data = $request->validate(['caption' => ['sometimes', 'nullable', 'string', 'max:255']] + Place::rules($project), [], ['caption' => 'legenda']);
+        $photo->update(array_key_exists('element_id', $data) || array_key_exists('location_id', $data) ? Place::normalize($project, $data) : $data);
 
         return new MediaResource($photo->load('uploadedBy:id,name'));
     }

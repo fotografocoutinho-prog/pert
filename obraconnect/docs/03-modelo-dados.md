@@ -183,7 +183,7 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 | `documents` | project_id, folder_id, title, specialty_id, current_version_id, tags (via pivô) |
 | `document_versions` | document_id, number, disk, path, size, mime, sha256, uploaded_by, antivirus_status |
 | `media` | project_id, kind (foto/vídeo), original_path, preview_path, sha256, taken_at, gps (opcional), exif JSON |
-| `attachables` | media_id/document_id, attachable_type, attachable_id (liga a tarefas, inspeções, ocorrências, elementos) |
+| `attachables` (**0.6.0:** substituído por `location_id`/`element_id` com FK composta em `site_diary_items`, `media` e `documents`) | media_id/document_id, attachable_type, attachable_id (liga a tarefas, inspeções, ocorrências, elementos) |
 | `download_logs` | document_version_id, user_id, ip, created_at |
 
 O original de cada fotografia é guardado sem alterações (hash SHA-256 registado) e as versões otimizadas ficam noutro caminho.

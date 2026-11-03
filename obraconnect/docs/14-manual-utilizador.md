@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.5.0)
+# Manual do utilizador (versão 0.6.0)
 
 ## Entrar
 
@@ -52,7 +52,10 @@ No separador **Estrutura** da obra descreve-se a obra em **edifícios**, **pisos
 - **+ Pisos** num edifício cria vários de uma vez: escreva, por exemplo, `-1 a 3`.
 - **+ Zona** cria uma zona num piso (ou diretamente no edifício, para arranjos exteriores).
 - **+ Elemento** junta um pilar, viga, laje, etc. Se deixar o código vazio, é numerado sozinho por tipo (P1, P2, V1, L1...). Toque num elemento para o corrigir, mudar de localização ou apagar.
-- Só se apaga um edifício, piso ou zona vazio.
+- Só se apaga um edifício, piso ou zona vazio, e só se apaga um local ou elemento que não tenha registos ligados.
+- **Histórico** (em cada local) ou um toque num elemento mostra tudo o que lhe está ligado: linhas do diário (com o dia), fotografias e documentos. Num piso, inclui as zonas e os elementos desse piso.
+
+**Ligar à estrutura.** Nas linhas do diário (campo **Onde?**), em cada fotografia e na janela de cada documento (**Refere-se a**) pode escolher o edifício, piso, zona ou elemento. Ao escolher um elemento (por exemplo, P1), o piso fica preenchido sozinho.
 
 ## Documentos da obra
 

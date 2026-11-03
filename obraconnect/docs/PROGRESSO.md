@@ -1,5 +1,17 @@
 # Registo de progresso
 
+## v0.6.0 — Fase 2, parte 5: ligar à estrutura (2026-11-07)
+
+| Área | Verificação |
+| --- | --- |
+| `location_id`/`element_id` em linhas do diário, fotografias e documentos, com FKs compostas e validação por obra | Testes |
+| Elemento define o local; mover o elemento leva as ligações | Testes |
+| Histórico por elemento e por local (com tudo o que está dentro), filtrado por diary.view / documents.view | Testes + browser |
+| Locais e elementos com ligações não se apagam (409) | Testes |
+| Interface: "Onde?" nas linhas do diário e fotografias, "Refere-se a" nos documentos, histórico na Estrutura | Browser |
+
+Total: **126 testes**.
+
 ## v0.5.0 — Fase 2, parte 4: estrutura da obra (2026-11-06)
 
 | Área | Verificação |

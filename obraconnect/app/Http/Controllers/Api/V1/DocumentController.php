@@ -12,6 +12,7 @@ use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\DocumentVersion;
 use App\Models\Project;
+use App\Structure\Place;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -90,7 +91,7 @@ class DocumentController extends Controller
             'title' => ['nullable', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:5000'],
             'folder_id' => ['nullable', 'integer', Rule::exists('document_folders', 'id')->where('project_id', $project->id)],
-        ], $this->fileMessages(), ['title' => 'título', 'folder_id' => 'pasta']);
+        ] + Place::rules($project), $this->fileMessages(), ['title' => 'título', 'folder_id' => 'pasta']);
 
         $file = $request->file('file');
         $this->storage->assertQuota($file);
@@ -100,7 +101,7 @@ class DocumentController extends Controller
                 'title' => filled($data['title'] ?? null) ? trim($data['title']) : (pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) ?: 'Documento'),
                 'description' => $data['description'] ?? null,
                 'folder_id' => $data['folder_id'] ?? null,
-            ]);
+            ] + Place::normalize($project, array_intersect_key($data, array_flip(['location_id', 'element_id'])) + ['location_id' => null, 'element_id' => null]));
             $document->created_by_user_id = $request->user()->id;
             $document->save();
 
@@ -130,11 +131,15 @@ class DocumentController extends Controller
         $this->authorizeDocumentEdit($project, $document);
         $this->assertProjectOpen($project);
 
-        $document->fill($request->validate([
+        $data = $request->validate([
             'title' => ['sometimes', 'required', 'string', 'max:200'],
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'folder_id' => ['sometimes', 'nullable', 'integer', Rule::exists('document_folders', 'id')->where('project_id', $project->id)],
-        ], [], ['title' => 'título', 'folder_id' => 'pasta']))->save();
+        ] + Place::rules($project), [], ['title' => 'título', 'folder_id' => 'pasta']);
+        if (array_key_exists('element_id', $data) || array_key_exists('location_id', $data)) {
+            $data = Place::normalize($project, $data);
+        }
+        $document->fill($data)->save();
 
         $changes = $this->auditor->changes($document);
         if ($changes['new'] !== []) {

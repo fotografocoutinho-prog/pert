@@ -290,6 +290,8 @@ export interface DiaryItem {
     quantity: number | null;
     unit: string | null;
     company: string | null;
+    location_id?: number | null;
+    element_id?: number | null;
 }
 
 export interface DiaryWeather {
@@ -304,6 +306,10 @@ export interface MediaItem {
     status: 'processing' | 'ready' | 'failed';
     status_label: string;
     caption: string | null;
+    diary_entry_id?: number | null;
+    diary_date?: string | null;
+    location_id?: number | null;
+    element_id?: number | null;
     original_name: string;
     mime: string;
     size_bytes: number;
@@ -359,6 +365,8 @@ export interface ProjectDocument {
     title: string;
     description: string | null;
     folder_id: number | null;
+    location_id?: number | null;
+    element_id?: number | null;
     created_by?: string | null;
     created_by_me: boolean;
     created_at: string | null;
@@ -407,4 +415,24 @@ export interface ProjectStructure {
     locations: ProjectLocationItem[];
     elements: ConstructionElementItem[];
     element_types: { value: string; label: string; prefix: string }[];
+}
+
+export interface StructureLinks {
+    /** null = sem permissão para consultar o diário (ou os documentos). */
+    diary_items:
+        | {
+              id: number;
+              entry_id: number;
+              entry_date: string;
+              kind_label: string;
+              description: string;
+              quantity: number | null;
+              unit: string | null;
+              company: string | null;
+              location_id: number | null;
+              element_id: number | null;
+          }[]
+        | null;
+    photos: MediaItem[] | null;
+    documents: ProjectDocument[] | null;
 }

@@ -16,6 +16,8 @@ class DocumentResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'folder_id' => $this->folder_id,
+            'location_id' => $this->location_id,
+            'element_id' => $this->element_id,
             'created_by' => $this->whenLoaded('createdBy', fn () => $this->createdBy?->name),
             // Quem enviou pode editar e juntar versões com documents.upload; os outros precisam de documents.manage.
             'created_by_me' => (int) $this->created_by_user_id === (int) $request->user()?->id,

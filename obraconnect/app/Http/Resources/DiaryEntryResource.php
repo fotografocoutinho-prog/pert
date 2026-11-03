@@ -29,6 +29,8 @@ class DiaryEntryResource extends JsonResource
                 'quantity' => $item->quantity !== null ? (float) $item->quantity : null,
                 'unit' => $item->unit,
                 'company' => $item->company,
+                'location_id' => $item->location_id,
+                'element_id' => $item->element_id,
             ])),
             'items_count' => $this->whenCounted('items'),
             'photos' => MediaResource::collection($this->whenLoaded('photos')),

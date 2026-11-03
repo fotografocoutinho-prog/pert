@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Documento da obra. O conteúdo está nas versões (imutáveis); a atual é a de número mais alto.
  * Criar versões e apagar passa por App\Documents\DocumentStorage (quota da empresa).
  */
-#[Fillable(['title', 'description', 'folder_id'])]
+#[Fillable(['title', 'description', 'folder_id', 'location_id', 'element_id'])]
 class Document extends Model
 {
     use BelongsToTenant;
@@ -36,6 +36,16 @@ class Document extends Model
     public function currentVersion(): HasOne
     {
         return $this->hasOne(DocumentVersion::class)->ofMany('number', 'max');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(ProjectLocation::class, 'location_id');
+    }
+
+    public function element(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionElement::class, 'element_id');
     }
 
     public function createdBy(): BelongsTo

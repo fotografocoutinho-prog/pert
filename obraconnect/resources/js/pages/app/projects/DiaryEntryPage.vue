@@ -5,6 +5,7 @@ import { diaryApi, projectsApi } from '@/api';
 import { ApiError } from '@/api/http';
 import type { DiaryEntry, DiaryItem, DiaryItemKind, Project } from '@/api/types';
 import { useForm } from '@/composables/useForm';
+import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
 import { formatDateTime } from '@/utils/format';
@@ -27,6 +28,8 @@ interface ItemRow {
     quantity: string;
     unit: string;
     company: string;
+    /** "L:<id>", "E:<id>" ou vazio (ver useStructurePlaces). */
+    place: string;
 }
 
 const route = useRoute();
@@ -39,6 +42,7 @@ const entry = ref<DiaryEntry | null>(null);
 const error = ref<string | null>(null);
 
 const projectId = computed(() => Number(route.params.id));
+const { placeOptions, hasStructure, toValue, toIds, labelOf, load: loadPlaces } = useStructurePlaces(projectId);
 const isNew = computed(() => route.params.entryId === undefined);
 const can = (permission: string) =>
     Boolean(project.value?.permissions.includes(permission)) && project.value?.status !== 'archived' && !session.isReadOnly;
@@ -65,6 +69,7 @@ function toRow(item: DiaryItem): ItemRow {
         quantity: item.quantity === null ? '' : String(item.quantity).replace('.', ','),
         unit: item.unit ?? '',
         company: item.company ?? '',
+        place: toValue(item.location_id, item.element_id),
     };
 }
 
@@ -85,6 +90,7 @@ async function load(): Promise<void> {
     error.value = null;
     try {
         project.value = await projectsApi.get(projectId.value);
+        loadPlaces();
         entry.value = isNew.value ? null : await diaryApi.get(projectId.value, Number(route.params.entryId));
         fill(entry.value);
     } catch (e) {
@@ -96,7 +102,7 @@ watch(() => route.fullPath, load, { immediate: true });
 
 // Linhas por secção (as linhas vivem todas em form.data.items, pela ordem em que foram criadas).
 const rowsOf = (kind: DiaryItemKind) => form.data.items.filter((i) => i.kind === kind);
-const addRow = (kind: DiaryItemKind) => form.data.items.push({ uid: ++nextUid, kind, description: '', quantity: '', unit: '', company: '' });
+const addRow = (kind: DiaryItemKind) => form.data.items.push({ uid: ++nextUid, kind, description: '', quantity: '', unit: '', company: '', place: '' });
 const removeRow = (row: ItemRow) => form.data.items.splice(form.data.items.indexOf(row), 1);
 const rowError = (row: ItemRow, field: string) => form.errors.value[`items.${form.data.items.indexOf(row)}.${field}`];
 
@@ -125,6 +131,7 @@ function payload(): Record<string, unknown> {
             quantity: number(i.quantity),
             unit: i.unit.trim() || null,
             company: i.company.trim() || null,
+            ...toIds(i.place),
         })),
     };
 }
@@ -258,6 +265,15 @@ const quantityText = (i: DiaryItem) => (i.quantity === null ? '' : `${String(i.q
                             <AppButton size="sm" variant="ghost" class="justify-self-end text-red-700 sm:col-span-1 sm:mt-1" :aria-label="`Remover linha de ${section.label}`" @click="removeRow(row)">
                                 Remover
                             </AppButton>
+                            <select
+                                v-if="hasStructure"
+                                v-model="row.place"
+                                class="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-700 sm:col-span-11"
+                                :aria-label="`Onde (${section.label})`"
+                            >
+                                <option value="">Onde? (opcional: piso, zona ou elemento)</option>
+                                <option v-for="o in placeOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+                            </select>
                         </li>
                     </ul>
                     <AppButton size="sm" variant="secondary" :class="rowsOf(section.kind).length ? 'mt-3' : ''" @click="addRow(section.kind)">+ {{ section.add }}</AppButton>
@@ -293,7 +309,10 @@ const quantityText = (i: DiaryItem) => (i.quantity === null ? '' : `${String(i.q
                 <AppCard v-for="section in DIARY_SECTIONS.filter((s) => itemsOf(s.kind).length)" :key="section.kind" :title="section.label">
                     <ul class="divide-y divide-slate-100 text-sm">
                         <li v-for="item in itemsOf(section.kind)" :key="item.id" class="flex flex-wrap justify-between gap-2 py-2">
-                            <span>{{ item.description }}<span v-if="item.company" class="text-slate-500"> · {{ item.company }}</span></span>
+                            <span>
+                                {{ item.description }}<span v-if="item.company" class="text-slate-500"> · {{ item.company }}</span>
+                                <span v-if="labelOf(item.location_id, item.element_id)" class="block text-xs text-slate-500">{{ labelOf(item.location_id, item.element_id) }}</span>
+                            </span>
                             <span class="font-medium">{{ quantityText(item) }}</span>
                         </li>
                     </ul>

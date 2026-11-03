@@ -42,4 +42,25 @@ class ProjectLocation extends Model
     {
         return $this->hasMany(ConstructionElement::class, 'location_id');
     }
+
+    public function diaryItems(): HasMany
+    {
+        return $this->hasMany(DiaryItem::class, 'location_id');
+    }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class, 'location_id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class, 'location_id');
+    }
+
+    /** Tem linhas do diário, fotografias ou documentos ligados (não se pode apagar). */
+    public function isReferenced(): bool
+    {
+        return $this->diaryItems()->exists() || $this->media()->exists() || $this->documents()->exists();
+    }
 }

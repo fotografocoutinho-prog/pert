@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { documentsApi } from '@/api';
 import { ApiError } from '@/api/http';
 import type { DocumentFolderRef, Project, ProjectDocument } from '@/api/types';
+import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
 import { appUrl } from '@/utils/base';
@@ -17,6 +18,7 @@ const emit = defineEmits<{ close: []; changed: [] }>();
 
 const session = useSessionStore();
 const toast = useToastStore();
+const { placeOptions, hasStructure, toValue, toIds, labelOf, load: loadPlaces } = useStructurePlaces(props.project.id);
 
 const doc = ref<ProjectDocument | null>(null);
 const error = ref<string | null>(null);
@@ -51,7 +53,10 @@ async function load(): Promise<void> {
 watch(() => props.documentId, (id) => {
     doc.value = null;
     note.value = '';
-    if (id !== null) load();
+    if (id !== null) {
+        load();
+        loadPlaces();
+    }
 }, { immediate: true });
 
 async function act(action: () => Promise<unknown>, success: string): Promise<boolean> {
@@ -77,6 +82,12 @@ async function move(event: Event): Promise<void> {
     if (!doc.value) return;
     const value = (event.target as HTMLSelectElement).value;
     await act(async () => (doc.value = await documentsApi.update(props.project.id, doc.value!.id, { folder_id: value ? Number(value) : null })), 'Documento movido.');
+}
+
+async function savePlace(event: Event): Promise<void> {
+    if (!doc.value) return;
+    const ids = toIds((event.target as HTMLSelectElement).value);
+    await act(async () => (doc.value = await documentsApi.update(props.project.id, doc.value!.id, ids)), 'Local guardado.');
 }
 
 // Nova versão
@@ -115,6 +126,14 @@ async function remove(): Promise<void> {
                     </select>
                 </div>
             </div>
+            <div v-if="canEdit && hasStructure">
+                <label class="mb-1 block text-sm font-medium text-slate-700" for="doc-place">Refere-se a</label>
+                <select id="doc-place" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm" :value="toValue(doc.location_id, doc.element_id)" @change="savePlace">
+                    <option value="">(toda a obra)</option>
+                    <option v-for="o in placeOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+                </select>
+            </div>
+            <p v-else-if="labelOf(doc.location_id, doc.element_id)" class="text-sm text-slate-600">Refere-se a: <strong>{{ labelOf(doc.location_id, doc.element_id) }}</strong></p>
             <p v-if="doc.description" class="text-sm whitespace-pre-line text-slate-700">{{ doc.description }}</p>
 
             <div>

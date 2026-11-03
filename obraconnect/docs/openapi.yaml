@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.5.0
+  version: 0.6.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -16,6 +16,10 @@ info:
     `ROLE_ESCALATION`, `LAST_ADMIN`, `ALREADY_MEMBER`, `INVITATION_PENDING`, `INVITATION_INVALID`, `ROLE_LOCKED`,
     `ROLE_IN_USE`, `PLATFORM_ONLY`, `PLATFORM_ROLE`, `SUPPORT_GRANT_INVALID`, `SUPPORT_READ_ONLY`, `EXPORT_RUNNING`,
     `PROJECT_ARCHIVED` (409), `ALREADY_IN_TEAM` (409), `MEMBERSHIP_INACTIVE`, `DIARY_SUBMITTED` (409).
+
+    **Ligação à estrutura.** Linhas do diário (`items.*`), fotografias e documentos aceitam `location_id` e/ou
+    `element_id` da mesma obra; com elemento, `location_id` passa a ser o do elemento. Locais e elementos com
+    ligações não se apagam (`LOCATION_IN_USE`, `ELEMENT_IN_USE`, 409).
 
     **Fotografias.** Os ficheiros nunca têm endereço público: `GET /api/v1/projects/{project}/media/{media}/{thumb|preview|original}`
     exige sessão e `diary.view` na obra. O original é devolvido sem alterações (o `sha256` da resposta confirma-o).
@@ -472,6 +476,10 @@ paths:
   /api/v1/projects/{project}/elements/{element}:
     patch: { tags: [Estrutura], summary: "Corrigir ou mudar de localização (structure.manage)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
     delete: { tags: [Estrutura], summary: Apagar (structure.manage), parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/projects/{project}/elements/{element}/links:
+    get: { tags: [Estrutura], summary: "Histórico do elemento: linhas do diário, fotografias, documentos (null sem permissão)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{diary_items, photos, documents}" } } }
+  /api/v1/projects/{project}/locations/{location}/links:
+    get: { tags: [Estrutura], summary: "Histórico do local e de tudo o que está dentro dele", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: location, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{diary_items, photos, documents}" } } }
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
   /api/v1/platform/tenants:
@@ -618,3 +626,5 @@ components:
               quantity: { type: [number, "null"] }
               unit: { type: [string, "null"] }
               company: { type: [string, "null"] }
+              location_id: { type: [integer, "null"] }
+              element_id: { type: [integer, "null"] }

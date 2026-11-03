@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { diaryApi } from '@/api';
 import { ApiError } from '@/api/http';
 import type { MediaItem } from '@/api/types';
+import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useToastStore } from '@/stores/toast';
 import { appUrl } from '@/utils/base';
 import { formatBytes, formatDateTime } from '@/utils/format';
@@ -12,6 +13,8 @@ import AppModal from '@/components/ui/AppModal.vue';
 const props = defineProps<{ projectId: number; entryId: number; photos: MediaItem[]; editable: boolean }>();
 
 const toast = useToastStore();
+const { placeOptions, hasStructure, toValue, toIds, labelOf, load: loadPlaces } = useStructurePlaces(props.projectId);
+loadPlaces();
 
 /** Igual a obraconnect.files.photo_max_mb no servidor (que é quem decide). */
 const MAX_MB = 20;
@@ -82,9 +85,18 @@ async function saveCaption(photo: MediaItem, caption: string): Promise<void> {
     const value = caption.trim() || null;
     if (value === photo.caption) return;
     try {
-        Object.assign(photo, await diaryApi.updatePhoto(props.projectId, props.entryId, photo.id, value));
+        Object.assign(photo, await diaryApi.updatePhoto(props.projectId, props.entryId, photo.id, { caption: value }));
     } catch (e) {
         toast.error(e instanceof ApiError ? e.message : 'Não foi possível guardar a legenda.');
+    }
+}
+
+/** "Onde" foi tirada (local ou elemento da estrutura). */
+async function savePlace(photo: MediaItem, value: string): Promise<void> {
+    try {
+        Object.assign(photo, await diaryApi.updatePhoto(props.projectId, props.entryId, photo.id, toIds(value)));
+    } catch (e) {
+        toast.error(e instanceof ApiError ? e.message : 'Não foi possível guardar o local.');
     }
 }
 
@@ -145,6 +157,19 @@ const viewing = ref<MediaItem | null>(null);
                         @keydown.enter.prevent="($event.target as HTMLInputElement).blur()"
                     />
                     <p v-else class="truncate text-sm" :title="photo.caption ?? ''">{{ photo.caption || ' ' }}</p>
+                    <select
+                        v-if="editable && hasStructure"
+                        :value="toValue(photo.location_id, photo.element_id)"
+                        class="mt-1 w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
+                        :aria-label="`Onde foi tirada ${photo.original_name}`"
+                        @change="savePlace(photo, ($event.target as HTMLSelectElement).value)"
+                    >
+                        <option value="">Onde? (opcional)</option>
+                        <option v-for="o in placeOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+                    </select>
+                    <p v-else-if="labelOf(photo.location_id, photo.element_id)" class="truncate text-xs text-slate-500" :title="labelOf(photo.location_id, photo.element_id)">
+                        {{ labelOf(photo.location_id, photo.element_id) }}
+                    </p>
                     <button v-if="editable" type="button" class="mt-1 text-xs font-medium text-red-700 hover:underline" @click="remove(photo)">Remover</button>
                 </div>
             </li>

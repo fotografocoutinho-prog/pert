@@ -1,4 +1,4 @@
--- ObraConnect 0.5.0 — SQL de instalação (esquema + dados base)
+-- ObraConnect 0.6.0 — SQL de instalação (esquema + dados base)
 -- Gerado por: php artisan obraconnect:install-sql
 --
 -- Uso no cPanel sem SSH:
@@ -216,35 +216,56 @@ alter table `construction_elements` add constraint `construction_elements_tenant
 alter table `construction_elements` add constraint `construction_elements_tenant_id_location_id_foreign` foreign key (`tenant_id`, `location_id`) references `project_locations` (`tenant_id`, `id`) on delete cascade;
 insert into `migrations` (`migration`, `batch`) values ('2026_11_06_100000_create_project_structure_tables', 1);
 
+-- 2026_11_07_100000_link_records_to_structure
+alter table `site_diary_items` add `location_id` bigint unsigned null;
+alter table `site_diary_items` add `element_id` bigint unsigned null;
+alter table `site_diary_items` add index `site_diary_items_location_id_index`(`location_id`);
+alter table `site_diary_items` add index `site_diary_items_element_id_index`(`element_id`);
+alter table `site_diary_items` add constraint `site_diary_items_location_fk` foreign key (`tenant_id`, `location_id`) references `project_locations` (`tenant_id`, `id`);
+alter table `site_diary_items` add constraint `site_diary_items_element_fk` foreign key (`tenant_id`, `element_id`) references `construction_elements` (`tenant_id`, `id`);
+alter table `media` add `location_id` bigint unsigned null;
+alter table `media` add `element_id` bigint unsigned null;
+alter table `media` add index `media_location_id_index`(`location_id`);
+alter table `media` add index `media_element_id_index`(`element_id`);
+alter table `media` add constraint `media_location_fk` foreign key (`tenant_id`, `location_id`) references `project_locations` (`tenant_id`, `id`);
+alter table `media` add constraint `media_element_fk` foreign key (`tenant_id`, `element_id`) references `construction_elements` (`tenant_id`, `id`);
+alter table `documents` add `location_id` bigint unsigned null;
+alter table `documents` add `element_id` bigint unsigned null;
+alter table `documents` add index `documents_location_id_index`(`location_id`);
+alter table `documents` add index `documents_element_id_index`(`element_id`);
+alter table `documents` add constraint `documents_location_fk` foreign key (`tenant_id`, `location_id`) references `project_locations` (`tenant_id`, `id`);
+alter table `documents` add constraint `documents_element_fk` foreign key (`tenant_id`, `element_id`) references `construction_elements` (`tenant_id`, `id`);
+insert into `migrations` (`migration`, `batch`) values ('2026_11_07_100000_link_records_to_structure', 1);
+
 -- Dados base
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('company.view', 'company', 'Ver dados da empresa', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('company.update', 'company', 'Editar dados e logótipo da empresa', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('security.manage', 'company', 'Definir políticas de segurança (ex.: 2FA obrigatório)', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.view', 'members', 'Ver utilizadores e convites', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.invite', 'members', 'Convidar utilizadores', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.manage', 'members', 'Alterar perfil, suspender e remover utilizadores', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('roles.view', 'roles', 'Ver perfis e permissões', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('roles.manage', 'roles', 'Criar e editar perfis', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('audit.view', 'audit', 'Consultar o registo de auditoria', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('subscription.view', 'subscription', 'Ver plano, limites e utilização', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('support.manage', 'support', 'Autorizar e revogar acesso do suporte técnico', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('data.export', 'data', 'Exportar todos os dados da empresa', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.all', 'projects', 'Acesso a todas as obras (sem esta permissão, só às obras de cuja equipa faz parte)', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.view', 'projects', 'Ver obras', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.create', 'projects', 'Criar obras', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.update', 'projects', 'Editar os dados da obra', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.team', 'projects', 'Gerir a equipa da obra', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.archive', 'projects', 'Concluir, arquivar e reabrir obras', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('structure.manage', 'structure', 'Gerir edifícios, pisos, zonas e elementos construtivos', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.view', 'diary', 'Consultar o diário de obra', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.write', 'diary', 'Escrever registos do diário (rascunho)', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.submit', 'diary', 'Submeter registos do diário (deixam de poder ser alterados)', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.view', 'documents', 'Consultar e descarregar documentos', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.upload', 'documents', 'Enviar documentos (e novas versões dos que enviou)', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.manage', 'documents', 'Gerir pastas, mover e apagar documentos, novas versões de qualquer documento', '2026-11-03 16:31:29', '2026-11-03 16:31:29');
-insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('start', 'Start', 'Para pequenas empresas: até 3 obras ativas e funcionalidades essenciais.', 4900, 49000, 30, '{\"max_users\":5,\"max_active_projects\":3,\"storage_mb\":5120}', '[\"diary\",\"documents\"]', 10, 'EUR', 1, 1, '2026-11-03 16:31:30', '2026-11-03 16:31:30');
-insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('professional', 'Professional', 'Até 15 obras ativas, fiscalização, controlo de custos e relatórios avançados.', 12900, 129000, 30, '{\"max_users\":25,\"max_active_projects\":15,\"storage_mb\":51200}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\"]', 20, 'EUR', 1, 1, '2026-11-03 16:31:30', '2026-11-03 16:31:30');
-insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('business', 'Business', 'Mais obras, inteligência artificial, integrações e automações.', 29900, 299000, 30, '{\"max_users\":100,\"max_active_projects\":60,\"storage_mb\":204800}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\",\"ai\",\"integrations\",\"automations\"]', 30, 'EUR', 1, 1, '2026-11-03 16:31:30', '2026-11-03 16:31:30');
-insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('enterprise', 'Enterprise', 'Preço personalizado, integrações dedicadas, suporte prioritário e requisitos específicos de segurança.', null, null, 0, '{\"max_users\":null,\"max_active_projects\":null,\"storage_mb\":null}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\",\"ai\",\"integrations\",\"automations\",\"dedicated_database\"]', 40, 'EUR', 1, 1, '2026-11-03 16:31:30', '2026-11-03 16:31:30');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('company.view', 'company', 'Ver dados da empresa', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('company.update', 'company', 'Editar dados e logótipo da empresa', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('security.manage', 'company', 'Definir políticas de segurança (ex.: 2FA obrigatório)', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.view', 'members', 'Ver utilizadores e convites', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.invite', 'members', 'Convidar utilizadores', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('members.manage', 'members', 'Alterar perfil, suspender e remover utilizadores', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('roles.view', 'roles', 'Ver perfis e permissões', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('roles.manage', 'roles', 'Criar e editar perfis', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('audit.view', 'audit', 'Consultar o registo de auditoria', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('subscription.view', 'subscription', 'Ver plano, limites e utilização', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('support.manage', 'support', 'Autorizar e revogar acesso do suporte técnico', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('data.export', 'data', 'Exportar todos os dados da empresa', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.all', 'projects', 'Acesso a todas as obras (sem esta permissão, só às obras de cuja equipa faz parte)', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.view', 'projects', 'Ver obras', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.create', 'projects', 'Criar obras', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.update', 'projects', 'Editar os dados da obra', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.team', 'projects', 'Gerir a equipa da obra', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('projects.archive', 'projects', 'Concluir, arquivar e reabrir obras', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('structure.manage', 'structure', 'Gerir edifícios, pisos, zonas e elementos construtivos', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.view', 'diary', 'Consultar o diário de obra', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.write', 'diary', 'Escrever registos do diário (rascunho)', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('diary.submit', 'diary', 'Submeter registos do diário (deixam de poder ser alterados)', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.view', 'documents', 'Consultar e descarregar documentos', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.upload', 'documents', 'Enviar documentos (e novas versões dos que enviou)', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `permissions` (`key`, `module`, `description`, `updated_at`, `created_at`) values ('documents.manage', 'documents', 'Gerir pastas, mover e apagar documentos, novas versões de qualquer documento', '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('start', 'Start', 'Para pequenas empresas: até 3 obras ativas e funcionalidades essenciais.', 4900, 49000, 30, '{\"max_users\":5,\"max_active_projects\":3,\"storage_mb\":5120}', '[\"diary\",\"documents\"]', 10, 'EUR', 1, 1, '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('professional', 'Professional', 'Até 15 obras ativas, fiscalização, controlo de custos e relatórios avançados.', 12900, 129000, 30, '{\"max_users\":25,\"max_active_projects\":15,\"storage_mb\":51200}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\"]', 20, 'EUR', 1, 1, '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('business', 'Business', 'Mais obras, inteligência artificial, integrações e automações.', 29900, 299000, 30, '{\"max_users\":100,\"max_active_projects\":60,\"storage_mb\":204800}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\",\"ai\",\"integrations\",\"automations\"]', 30, 'EUR', 1, 1, '2026-11-03 17:08:24', '2026-11-03 17:08:24');
+insert into `plans` (`code`, `name`, `description`, `price_monthly_cents`, `price_yearly_cents`, `trial_days`, `limits`, `features`, `sort_order`, `currency`, `is_public`, `is_active`, `updated_at`, `created_at`) values ('enterprise', 'Enterprise', 'Preço personalizado, integrações dedicadas, suporte prioritário e requisitos específicos de segurança.', null, null, 0, '{\"max_users\":null,\"max_active_projects\":null,\"storage_mb\":null}', '[\"diary\",\"documents\",\"inspections\",\"costs\",\"advanced_reports\",\"ai\",\"integrations\",\"automations\",\"dedicated_database\"]', 40, 'EUR', 1, 1, '2026-11-03 17:08:24', '2026-11-03 17:08:24');
 
 SET FOREIGN_KEY_CHECKS = 1;
