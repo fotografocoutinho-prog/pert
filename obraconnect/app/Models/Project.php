@@ -16,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * (perfil na empresa com "acesso a todas as obras" ou perfil na equipa da obra).
  */
 #[Fillable([
-    'code', 'name', 'owner_name', 'type', 'address', 'postal_code', 'city',
-    'contract_value_cents', 'starts_on', 'planned_end_on', 'status', 'description',
+    'code', 'name', 'client_id', 'owner_name', 'type', 'address', 'postal_code', 'city',
+    'contract_value_cents', 'starts_on', 'planned_end_on', 'work_calendar_id', 'status', 'description',
 ])]
 class Project extends Model
 {
@@ -36,6 +36,17 @@ class Project extends Model
             'starts_on' => 'date',
             'planned_end_on' => 'date',
         ];
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /** Null = calendário por omissão da empresa (App\Calendar\WorkCalendars::forProject). */
+    public function workCalendar(): BelongsTo
+    {
+        return $this->belongsTo(WorkCalendar::class);
     }
 
     public function members(): HasMany

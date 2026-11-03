@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\DiaryEntryController;
 use App\Http\Controllers\Api\V1\DiaryPhotoController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\Platform;
+use App\Http\Controllers\Api\V1\ProjectCalendarController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectMemberController;
 use App\Http\Controllers\Api\V1\PublicPlanController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\StructureController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
+use App\Http\Controllers\Api\V1\WorkCalendarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -83,6 +86,22 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('exports', [ExportController::class, 'store'])->middleware('throttle:exports')->name('exports.store');
             Route::get('exports/{tenantExport}/download', [ExportController::class, 'download'])->name('exports.download');
 
+            Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
+            Route::get('clients/options', [ClientController::class, 'options'])->name('clients.options');
+            Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
+            Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+            Route::put('clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+            Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+
+            Route::get('work-calendars', [WorkCalendarController::class, 'index'])->name('calendars.index');
+            Route::post('work-calendars', [WorkCalendarController::class, 'store'])->name('calendars.store');
+            Route::put('work-calendars/{workCalendar}', [WorkCalendarController::class, 'update'])->name('calendars.update');
+            Route::delete('work-calendars/{workCalendar}', [WorkCalendarController::class, 'destroy'])->name('calendars.destroy');
+            Route::get('work-calendars/{workCalendar}/holidays', [WorkCalendarController::class, 'holidays'])->name('calendars.holidays.index');
+            Route::post('work-calendars/{workCalendar}/holidays', [WorkCalendarController::class, 'storeHolidays'])->name('calendars.holidays.store');
+            Route::delete('work-calendars/{workCalendar}/holidays', [WorkCalendarController::class, 'destroyHolidays'])->name('calendars.holidays.destroy');
+            Route::post('work-calendars/{workCalendar}/national-holidays', [WorkCalendarController::class, 'addNationalHolidays'])->name('calendars.national');
+
             // Obras. O acesso a cada obra é decidido no controlador (perfil na empresa ou na equipa).
             Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
             Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -91,6 +110,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
             // Recursos dentro da obra: scopeBindings garante que pertencem à obra do endereço.
             Route::scopeBindings()->prefix('projects/{project}')->name('projects.')->group(function () {
+                Route::get('calendar', ProjectCalendarController::class)->name('calendar');
+
                 Route::get('members', [ProjectMemberController::class, 'index'])->name('members.index');
                 Route::get('members/options', [ProjectMemberController::class, 'options'])->name('members.options');
                 Route::post('members', [ProjectMemberController::class, 'store'])->name('members.store');

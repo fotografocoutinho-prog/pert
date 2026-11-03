@@ -250,6 +250,8 @@ export interface Project {
     id: number;
     code: string;
     name: string;
+    client_id: number | null;
+    client: { id: number; name: string; type: ClientType } | null;
     owner_name: string | null;
     type: string | null;
     type_label: string | null;
@@ -259,6 +261,9 @@ export interface Project {
     contract_value_cents: number | null;
     starts_on: string | null;
     planned_end_on: string | null;
+    /** null = calendário por omissão da empresa. */
+    work_calendar_id: number | null;
+    work_calendar: { id: number; name: string } | null;
     status: ProjectStatus;
     status_label: string;
     description: string | null;
@@ -266,6 +271,83 @@ export interface Project {
     created_at: string | null;
     /** O que o utilizador pode fazer nesta obra (só para a interface; o servidor decide). */
     permissions: string[];
+}
+
+export type ClientType = 'private' | 'company' | 'public';
+
+export interface Client {
+    id: number;
+    type: ClientType;
+    type_label: string;
+    name: string;
+    nif: string | null;
+    country_code: string;
+    email: string | null;
+    phone: string | null;
+    contact_name: string | null;
+    address: string | null;
+    postal_code: string | null;
+    city: string | null;
+    notes: string | null;
+    archived: boolean;
+    archived_at: string | null;
+    projects_count?: number;
+    created_at: string | null;
+}
+
+export interface ClientOption {
+    id: number;
+    name: string;
+    type: ClientType;
+    archived: boolean;
+}
+
+/** Chaves ISO: "1" = segunda … "7" = domingo; 0 horas = não se trabalha. */
+export type WeeklyHours = Record<'1' | '2' | '3' | '4' | '5' | '6' | '7', number>;
+
+export interface WorkCalendar {
+    id: number;
+    name: string;
+    weekly_hours: WeeklyHours;
+    weekly_total: number;
+    is_default: boolean;
+    projects_count: number | null;
+    national_holiday_years: number[];
+}
+
+export type HolidayKind = 'national' | 'optional' | 'municipal' | 'company';
+
+export interface Holiday {
+    id: number;
+    date: string;
+    name: string;
+    kind: HolidayKind;
+    kind_label: string;
+}
+
+export interface CalendarDay {
+    date: string;
+    weekday: number;
+    working: boolean;
+    hours: number;
+    holiday: { name: string; kind: HolidayKind; kind_label: string } | null;
+}
+
+export interface ProjectCalendar {
+    calendar: { id: number; name: string; is_default: boolean; chosen: boolean };
+    month: string;
+    today: string;
+    days: CalendarDay[];
+    working_days: number;
+    missing_holiday_years: number[];
+    /** Prazo entre o início e o fim previsto (null se faltar uma das datas). */
+    term: {
+        calendar_days: number;
+        working_days: number | null;
+        working_days_done: number | null;
+        working_days_left: number | null;
+        missing_holiday_years: number[];
+    } | null;
 }
 
 export interface ProjectMember {

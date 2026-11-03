@@ -1,5 +1,17 @@
 # Histórico de versões
 
+## 0.8.0 — 2026-11-09
+
+Fase 2, sétima parte: clientes e calendários de trabalho.
+
+- **Clientes** (particulares, empresas, entidades públicas): NIF português validado (dígito de controlo) e único na empresa, ou n.º fiscal estrangeiro; contactos, morada, notas. Com obras não se apagam: arquivam-se (saem das escolhas, as obras continuam a mostrá-los). Permissões `clients.view` e `clients.manage`.
+- Cada obra pode ter **cliente** (escolhido na lista ou criado ali mesmo, no formulário da obra) e continua a ter **dono de obra** em texto, para quando a empresa trabalha como subempreiteira. A ficha do cliente mostra as obras dele a que quem consulta tem acesso.
+- **Calendários de trabalho**: horas por dia da semana e dias sem trabalho (feriados nacionais, municipais, facultativos e paragens da empresa, um dia ou um período). Cada empresa tem um calendário por omissão (segunda a sexta, 8 h, com os feriados nacionais deste ano e do seguinte); cada obra pode escolher outro. Permissão `calendars.manage`.
+- Feriados nacionais calculados para qualquer ano desde 2016 (art. 234.º do Código do Trabalho, com Páscoa, Sexta-feira Santa e Corpo de Deus móveis); Carnaval opcional. Aviso quando falta o ano seguinte.
+- **Prazo da obra em dias úteis** (no separador Dados): dias úteis e de calendário entre o início e o fim previsto, decorridos e por fazer, com aviso se o calendário não tiver os feriados de algum ano do prazo.
+- **Diário**: os feriados aparecem junto ao dia; "Ainda não há registo de hoje" não aparece em dias sem trabalho; numa obra em curso, lista dos dias úteis do mês já passados sem registo (cada um abre o registo desse dia).
+- Clientes e calendários entram na exportação de dados e na auditoria.
+
 ## 0.7.0 — 2026-11-08
 
 Fase 2, sexta parte: modo sem rede no diário de obra.

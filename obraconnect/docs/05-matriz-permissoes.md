@@ -55,6 +55,12 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 
 | `structure.manage` | Edifícios, pisos, zonas e elementos | ● | ● | ○ | | ○ | ● | | | | | | | | |
 
+| `clients.view` | Ver clientes e contactos | ● | ● | ● | | ● | ● | | | | ● | | | | |
+| `clients.manage` | Criar, editar, arquivar, apagar clientes | ● | ● | | | | | | | | ● | | | | |
+| `calendars.manage` | Calendários, feriados e paragens | ● | ● | | | | | | | | ● | | | | |
+
+Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
+
 Estrutura (0.5.0): ver a estrutura só exige `projects.view`. O medidor-orçamentista gere a estrutura em todas as obras (tem `projects.all`).
 
 Documentos (0.4.0): o medidor-orçamentista tem acesso a todas as obras, por isso consulta e envia em todas (a proposta tinha ○).

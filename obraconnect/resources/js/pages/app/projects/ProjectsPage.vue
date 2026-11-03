@@ -118,7 +118,7 @@ async function create(): Promise<void> {
                             <p class="text-xs font-medium tracking-wide text-slate-500">{{ project.code }}</p>
                             <p class="truncate font-semibold text-slate-900">{{ project.name }}</p>
                             <p class="text-sm text-slate-500">
-                                {{ [project.city, project.owner_name].filter(Boolean).join(' · ') || '—' }}
+                                {{ [project.city, project.client?.name ?? project.owner_name].filter(Boolean).join(' · ') || '—' }}
                             </p>
                         </div>
                         <div class="flex flex-col items-end gap-1 text-right text-sm">

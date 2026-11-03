@@ -1,5 +1,26 @@
 # Registo de progresso
 
+## v0.8.0 — Fase 2, parte 7: clientes e calendários de trabalho (2026-11-09)
+
+| Área | Verificação |
+| --- | --- |
+| Clientes: NIF português (dígito de controlo) único por empresa, estrangeiro sem validação PT, arquivar em vez de apagar com obras, opções para escolher (arquivado só o atual), permissões e isolamento | Testes + browser (erro de NIF no campo, criar, ficha) |
+| Obra com cliente (escolhido ou criado no formulário da obra; Enter cria o cliente sem submeter a obra) e calendário | Testes + browser |
+| Feriados nacionais 2016–2099 (Páscoa por Meeus/Jones/Butcher; nomes juntos quando coincidem, ex.: 25/4/2038) | Testes unitários |
+| Calendário por omissão no registo da empresa e criado quando falta (empresas anteriores); dias e períodos sem trabalho; feriados nacionais por ano | Testes + browser (férias coletivas agrupadas numa linha) |
+| Prazo da obra em dias úteis (decorridos e por fazer) e mês da obra com feriados | Testes (20/4–8/5/2026 = 14 dias úteis; 15 com sábados) + browser (1/10/2026–31/3/2027 = 124) |
+| Diário: feriado junto ao dia, sem aviso de "hoje" em dias sem trabalho, dias úteis sem registo | Browser (outubro: 20 dias, sem o 5 de outubro nem fins de semana) |
+| Exportação e auditoria | Testes |
+
+Total: **141 testes, 843 asserções**.
+
+### Limitações
+
+- Os feriados nacionais de cada ano novo juntam-se à mão (botão próprio, com aviso); não há tarefa automática.
+- O feriado municipal não é sugerido pelo concelho da obra: marca-se no calendário.
+- Calendários por obra servem para contar dias; o planeamento (Gantt/CPM) chega na fase 4.
+- Departamentos, centros de custo e especialidades ficam para depois.
+
 ## v0.7.0 — Fase 2, parte 6: modo sem rede (2026-11-08)
 
 | Área | Verificação |

@@ -3,10 +3,13 @@ import { cachedRead } from '@/offline/cache';
 import { ensureCsrfCookie, getData, http } from './http';
 import type {
     AuditEntry,
+    Client,
+    ClientOption,
     Company,
     DataExport,
     DiaryEntry,
     DocumentListing,
+    Holiday,
     Invitation,
     MediaItem,
     Member,
@@ -18,6 +21,7 @@ import type {
     PlatformTenant,
     PlatformTenantDetail,
     Project,
+    ProjectCalendar,
     ProjectDocument,
     ProjectMember,
     ProjectStructure,
@@ -26,6 +30,8 @@ import type {
     Subscription,
     SupportGrant,
     UsageItem,
+    WeeklyHours,
+    WorkCalendar,
 } from './types';
 
 /** Rotas do Fortify (prefixo /auth). Cada escrita garante o cookie CSRF. */
@@ -182,12 +188,15 @@ export const exportsApi = {
 
 export const projectsApi = {
     // Leituras com cópia local: abrem sem rede com o que foi visto da última vez.
-    list: (params: { search?: string; status?: string; page?: number }) =>
+    list: (params: { search?: string; status?: string; page?: number; client_id?: number }) =>
         cachedRead(`projects:${JSON.stringify(params)}`, async () => (await http.get<Paginated<Project>>('/api/v1/projects', { params })).data),
     get: (id: number) => cachedRead(`project:${id}`, () => getData<Project>(`/api/v1/projects/${id}`)),
     create: async (payload: Record<string, unknown>) => (await http.post<{ data: Project }>('/api/v1/projects', payload)).data.data,
     update: async (id: number, payload: Record<string, unknown>) =>
         (await http.put<{ data: Project }>(`/api/v1/projects/${id}`, payload)).data.data,
+    /** Mês do calendário da obra e prazo em dias úteis (com cópia local, para o diário sem rede). */
+    calendar: (id: number, month?: string) =>
+        cachedRead(`project-calendar:${id}:${month ?? ''}`, () => getData<ProjectCalendar>(`/api/v1/projects/${id}/calendar`, { month })),
     members: (id: number) => getData<ProjectMember[]>(`/api/v1/projects/${id}/members`),
     memberOptions: (id: number) =>
         getData<{
@@ -199,6 +208,30 @@ export const projectsApi = {
     updateMember: async (id: number, memberId: number, roleId: number) =>
         (await http.patch<{ data: ProjectMember }>(`/api/v1/projects/${id}/members/${memberId}`, { role_id: roleId })).data.data,
     removeMember: (id: number, memberId: number) => http.delete(`/api/v1/projects/${id}/members/${memberId}`),
+};
+
+export const clientsApi = {
+    list: async (params: { search?: string; status?: string; page?: number }) => (await http.get<Paginated<Client>>('/api/v1/clients', { params })).data,
+    options: (include?: number | null) => getData<ClientOption[]>('/api/v1/clients/options', include ? { include } : undefined),
+    get: (id: number) => getData<Client>(`/api/v1/clients/${id}`),
+    create: async (payload: Record<string, unknown>) => (await http.post<{ data: Client }>('/api/v1/clients', payload)).data.data,
+    update: async (id: number, payload: Record<string, unknown>) => (await http.put<{ data: Client }>(`/api/v1/clients/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/clients/${id}`),
+};
+
+export const calendarsApi = {
+    list: () => getData<WorkCalendar[]>('/api/v1/work-calendars'),
+    create: async (payload: { name: string; weekly_hours: WeeklyHours; with_national_holidays?: boolean }) =>
+        (await http.post<{ data: WorkCalendar }>('/api/v1/work-calendars', payload)).data.data,
+    update: async (id: number, payload: { name?: string; weekly_hours?: WeeklyHours; is_default?: true }) =>
+        (await http.put<{ data: WorkCalendar }>(`/api/v1/work-calendars/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/work-calendars/${id}`),
+    holidays: (id: number, year: number) => getData<Holiday[]>(`/api/v1/work-calendars/${id}/holidays`, { year }),
+    addDaysOff: async (id: number, payload: { date: string; until?: string | null; name: string; kind: string }) =>
+        (await http.post<{ data: Holiday[] }>(`/api/v1/work-calendars/${id}/holidays`, payload)).data.data,
+    removeDaysOff: (id: number, ids: number[]) => http.delete(`/api/v1/work-calendars/${id}/holidays`, { data: { ids } }),
+    addNational: async (id: number, year: number, carnival: boolean) =>
+        (await http.post<{ data: { added: number } }>(`/api/v1/work-calendars/${id}/national-holidays`, { year, carnival })).data.data.added,
 };
 
 export const diaryApi = {

@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.7.0)
+# Manual do utilizador (versão 0.8.0)
 
 ## Entrar
 
@@ -30,6 +30,8 @@ Em **Obras** vê as obras a que tem acesso. Quem tem acesso a todas as obras (po
 
 - **Nova obra**: só o nome é obrigatório. O código é criado automaticamente (ex.: OB-2026-001) se o deixar vazio. Quem cria a obra fica na equipa.
 - **Equipa**: quem trabalha na obra e com que **perfil nessa obra**. Por omissão é o perfil que a pessoa tem na empresa, mas pode ser outro (por exemplo, um trabalhador que é encarregado só numa obra). Pessoas de fora (subempreiteiros, fiscalização, dono de obra) são convidadas primeiro em **Utilizadores** e depois adicionadas à equipa.
+- **Cliente e dono de obra**: escolha o cliente na lista (ou **+ Novo cliente**, que o cria ali mesmo). O campo **Dono de obra** só é preciso quando não é o cliente (por exemplo, quando a empresa trabalha como subempreiteira de outra).
+- **Calendário de trabalho** e **Prazo**: nos dados da obra escolhe-se o calendário (por omissão, o da empresa). Com início e fim previsto preenchidos, o quadro **Prazo** mostra os dias úteis e de calendário, quantos já passaram e quantos faltam.
 - **Estado**: em preparação → em curso → concluída → arquivada (também pode suspender e retomar). Concluir, arquivar e reabrir exigem uma permissão própria. Obras concluídas e arquivadas não contam para o limite do plano. Uma obra arquivada fica só para consulta.
 
 ## Diário de obra
@@ -41,6 +43,8 @@ Um registo por dia em cada obra, no separador **Diário** da obra.
 3. **Guardar rascunho** para continuar mais tarde, ou **Guardar e submeter** para fechar o registo. Um registo submetido **não pode ser alterado nem apagado**.
 
 **Fotografias.** Num rascunho já guardado, use **Tirar fotografia** (abre a câmara no telemóvel) ou **Escolher fotografias** (várias de uma vez). Pode escrever uma legenda em cada uma. Aceita JPEG, PNG e WebP até 20 MB, no máximo 30 por registo. As miniaturas aparecem ao fim de alguns segundos (até cerca de um minuto). Toque numa fotografia para a ver em grande ou **descarregar o original**, que é guardado exatamente como foi enviado. As fotografias ocupam o espaço do plano e ficam fechadas quando o registo é submetido.
+
+**Dias em falta.** Numa obra em curso, o diário mostra os dias úteis do mês, desde o início da obra, que ainda não têm registo; toque num dia para o registar. Feriados e paragens do calendário da obra não contam e aparecem junto ao dia.
 
 Não é possível registar dias futuros. Quem só tem consulta (por exemplo, fiscal ou dono de obra) vê os registos mas não os altera.
 
@@ -56,6 +60,24 @@ No separador **Estrutura** da obra descreve-se a obra em **edifícios**, **pisos
 - **Histórico** (em cada local) ou um toque num elemento mostra tudo o que lhe está ligado: linhas do diário (com o dia), fotografias e documentos. Num piso, inclui as zonas e os elementos desse piso.
 
 **Ligar à estrutura.** Nas linhas do diário (campo **Onde?**), em cada fotografia e na janela de cada documento (**Refere-se a**) pode escolher o edifício, piso, zona ou elemento. Ao escolher um elemento (por exemplo, P1), o piso fica preenchido sozinho.
+
+## Clientes
+
+Em **Clientes** ficam os clientes da empresa: particulares, empresas e entidades públicas.
+
+- **Novo cliente**: tipo e nome são obrigatórios. O NIF português é validado e não pode repetir-se na empresa; para clientes de outro país, mude o **País** (ex.: ES) e escreva o número fiscal desse país.
+- Na ficha do cliente vê os contactos e as obras dele (só as obras a que tem acesso).
+- Um cliente com obras não se apaga: **Arquivar** tira-o das escolhas, mas as obras que já o têm continuam a mostrá-lo. **Reativar** volta a pô-lo na lista.
+- Por omissão, gerem clientes o administrador, o diretor técnico e o administrativo; o diretor de obra, o preparador e o medidor-orçamentista consultam.
+
+## Calendários de trabalho
+
+Em **Calendários de trabalho** definem-se os dias e horas de trabalho e os dias sem trabalho. Servem para contar os dias úteis do prazo das obras e os dias em falta no diário.
+
+- Cada empresa começa com o **Calendário geral** (segunda a sexta, 8 horas, com os feriados nacionais deste ano e do seguinte). É o calendário **por omissão**: vale para as obras sem calendário escolhido.
+- **Novo calendário** cria outro (por exemplo, para obras que trabalham ao sábado). **Tornar por omissão** troca o da empresa. Só se apaga um calendário que não seja o por omissão e não tenha obras.
+- **Juntar feriados nacionais de AAAA** junta os 13 feriados obrigatórios desse ano (o Carnaval só se marcar a opção). Faça-o todos os anos para o ano seguinte: a página avisa quando falta.
+- **Marcar dia ou período**: feriado municipal (ex.: São João), feriado facultativo ou paragem da empresa. Num período (por exemplo, férias coletivas de 3 a 14 de agosto) só ficam marcados os dias de trabalho; aparece numa só linha e retira-se de uma vez.
 
 ## Documentos da obra
 

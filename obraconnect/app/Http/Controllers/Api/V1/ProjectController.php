@@ -10,6 +10,7 @@ use App\Enums\ProjectType;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProjectResource;
+use App\Models\Client;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -20,6 +21,9 @@ use Illuminate\Validation\ValidationException;
 
 class ProjectController extends Controller
 {
+    /** Só o nome do cliente e do calendário (a ficha do cliente pede clients.view). */
+    private const RELATIONS = ['client:id,name,type', 'workCalendar:id,name'];
+
     public function __construct(
         private readonly Auditor $auditor,
         private readonly PlanLimits $limits,
@@ -35,12 +39,14 @@ class ProjectController extends Controller
         $search = trim((string) $request->query('search'));
 
         $projects = Project::query()
+            ->with(self::RELATIONS)
             ->withCount('members')
             ->when($visible !== null, fn ($q) => $q->whereIn('id', $visible))
             ->when($search !== '', fn ($q) => $q->where(fn ($w) => $w
                 ->where('name', 'like', '%'.addcslashes($search, '%_\\').'%')
                 ->orWhere('code', 'like', '%'.addcslashes($search, '%_\\').'%')
                 ->orWhere('city', 'like', '%'.addcslashes($search, '%_\\').'%')))
+            ->when($request->integer('client_id'), fn ($q, int $id) => $q->where('client_id', $id))
             ->when($request->query('status') === 'open', fn ($q) => $q->whereIn('status', ProjectStatus::activeValues()))
             ->when(
                 $request->query('status') && $request->query('status') !== 'open',
@@ -86,14 +92,14 @@ class ProjectController extends Controller
 
         $this->auditor->record('project.created', $project, ['code' => $project->code, 'name' => $project->name]);
 
-        return new ProjectResource($project->loadCount('members'));
+        return new ProjectResource($project->load(self::RELATIONS)->loadCount('members'));
     }
 
     public function show(Project $project): ProjectResource
     {
         $this->authorize('projects.view', $project);
 
-        return new ProjectResource($project->loadCount('members'));
+        return new ProjectResource($project->load(self::RELATIONS)->loadCount('members'));
     }
 
     public function update(Request $request, Project $project): ProjectResource
@@ -129,7 +135,7 @@ class ProjectController extends Controller
             $this->auditor->record($statusChanged ? 'project.status_changed' : 'project.updated', $project, $changes);
         }
 
-        return new ProjectResource($project->loadCount('members'));
+        return new ProjectResource($project->load(self::RELATIONS)->loadCount('members'));
     }
 
     /** @return array<string, mixed> */
@@ -142,6 +148,7 @@ class ProjectController extends Controller
             'name' => [$required, 'string', 'max:150'],
             'code' => ['sometimes', 'nullable', 'string', 'max:30',
                 Rule::unique('projects', 'code')->where('tenant_id', $tenantId)->ignore($project?->id)],
+            'client_id' => ['sometimes', 'nullable', 'integer', Rule::exists('clients', 'id')->where('tenant_id', $tenantId)],
             'owner_name' => ['sometimes', 'nullable', 'string', 'max:150'],
             'type' => ['sometimes', 'nullable', Rule::enum(ProjectType::class)],
             'address' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -150,16 +157,25 @@ class ProjectController extends Controller
             'contract_value_cents' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:99999999999999'],
             'starts_on' => ['sometimes', 'nullable', 'date'],
             'planned_end_on' => ['sometimes', 'nullable', 'date'],
+            'work_calendar_id' => ['sometimes', 'nullable', 'integer', Rule::exists('work_calendars', 'id')->where('tenant_id', $tenantId)],
             'status' => ['sometimes', Rule::enum(ProjectStatus::class)],
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ], [], [
             'name' => 'nome da obra',
             'code' => 'código',
+            'client_id' => 'cliente',
             'owner_name' => 'dono de obra',
+            'work_calendar_id' => 'calendário de trabalho',
             'contract_value_cents' => 'valor da adjudicação',
             'starts_on' => 'data de início',
             'planned_end_on' => 'data de fim prevista',
         ]);
+
+        // Um cliente arquivado fica nas obras que já o tinham, mas não se escolhe de novo.
+        if (! empty($data['client_id']) && (int) $data['client_id'] !== $project?->client_id
+            && Client::query()->whereKey($data['client_id'])->whereNotNull('archived_at')->exists()) {
+            throw ValidationException::withMessages(['client_id' => 'Este cliente está arquivado. Reative-o para o escolher.']);
+        }
 
         // Compara com a data guardada quando o pedido só altera uma das duas.
         $start = array_key_exists('starts_on', $data) ? $data['starts_on'] : $project?->starts_on?->toDateString();

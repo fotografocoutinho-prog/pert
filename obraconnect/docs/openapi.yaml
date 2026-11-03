@@ -50,6 +50,8 @@ tags:
   - name: Diário de obra
   - name: Documentos
   - name: Estrutura
+  - name: Clientes
+  - name: Calendários
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -483,6 +485,29 @@ paths:
     get: { tags: [Estrutura], summary: "Histórico do elemento: linhas do diário, fotografias, documentos (null sem permissão)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: element, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{diary_items, photos, documents}" } } }
   /api/v1/projects/{project}/locations/{location}/links:
     get: { tags: [Estrutura], summary: "Histórico do local e de tudo o que está dentro dele", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: location, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{diary_items, photos, documents}" } } }
+  /api/v1/projects/{project}/calendar:
+    get: { tags: [Calendários], summary: "Mês do calendário da obra (dias úteis, feriados, paragens) e prazo em dias úteis (projects.view)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: month, in: query, schema: { type: string, example: "2026-11" } }], responses: { "200": { description: "{calendar, month, today, days[], working_days, missing_holiday_years, term}" } } }
+  /api/v1/clients:
+    get: { tags: [Clientes], summary: "Lista paginada (clients.view)", parameters: [{ name: search, in: query, schema: { type: string } }, { name: status, in: query, schema: { type: string, enum: [active, archived, all], default: active } }], responses: { "200": { description: OK } } }
+    post: { tags: [Clientes], summary: "Criar (clients.manage). NIF português validado e único na empresa", requestBody: { content: { application/json: { schema: { type: object, required: [type, name], properties: { type: { type: string, enum: [private, company, public] }, name: { type: string }, nif: { type: string }, country_code: { type: string, default: PT }, email: { type: string }, phone: { type: string }, contact_name: { type: string }, address: { type: string }, postal_code: { type: string }, city: { type: string }, notes: { type: string } } } } } }, responses: { "201": { description: Criado }, "422": { description: NIF inválido ou repetido } } }
+  /api/v1/clients/options:
+    get: { tags: [Clientes], summary: "Para escolher numa obra: id, nome, tipo dos ativos (+ include=ID mesmo arquivado) (clients.view, projects.create ou projects.update)", parameters: [{ name: include, in: query, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/clients/{client}:
+    get: { tags: [Clientes], summary: "Ficha (clients.view)", parameters: [{ name: client, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    put: { tags: [Clientes], summary: "Editar; archived true/false arquiva ou reativa (clients.manage)", parameters: [{ name: client, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Clientes], summary: "Apagar sem obras (clients.manage)", parameters: [{ name: client, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: CLIENT_IN_USE } } }
+  /api/v1/work-calendars:
+    get: { tags: [Calendários], summary: "Calendários da empresa (cria o por omissão se faltar) (company.view, calendars.manage, projects.create ou projects.update)", responses: { "200": { description: "[{id, name, weekly_hours, weekly_total, is_default, projects_count, national_holiday_years}]" } } }
+    post: { tags: [Calendários], summary: "Criar (calendars.manage)", requestBody: { content: { application/json: { schema: { type: object, required: [name, weekly_hours], properties: { name: { type: string }, weekly_hours: { type: object, description: "chaves 1 (segunda) a 7 (domingo), horas 0–24" }, with_national_holidays: { type: boolean, default: true } } } } } }, responses: { "201": { description: Criado } } }
+  /api/v1/work-calendars/{workCalendar}:
+    put: { tags: [Calendários], summary: "Nome, horas por dia; is_default true torna-o por omissão (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Calendários], summary: "Apagar (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: "CALENDAR_DEFAULT ou CALENDAR_IN_USE" } } }
+  /api/v1/work-calendars/{workCalendar}/holidays:
+    get: { tags: [Calendários], summary: "Dias sem trabalho de um ano", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }, { name: year, in: query, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    post: { tags: [Calendários], summary: "Marcar um dia, ou um período (date…until, máx. 62 dias; só os dias de trabalho) (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [date, name, kind], properties: { date: { type: string, format: date }, until: { type: string, format: date }, name: { type: string }, kind: { type: string, enum: [national, optional, municipal, company] } } } } } }, responses: { "201": { description: Dias criados }, "422": { description: Já marcado ou período sem dias de trabalho } } }
+    delete: { tags: [Calendários], summary: "Retirar dias (corpo: ids[]) (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/work-calendars/{workCalendar}/national-holidays:
+    post: { tags: [Calendários], summary: "Juntar os feriados nacionais em falta de um ano (2016–2099), opcionalmente o Carnaval (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [year], properties: { year: { type: integer }, carnival: { type: boolean } } } } } }, responses: { "200": { description: "{added}" } } }
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
   /api/v1/platform/tenants:

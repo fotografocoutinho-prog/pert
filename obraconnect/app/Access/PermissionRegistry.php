@@ -73,6 +73,19 @@ final class PermissionRegistry
                     'data.export' => 'Exportar todos os dados da empresa',
                 ],
             ],
+            'clients' => [
+                'label' => 'Clientes',
+                'permissions' => [
+                    'clients.view' => 'Ver clientes e os seus contactos',
+                    'clients.manage' => 'Criar, editar, arquivar e apagar clientes',
+                ],
+            ],
+            'calendars' => [
+                'label' => 'Calendários de trabalho',
+                'permissions' => [
+                    'calendars.manage' => 'Gerir calendários de trabalho, feriados e paragens',
+                ],
+            ],
             'projects' => [
                 'label' => 'Obras',
                 'permissions' => [

@@ -3,6 +3,7 @@
 namespace App\Tenancy;
 
 use App\Models\AuditLog;
+use App\Models\Client;
 use App\Models\DiaryEntry;
 use App\Models\Document;
 use App\Models\Invitation;
@@ -12,6 +13,7 @@ use App\Models\Project;
 use App\Models\Role;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
+use App\Models\WorkCalendar;
 use Closure;
 use RuntimeException;
 use ZipArchive;
@@ -71,6 +73,23 @@ class TenantDataExporter
         $this->sections['support_access_grants'] = fn () => SupportAccessGrant::query()->get()
             ->map(fn (SupportAccessGrant $g) => $g->only(['reason', 'access_level', 'expires_at', 'revoked_at', 'last_used_at', 'created_at']));
 
+        $this->sections['clients'] = fn () => Client::query()->orderBy('id')->get()
+            ->map(fn (Client $c) => $c->only([
+                'id', 'name', 'nif', 'country_code', 'email', 'phone', 'contact_name', 'address', 'postal_code', 'city', 'notes', 'created_at',
+            ]) + [
+                'type' => $c->type->value,
+                'archived_at' => $c->archived_at?->toIso8601String(),
+            ]);
+
+        $this->sections['work_calendars'] = fn () => WorkCalendar::query()->with(['holidays' => fn ($q) => $q->orderBy('date')])->orderBy('id')->get()
+            ->map(fn (WorkCalendar $c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'weekly_hours' => $c->weekly_hours,
+                'is_default' => $c->is_default,
+                'days_off' => $c->holidays->map(fn ($h) => ['date' => $h->date->toDateString(), 'name' => $h->name, 'kind' => $h->kind->value]),
+            ]);
+
         $this->sections['projects'] = fn () => Project::query()->with(['members.membership.user:id,name,email', 'members.role:id,name'])->get()
             ->map(fn (Project $p) => $p->only([
                 'code', 'name', 'owner_name', 'address', 'postal_code', 'city', 'contract_value_cents', 'description', 'created_at',
@@ -79,6 +98,8 @@ class TenantDataExporter
                 'status' => $p->status->value,
                 'starts_on' => $p->starts_on?->toDateString(),
                 'planned_end_on' => $p->planned_end_on?->toDateString(),
+                'client_id' => $p->client_id,
+                'work_calendar_id' => $p->work_calendar_id,
                 'team' => $p->members->map(fn ($m) => [
                     'name' => $m->membership->user->name,
                     'email' => $m->membership->user->email,

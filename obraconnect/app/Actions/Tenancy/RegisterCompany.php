@@ -4,6 +4,7 @@ namespace App\Actions\Tenancy;
 
 use App\Access\PermissionSynchronizer;
 use App\Audit\Auditor;
+use App\Calendar\WorkCalendars;
 use App\Enums\SubscriptionStatus;
 use App\Models\Membership;
 use App\Models\Plan;
@@ -16,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
- * Cria uma empresa nova com perfis, o utilizador como administrador e o período experimental.
+ * Cria uma empresa nova com perfis, o utilizador como administrador, o período experimental
+ * e o calendário de trabalho por omissão.
  */
 class RegisterCompany
 {
@@ -24,6 +26,7 @@ class RegisterCompany
         private readonly PermissionSynchronizer $permissions,
         private readonly TenantContext $tenants,
         private readonly Auditor $auditor,
+        private readonly WorkCalendars $calendars,
     ) {}
 
     /**
@@ -52,6 +55,7 @@ class RegisterCompany
                 ]);
 
                 $this->startTrial($tenant, $plan);
+                $this->calendars->createDefault();
 
                 $this->auditor->record('tenant.registered', $tenant, ['name' => $tenant->name], actor: $owner, actorType: 'user');
             });

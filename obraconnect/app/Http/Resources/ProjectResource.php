@@ -18,6 +18,10 @@ class ProjectResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'name' => $this->name,
+            'client_id' => $this->client_id,
+            'client' => $this->whenLoaded('client', fn () => $this->client
+                ? ['id' => $this->client->id, 'name' => $this->client->name, 'type' => $this->client->type->value]
+                : null),
             'owner_name' => $this->owner_name,
             'type' => $this->type?->value,
             'type_label' => $this->type?->label(),
@@ -27,6 +31,10 @@ class ProjectResource extends JsonResource
             'contract_value_cents' => $this->contract_value_cents,
             'starts_on' => $this->starts_on?->toDateString(),
             'planned_end_on' => $this->planned_end_on?->toDateString(),
+            'work_calendar_id' => $this->work_calendar_id,
+            'work_calendar' => $this->whenLoaded('workCalendar', fn () => $this->workCalendar
+                ? ['id' => $this->workCalendar->id, 'name' => $this->workCalendar->name]
+                : null),
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'description' => $this->description,

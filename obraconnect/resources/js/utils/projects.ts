@@ -5,6 +5,7 @@ export interface ProjectFormData extends Record<string, unknown> {
     name: string;
     code: string;
     type: string | null;
+    client_id: number | '';
     owner_name: string;
     address: string;
     postal_code: string;
@@ -12,6 +13,7 @@ export interface ProjectFormData extends Record<string, unknown> {
     contract_value: string;
     starts_on: string;
     planned_end_on: string;
+    work_calendar_id: number | '';
     description: string;
 }
 
@@ -20,6 +22,7 @@ export function projectToForm(project?: Project | null): ProjectFormData {
         name: project?.name ?? '',
         code: project?.code ?? '',
         type: project?.type ?? null,
+        client_id: project?.client_id ?? '',
         owner_name: project?.owner_name ?? '',
         address: project?.address ?? '',
         postal_code: project?.postal_code ?? '',
@@ -27,6 +30,7 @@ export function projectToForm(project?: Project | null): ProjectFormData {
         contract_value: centsToEuros(project?.contract_value_cents),
         starts_on: project?.starts_on ?? '',
         planned_end_on: project?.planned_end_on ?? '',
+        work_calendar_id: project?.work_calendar_id ?? '',
         description: project?.description ?? '',
     };
 }

@@ -29,6 +29,7 @@ final class RoleTemplates
                 'description' => 'Responsável técnico da empresa.',
                 'permissions' => [
                     'company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view',
+                    'clients.view', 'clients.manage', 'calendars.manage',
                     'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive', 'structure.manage',
                     'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
@@ -38,7 +39,7 @@ final class RoleTemplates
                 'name' => 'Diretor de obra',
                 'description' => 'Gestão das obras atribuídas.',
                 'permissions' => [
-                    'company.view', 'members.view', 'members.invite',
+                    'company.view', 'members.view', 'members.invite', 'clients.view',
                     'projects.view', 'projects.update', 'projects.team', 'structure.manage', 'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
                 ],
@@ -51,12 +52,12 @@ final class RoleTemplates
             'preparador' => [
                 'name' => 'Preparador de obra',
                 'description' => 'Preparação, compras e planeamento.',
-                'permissions' => ['company.view', 'members.view', 'projects.view', 'projects.update', 'structure.manage', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage'],
+                'permissions' => ['company.view', 'members.view', 'clients.view', 'projects.view', 'projects.update', 'structure.manage', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'medidor_orcamentista' => [
                 'name' => 'Medidor-orçamentista',
                 'description' => 'Medições e orçamentos.',
-                'permissions' => ['company.view', 'members.view', 'projects.all', 'projects.view', 'structure.manage', 'documents.view', 'documents.upload'],
+                'permissions' => ['company.view', 'members.view', 'clients.view', 'projects.all', 'projects.view', 'structure.manage', 'documents.view', 'documents.upload'],
             ],
             'fiscal' => [
                 'name' => 'Fiscal',
@@ -76,7 +77,7 @@ final class RoleTemplates
             'administrativo' => [
                 'name' => 'Administrativo',
                 'description' => 'Gestão administrativa e documental.',
-                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage'],
+                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'clients.view', 'clients.manage', 'calendars.manage', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'trabalhador' => [
                 'name' => 'Trabalhador',

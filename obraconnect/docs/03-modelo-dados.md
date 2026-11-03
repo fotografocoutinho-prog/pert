@@ -143,6 +143,8 @@ Todas as tabelas abaixo levam `tenant_id`, `created_at`, `updated_at` e, quando 
 
 ### Estrutura da empresa (fase 2)
 
+**Implementado na 0.8.0:** `clients` (type, name, nif único por empresa, country_code, contactos, morada, notes, archived_at), `work_calendars` (name, `weekly_hours` JSON com chaves ISO "1"…"7", `is_default` — um por empresa, garantido pela aplicação) e `holidays` (work_calendar_id, date, name, kind nacional/facultativo/municipal/empresa; `UNIQUE(work_calendar_id, date)`). `projects` ganhou `client_id` e `work_calendar_id` com FKs compostas sem "set null" (a aplicação recusa apagar clientes e calendários com obras). Departamentos, centros de custo e especialidades continuam por fazer.
+
 | Tabela | Campos principais | Relações |
 | --- | --- | --- |
 | `departments` | name | — |

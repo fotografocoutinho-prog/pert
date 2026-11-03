@@ -27,6 +27,8 @@ watch(() => route.fullPath, () => (menuOpen.value = false));
 const tenantNav = computed<NavItem[]>(() => [
     { to: '/app', label: 'Painel', show: true },
     { to: '/app/obras', label: 'Obras', show: session.can('projects.view') },
+    { to: '/app/clientes', label: 'Clientes', show: session.can('clients.view') },
+    { to: '/app/calendarios', label: 'Calendários de trabalho', show: session.can('company.view') },
     { to: '/app/empresa', label: 'Empresa', show: session.can('company.view') },
     { to: '/app/utilizadores', label: 'Utilizadores', show: session.can('members.view') },
     { to: '/app/perfis', label: 'Perfis e permissões', show: session.can('roles.view') },
