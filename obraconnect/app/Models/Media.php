@@ -47,6 +47,11 @@ class Media extends Model
         return $this->belongsTo(DiaryEntry::class);
     }
 
+    public function inspectionItem(): BelongsTo
+    {
+        return $this->belongsTo(InspectionItem::class);
+    }
+
     public function location(): BelongsTo
     {
         return $this->belongsTo(ProjectLocation::class, 'location_id');

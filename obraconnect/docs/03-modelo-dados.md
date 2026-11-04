@@ -192,6 +192,8 @@ O original de cada fotografia é guardado sem alterações (hash SHA-256 regista
 
 ### Fiscalização e qualidade (fase 3)
 
+**Implementado na 0.11.0:** `checklist_templates` (name único por empresa, specialty_id, version, archived_at) e `checklist_template_items` (text, guidance, requires_photo, min_photos, requires_measure, measure_unit, measure_min, measure_max — as `evidence_requirements` ficaram nestas colunas); `inspections` (number único por obra, title, checklist_template_id + template_version, reinspection_of_id, location_id/element_id, specialty_id, status com os 9 estados de `App\Enums\InspectionStatus`, remote, scheduled_for, quem pediu/fez/decidiu e quando, decision_note, evidence_score — o `evidence_scores` ficou nesta coluna, gravada na submissão); `inspection_items` (cópia dos pontos + result ok/nok/na, measure_value, notes); `inspection_events` (substitui `inspection_decisions`: uma linha por passo, sequence, action, from/to_status, user_id e user_name copiado, reason, payload em JSON canónico, prev_hash, hash; sem FK para users e sem updated_at — o modelo recusa alterar e apagar); `media.inspection_item_id` (FK composta) para as fotografias de evidência. Todas as ligações com FK composta e sem "set null".
+
 | Tabela | Campos principais |
 | --- | --- |
 | `checklist_templates` | name, specialty_id, version, is_active |

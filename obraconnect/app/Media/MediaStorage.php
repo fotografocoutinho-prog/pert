@@ -6,6 +6,7 @@ use App\Billing\PlanLimits;
 use App\Billing\StorageUsage;
 use App\Jobs\GeneratePhotoPreviews;
 use App\Models\DiaryEntry;
+use App\Models\InspectionItem;
 use App\Models\Media;
 use App\Models\Project;
 use App\Models\User;
@@ -29,6 +30,18 @@ class MediaStorage
     /** $mime vem do conteúdo (getimagesize), não do que o cliente declara. */
     public function storeDiaryPhoto(Project $project, DiaryEntry $entry, UploadedFile $file, string $mime, ?string $caption, User $by, ?string $clientUuid = null): Media
     {
+        return $this->store($project, ['diary_entry_id' => $entry->id], (int) $entry->photos()->max('sort_order') + 1, $file, $mime, $caption, $by, $clientUuid);
+    }
+
+    /** Fotografia de evidência de um ponto de uma inspeção. */
+    public function storeInspectionPhoto(Project $project, InspectionItem $item, UploadedFile $file, string $mime, ?string $caption, User $by): Media
+    {
+        return $this->store($project, ['inspection_item_id' => $item->id], (int) $item->photos()->max('sort_order') + 1, $file, $mime, $caption, $by);
+    }
+
+    /** @param  array<string, int>  $owner  coluna do dono => id */
+    private function store(Project $project, array $owner, int $sortOrder, UploadedFile $file, string $mime, ?string $caption, User $by, ?string $clientUuid = null): Media
+    {
         $tenant = $this->tenants->tenantOrFail();
         $this->limits->assertCanAdd($tenant, 'storage_mb', (int) ceil($file->getSize() / 1048576));
 
@@ -41,10 +54,9 @@ class MediaStorage
         $directory = "tenants/{$tenant->id}/projects/{$project->id}/media/".Str::uuid();
         $path = Storage::disk($disk)->putFileAs($directory, $file, "original.{$extension}");
 
-        $media = new Media(['caption' => $caption, 'sort_order' => (int) $entry->photos()->max('sort_order') + 1]);
-        $media->forceFill([
+        $media = new Media(['caption' => $caption, 'sort_order' => $sortOrder]);
+        $media->forceFill($owner + [
             'project_id' => $project->id,
-            'diary_entry_id' => $entry->id,
             'disk' => $disk,
             'original_path' => $path,
             'original_name' => Str::limit($file->getClientOriginalName(), 250, ''),

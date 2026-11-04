@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\ChecklistTemplateController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\CostCenterController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DocumentFolderController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\InspectionController;
+use App\Http\Controllers\Api\V1\InspectionItemController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\MeController;
@@ -106,6 +109,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::put('specialties/{specialty}', [SpecialtyController::class, 'update'])->name('specialties.update');
             Route::delete('specialties/{specialty}', [SpecialtyController::class, 'destroy'])->name('specialties.destroy');
 
+            Route::get('checklist-templates', [ChecklistTemplateController::class, 'index'])->name('checklists.index');
+            Route::post('checklist-templates', [ChecklistTemplateController::class, 'store'])->name('checklists.store');
+            Route::get('checklist-templates/{checklistTemplate}', [ChecklistTemplateController::class, 'show'])->name('checklists.show');
+            Route::put('checklist-templates/{checklistTemplate}', [ChecklistTemplateController::class, 'update'])->name('checklists.update');
+            Route::delete('checklist-templates/{checklistTemplate}', [ChecklistTemplateController::class, 'destroy'])->name('checklists.destroy');
+
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
             Route::get('clients/options', [ClientController::class, 'options'])->name('clients.options');
             Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
@@ -167,6 +176,20 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                     ->middleware('throttle:uploads')->name('documents.versions.store');
                 Route::get('documents/{document}/versions/{version}/download', [DocumentController::class, 'download'])
                     ->name('documents.versions.download');
+
+                Route::get('inspections', [InspectionController::class, 'index'])->name('inspections.index');
+                Route::post('inspections', [InspectionController::class, 'store'])->name('inspections.store');
+                Route::get('inspections/{inspection}', [InspectionController::class, 'show'])->name('inspections.show');
+                Route::put('inspections/{inspection}', [InspectionController::class, 'update'])->name('inspections.update');
+                Route::delete('inspections/{inspection}', [InspectionController::class, 'destroy'])->name('inspections.destroy');
+                Route::post('inspections/{inspection}/actions/{action}', [InspectionController::class, 'transition'])
+                    ->where('action', '[a-z_]+')->name('inspections.transition');
+                Route::post('inspections/{inspection}/reinspection', [InspectionController::class, 'reinspect'])->name('inspections.reinspect');
+                Route::patch('inspections/{inspection}/items/{item}', [InspectionItemController::class, 'update'])->name('inspections.items.update');
+                Route::post('inspections/{inspection}/items/{item}/photos', [InspectionItemController::class, 'storePhoto'])
+                    ->middleware('throttle:uploads')->name('inspections.photos.store');
+                Route::delete('inspections/{inspection}/items/{item}/photos/{photo}', [InspectionItemController::class, 'destroyPhoto'])
+                    ->name('inspections.photos.destroy');
 
                 Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
                 Route::post('locations', [StructureController::class, 'storeLocation'])->name('locations.store');

@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Especialidade (Arquitetura, Estruturas, AVAC...). Classifica elementos construtivos e documentos;
- * mais tarde, inspeções e subempreiteiros. Com ligações não se apaga: arquiva-se.
+ * Especialidade (Arquitetura, Estruturas, AVAC...). Classifica elementos construtivos, documentos,
+ * listas de verificação e inspeções; mais tarde, subempreiteiros. Com ligações não se apaga: arquiva-se.
  */
 #[Fillable(['code', 'name', 'sort_order'])]
 class Specialty extends Model
@@ -54,6 +54,16 @@ class Specialty extends Model
         return $this->hasMany(Document::class);
     }
 
+    public function checklistTemplates(): HasMany
+    {
+        return $this->hasMany(ChecklistTemplate::class);
+    }
+
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
@@ -61,7 +71,8 @@ class Specialty extends Model
 
     public function isReferenced(): bool
     {
-        return $this->elements()->exists() || $this->documents()->exists();
+        return $this->elements()->exists() || $this->documents()->exists()
+            || $this->checklistTemplates()->exists() || $this->inspections()->exists();
     }
 
     /**

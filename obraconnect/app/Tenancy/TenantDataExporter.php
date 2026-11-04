@@ -3,11 +3,13 @@
 namespace App\Tenancy;
 
 use App\Models\AuditLog;
+use App\Models\ChecklistTemplate;
 use App\Models\Client;
 use App\Models\CostCenter;
 use App\Models\Department;
 use App\Models\DiaryEntry;
 use App\Models\Document;
+use App\Models\Inspection;
 use App\Models\Invitation;
 use App\Models\Media;
 use App\Models\Membership;
@@ -149,11 +151,13 @@ class TenantDataExporter
             ]);
 
         // Só a lista (com o SHA-256 de cada original): os ficheiros podem somar gigabytes e não entram no ZIP.
-        $this->sections['photos'] = fn () => Media::query()->with(['project:id,code', 'diaryEntry:id,entry_date', 'uploadedBy:id,name'])
+        $this->sections['photos'] = fn () => Media::query()->with(['project:id,code', 'diaryEntry:id,entry_date', 'inspectionItem:id,inspection_id', 'uploadedBy:id,name'])
             ->orderBy('id')->lazy(500)
             ->map(fn (Media $m) => [
                 'project' => $m->project->code,
                 'diary_date' => $m->diaryEntry?->entry_date->toDateString(),
+                'inspection_id' => $m->inspectionItem?->inspection_id,
+                'inspection_item_id' => $m->inspection_item_id,
                 'original_name' => $m->original_name,
                 'mime' => $m->mime,
                 'size_bytes' => $m->size_bytes,
@@ -202,6 +206,46 @@ class TenantDataExporter
                     'notes' => $e->notes,
                     'specialty_id' => $e->specialty_id,
                 ]),
+            ]);
+
+        $this->sections['checklist_templates'] = fn () => ChecklistTemplate::query()->with('items')->orderBy('id')->get()
+            ->map(fn (ChecklistTemplate $t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'description' => $t->description,
+                'specialty_id' => $t->specialty_id,
+                'version' => $t->version,
+                'archived_at' => $t->archived_at?->toIso8601String(),
+                'items' => $t->items->map(fn ($i) => $i->only(['text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max'])),
+            ]);
+
+        // Com o histórico encadeado completo (hash de cada linha), para se poder verificar fora daqui.
+        $this->sections['inspections'] = fn () => Inspection::query()->with(['project:id,code', 'items', 'events'])
+            ->orderBy('project_id')->orderBy('number')->lazy(200)
+            ->map(fn (Inspection $i) => [
+                'id' => $i->id,
+                'project' => $i->project->code,
+                'number' => $i->number,
+                'title' => $i->title,
+                'description' => $i->description,
+                'status' => $i->status->value,
+                'checklist_template_id' => $i->checklist_template_id,
+                'template_version' => $i->template_version,
+                'reinspection_of_id' => $i->reinspection_of_id,
+                'location_id' => $i->location_id,
+                'element_id' => $i->element_id,
+                'specialty_id' => $i->specialty_id,
+                'remote' => $i->remote,
+                'scheduled_for' => $i->scheduled_for?->toIso8601String(),
+                'evidence_score' => $i->evidence_score,
+                'decision_note' => $i->decision_note,
+                'items' => $i->items->map(fn ($item) => ['id' => $item->id] + $item->only([
+                    'text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max',
+                    'measure_value', 'notes',
+                ]) + ['result' => $item->result?->value, 'answered_at' => $item->answered_at?->toIso8601String()]),
+                'events' => $i->events->map(fn ($e) => $e->only([
+                    'sequence', 'action', 'from_status', 'to_status', 'user_id', 'user_name', 'reason', 'payload', 'prev_hash', 'hash',
+                ]) + ['created_at' => $e->created_at->format('Y-m-d H:i:s')]),
             ]);
 
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)

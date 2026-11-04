@@ -89,6 +89,11 @@ class Project extends Model
         return $this->hasMany(ConstructionElement::class);
     }
 
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');

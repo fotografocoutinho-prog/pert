@@ -40,6 +40,11 @@ class ConstructionElement extends Model
         return $this->hasMany(DiaryItem::class, 'element_id');
     }
 
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class, 'element_id');
+    }
+
     public function media(): HasMany
     {
         return $this->hasMany(Media::class, 'element_id');
@@ -53,6 +58,6 @@ class ConstructionElement extends Model
     /** Tem linhas do diário, fotografias ou documentos ligados (não se pode apagar). */
     public function isReferenced(): bool
     {
-        return $this->diaryItems()->exists() || $this->media()->exists() || $this->documents()->exists();
+        return $this->diaryItems()->exists() || $this->media()->exists() || $this->documents()->exists() || $this->inspections()->exists();
     }
 }

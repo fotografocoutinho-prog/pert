@@ -8,7 +8,7 @@ O primeiro produto que pode ser cobrado a uma empresa de construção correspond
 | --- | --- | --- |
 | 1 | Registo de empresas, utilizadores, perfis, permissões, subscrições manuais, auditoria, backoffice, suporte autorizado, exportação RGPD | **Implementada (v0.1.0)** |
 | 2 | Obras e estrutura, diário de obra, documentos e fotografias, tarefas, modo obra (telemóvel), offline básico | Por fazer |
-| 3 | Inspeções e checklists, evidências, pontos de paragem, ocorrências/NC, aprovações, notificações por email | Por fazer |
+| 3 | Inspeções e checklists, evidências, pontos de paragem, ocorrências/NC, aprovações, notificações por email | Em curso (0.11.0: inspeções, listas, evidências) |
 
 Fases 4 a 6 (orçamentação, custos, tempos, IA, pagamentos, integrações) entram como upgrades dos planos Professional e Business.
 

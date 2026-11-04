@@ -3,6 +3,8 @@ import { cachedRead } from '@/offline/cache';
 import { ensureCsrfCookie, getData, http } from './http';
 import type {
     AuditEntry,
+    ChecklistItemDef,
+    ChecklistTemplate,
     Client,
     ClientOption,
     Company,
@@ -12,6 +14,10 @@ import type {
     DiaryEntry,
     DocumentListing,
     Holiday,
+    Inspection,
+    InspectionDetail,
+    InspectionItem,
+    EvidenceIndex,
     Invitation,
     MediaItem,
     Member,
@@ -316,6 +322,57 @@ function upload<T>(url: string, form: FormData, onProgress?: (percent: number) =
         })
         .then((r) => r.data.data);
 }
+
+export const checklistsApi = {
+    list: () => getData<ChecklistTemplate[]>('/api/v1/checklist-templates'),
+    get: (id: number) => getData<ChecklistTemplate>(`/api/v1/checklist-templates/${id}`),
+    create: async (payload: { name: string; description?: string | null; specialty_id?: number | null; items: ChecklistItemDef[] }) =>
+        (await http.post<{ data: ChecklistTemplate }>('/api/v1/checklist-templates', payload)).data.data,
+    update: async (
+        id: number,
+        payload: { name?: string; description?: string | null; specialty_id?: number | null; items?: ChecklistItemDef[]; archived?: boolean },
+    ) => (await http.put<{ data: ChecklistTemplate }>(`/api/v1/checklist-templates/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/checklist-templates/${id}`),
+};
+
+export const inspectionsApi = {
+    list: async (projectId: number, params: { group?: string; search?: string; page?: number }) =>
+        (await http.get<Paginated<Inspection>>(`/api/v1/projects/${projectId}/inspections`, { params })).data,
+    get: (projectId: number, id: number) => getData<InspectionDetail>(`/api/v1/projects/${projectId}/inspections/${id}`),
+    create: async (projectId: number, payload: Record<string, unknown>) =>
+        (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections`, payload)).data.data,
+    update: async (projectId: number, id: number, payload: Record<string, unknown>) =>
+        (await http.put<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}`, payload)).data.data,
+    remove: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/inspections/${id}`),
+    act: async (projectId: number, id: number, action: string, payload: { reason?: string | null; scheduled_for?: string } = {}) =>
+        (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}/actions/${action}`, payload)).data.data,
+    reinspect: async (projectId: number, id: number) =>
+        (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}/reinspection`)).data.data,
+    updateItem: async (
+        projectId: number,
+        id: number,
+        itemId: number,
+        payload: { result?: string | null; measure_value?: number | null; notes?: string | null },
+    ) =>
+        (
+            await http.patch<{ data: { item: Partial<InspectionItem>; evidence: EvidenceIndex } }>(
+                `/api/v1/projects/${projectId}/inspections/${id}/items/${itemId}`,
+                payload,
+            )
+        ).data.data,
+    uploadPhoto: (projectId: number, id: number, itemId: number, file: File, onProgress?: (percent: number) => void) => {
+        const form = new FormData();
+        form.append('photo', file);
+        return http
+            .post<{ data: { photo: MediaItem; evidence: EvidenceIndex } }>(`/api/v1/projects/${projectId}/inspections/${id}/items/${itemId}/photos`, form, {
+                timeout: 300_000,
+                onUploadProgress: (e) => onProgress?.(e.total ? Math.round((e.loaded * 100) / e.total) : 0),
+            })
+            .then((r) => r.data.data);
+    },
+    removePhoto: async (projectId: number, id: number, itemId: number, photoId: number) =>
+        (await http.delete<{ data: { evidence: EvidenceIndex } }>(`/api/v1/projects/${projectId}/inspections/${id}/items/${itemId}/photos/${photoId}`)).data.data,
+};
 
 export const documentsApi = {
     list: (projectId: number, params: { folder_id?: number; search?: string; specialty_id?: number; tree?: 1 }) =>

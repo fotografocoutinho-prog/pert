@@ -102,7 +102,7 @@ class StructureController extends Controller
             throw ApiException::conflict('Só se apaga vazio: retire primeiro o que tem dentro (pisos, zonas ou elementos).', 'LOCATION_NOT_EMPTY');
         }
         if ($location->isReferenced()) {
-            throw ApiException::conflict('Há registos do diário, fotografias ou documentos ligados a este local. Mude-os primeiro.', 'LOCATION_IN_USE');
+            throw ApiException::conflict('Há registos do diário, fotografias, documentos ou inspeções ligados a este local. Mude-os primeiro.', 'LOCATION_IN_USE');
         }
 
         $location->delete();
@@ -135,7 +135,7 @@ class StructureController extends Controller
 
         // O local das ligações segue o elemento (o "onde" de um elemento é sempre o dele).
         if ($element->wasChanged('location_id')) {
-            foreach ([$element->diaryItems(), $element->media(), $element->documents()] as $linked) {
+            foreach ([$element->diaryItems(), $element->media(), $element->documents(), $element->inspections()] as $linked) {
                 $linked->update(['location_id' => $element->location_id]);
             }
         }
@@ -153,7 +153,7 @@ class StructureController extends Controller
         $this->authorizeWrite($project);
 
         if ($element->isReferenced()) {
-            throw ApiException::conflict('Há registos do diário, fotografias ou documentos ligados a este elemento. Mude-os primeiro.', 'ELEMENT_IN_USE');
+            throw ApiException::conflict('Há registos do diário, fotografias, documentos ou inspeções ligados a este elemento. Mude-os primeiro.', 'ELEMENT_IN_USE');
         }
 
         $element->delete();
@@ -218,7 +218,7 @@ class StructureController extends Controller
                     'element_id' => $i->element_id,
                 ]) : null,
             'photos' => $canDiary ? MediaResource::collection(
-                $project->media()->tap($match)->with(['uploadedBy:id,name', 'diaryEntry:id,entry_date'])->latest('id')->limit(200)->get()
+                $project->media()->tap($match)->whereNotNull('diary_entry_id')->with(['uploadedBy:id,name', 'diaryEntry:id,entry_date'])->latest('id')->limit(200)->get()
             )->additional([]) : null,
             'documents' => $canDocuments ? DocumentResource::collection(
                 $project->documents()->tap($match)->with('currentVersion.uploadedBy:id,name')->orderBy('title')->get()

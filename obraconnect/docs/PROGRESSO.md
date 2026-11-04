@@ -1,6 +1,30 @@
 # Registo de progresso
 
-## v0.10.0 — Fase 2, parte 9: especialidades (2026-11-11)
+## v0.11.0 — Fase 3, parte 1: listas de verificação e inspeções (2026-11-04)
+
+| Área | Verificação |
+| --- | --- |
+| Listas de verificação: pontos com fotografia/medição exigidas, nome único sem maiúsculas, versão só sobe quando os pontos mudam, arquivar em vez de apagar quando usada | Testes + browser (criada pela interface) |
+| Inspeção a partir de lista (pontos copiados; mudar a lista depois não a altera) ou com pontos à mão; especialidade herdada da lista; local/elemento da estrutura | Testes + browser |
+| 9 estados e passagens por permissão (pedir / fazer / decidir), justificação obrigatória, aprovar bloqueado com não conformidades, reinspeção, cancelamento, obra arquivada | Testes + browser (pedida → em curso → submetida → aprovada com reservas → reinspeção) |
+| Evidências obrigatórias na submissão e índice explicado (recomendados baixam o índice) | Testes + browser (medição fora dos limites assinalada, índice 80 %) |
+| Histórico encadeado: hash por passo, modelo recusa alterar/apagar, alteração direta na base de dados detetada no passo certo | Testes |
+| Fotografias de evidência: só em curso, quota, servidas só a quem vê inspeções (dono de obra com diário não as abre), fora do histórico do elemento | Testes + browser (miniatura gerada) |
+| Permissões por perfil e equipa, isolamento entre empresas, exportação (listas e inspeções com a cadeia) | Testes |
+| Ecrãs em 360 px sem deslizamento lateral | Browser |
+
+Total: **156 testes, 1176 asserções**.
+
+Decisão: os 9 estados não estavam definidos nos documentos; ficaram rascunho, pedida, agendada, em curso, em apreciação, aprovada, aprovada com reservas, rejeitada e cancelada (passagens em `App\Inspections\InspectionWorkflow`). A cadeia imutável, prevista para "aprovações", começa já nesta parte para todos os passos da inspeção.
+
+### Limitações
+
+- Pontos de paragem, ocorrências/não conformidades com escalonamento, aprovações em vários passos, relatório PDF e emails: partes seguintes da fase 3.
+- Inspeções não funcionam sem rede (só o diário).
+- A funcionalidade `inspections` dos planos ainda não é verificada (como o diário e os documentos).
+- As fotografias de evidência não têm legenda nem local próprio (são do ponto e da inspeção).
+
+## v0.10.0 — Fase 2, parte 9: especialidades (2026-11-04)
 
 | Área | Verificação |
 | --- | --- |
@@ -19,7 +43,7 @@ Com esta parte, a **Fase 2 fica concluída**: obras e equipas, diário com fotog
 - A especialidade ainda não se usa em inspeções nem em subempreiteiros (fases 3 e 4).
 - Fotografias e linhas do diário não têm especialidade (herdam-na do elemento, se estiverem ligadas a um).
 
-## v0.9.0 — Fase 2, parte 8: departamentos e centros de custo (2026-11-10)
+## v0.9.0 — Fase 2, parte 8: departamentos e centros de custo (2026-11-04)
 
 | Área | Verificação |
 | --- | --- |
@@ -36,7 +60,7 @@ Total: **145 testes, 921 asserções**.
 - Um centro por obra é escolhido à mão; não é criado sozinho ao criar a obra.
 - Especialidades ficam para depois.
 
-## v0.8.0 — Fase 2, parte 7: clientes e calendários de trabalho (2026-11-09)
+## v0.8.0 — Fase 2, parte 7: clientes e calendários de trabalho (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |
@@ -57,7 +81,7 @@ Total: **141 testes, 843 asserções**.
 - Calendários por obra servem para contar dias; o planeamento (Gantt/CPM) chega na fase 4.
 - Departamentos, centros de custo e especialidades ficam para depois.
 
-## v0.7.0 — Fase 2, parte 6: modo sem rede (2026-11-08)
+## v0.7.0 — Fase 2, parte 6: modo sem rede (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |
@@ -76,7 +100,7 @@ Total: **129 testes**.
 - Os dados ficam no browser do telemóvel: limpar os dados do site apaga o que estiver por enviar.
 - A cópia de leitura é a última vista: um mês nunca aberto com rede aparece só com o que está no telemóvel.
 
-## v0.6.0 — Fase 2, parte 5: ligar à estrutura (2026-11-07)
+## v0.6.0 — Fase 2, parte 5: ligar à estrutura (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |
@@ -88,7 +112,7 @@ Total: **129 testes**.
 
 Total: **126 testes**.
 
-## v0.5.0 — Fase 2, parte 4: estrutura da obra (2026-11-06)
+## v0.5.0 — Fase 2, parte 4: estrutura da obra (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |
@@ -104,7 +128,7 @@ Total: **122 testes, 606 asserções**.
 - Atividades (WBS, quantidades, dependências) — chegam com o planeamento.
 - Ligar o diário, fotografias e documentos a localizações/elementos; especialidades.
 
-## v0.4.0 — Fase 2, parte 3: documentos da obra (2026-11-05)
+## v0.4.0 — Fase 2, parte 3: documentos da obra (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |
@@ -121,7 +145,7 @@ Total: **117 testes, 555 asserções**.
 - Antivírus (ClamAV não existe no alojamento partilhado).
 - Especialidades e etiquetas nos documentos; partilha com externos fora da equipa; pré-visualização de DWG/IFC.
 
-## v0.3.0 — Fase 2, parte 2: fotografias no diário (2026-11-04)
+## v0.3.0 — Fase 2, parte 2: fotografias no diário (2026-11-03)
 
 | Área | Verificação |
 | --- | --- |

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Inspections\InspectionWorkflow;
 use App\Models\Media;
 use App\Models\Project;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,8 +18,12 @@ class MediaController extends Controller
 {
     public function show(Project $project, Media $media, string $variant): StreamedResponse
     {
-        // Hoje só o diário tem fotografias; outros donos (inspeções, ocorrências) juntam aqui a sua regra.
-        $this->authorize('diary.view', $project);
+        // Cada dono tem a sua regra: evidências de inspeção para quem vê inspeções, o resto pelo diário.
+        if ($media->inspection_item_id !== null) {
+            abort_unless(Gate::any(InspectionWorkflow::VIEW_PERMISSIONS, $project), 403);
+        } else {
+            $this->authorize('diary.view', $project);
+        }
 
         $path = match ($variant) {
             'thumb' => $media->thumb_path,

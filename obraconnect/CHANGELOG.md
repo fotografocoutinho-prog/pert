@@ -1,6 +1,20 @@
 # Histórico de versões
 
-## 0.10.0 — 2026-11-11
+## 0.11.0 — 2026-11-04
+
+Fase 3, primeira parte: listas de verificação e inspeções.
+
+- **Listas de verificação** da empresa (ex.: Betonagem de lajes): pontos a verificar, cada um com as evidências que exige — fotografia (com número mínimo) e/ou medição (unidade e limites opcionais) — e indicações para quem inspeciona. Mudar os pontos sobe a versão; usadas em inspeções não se apagam, arquivam-se. Permissão `checklists.manage`.
+- **Inspeções** na obra (separador **Inspeções**), criadas a partir de uma lista (os pontos são copiados: mudar a lista depois não altera a inspeção) ou com pontos escritos à mão; local ou elemento da estrutura, especialidade, data pretendida, inspeção remota.
+- **9 estados**: rascunho, pedida, agendada, em curso, em apreciação, aprovada, aprovada com reservas, rejeitada e cancelada. Quem pede (`inspections.request`), quem faz (`inspections.perform`) e quem decide (`inspections.approve`) são permissões separadas; com pontos não conformes não se aprova sem reservas; reservas, rejeição, devolução e cancelamento exigem justificação. Depois de rejeitada (ou aprovada com reservas) pede-se uma **reinspeção** com os mesmos pontos.
+- **Evidências obrigatórias**: não se submete sem resultado em todos os pontos, as fotografias e medições exigidas e a descrição de cada não conformidade.
+- **Índice de suficiência das evidências** (0–100), explicado critério a critério: os obrigatórios e os recomendados (não conformidades com fotografia, medições conformes dentro dos limites, fotografia em cada ponto numa inspeção remota). Fica registado na submissão; nunca aprova nada sozinho.
+- **Histórico encadeado**: cada passo (criada, pedida, agendada, iniciada, submetida, devolvida, decidida, cancelada, reinspeção) fica com o SHA-256 do passo anterior; o ecrã mostra se a cadeia está íntegra e aponta o primeiro passo alterado fora da aplicação. A submissão guarda os resultados e o SHA-256 de cada fotografia.
+- Fotografias de evidência com o original intacto e versões reduzidas, como as do diário; só as vê quem vê as inspeções da obra.
+- Locais, elementos e especialidades com inspeções não se apagam. Listas e inspeções (com o histórico completo) entram na exportação de dados e na auditoria.
+- Corrigidas as datas das versões 0.3.0 a 0.10.0 neste histórico (estavam adiantadas).
+
+## 0.10.0 — 2026-11-04
 
 Fase 2, nona parte: especialidades. Fecha a Fase 2.
 
@@ -11,7 +25,7 @@ Fase 2, nona parte: especialidades. Fecha a Fase 2.
 - Corrigido: a janela de um documento registava um erro na consola ao abrir o separador Documentos (variável usada antes de declarada); não tinha efeito visível.
 - Especialidades entram na exportação de dados e na auditoria.
 
-## 0.9.0 — 2026-11-10
+## 0.9.0 — 2026-11-04
 
 Fase 2, oitava parte: departamentos e centros de custo.
 
@@ -21,7 +35,7 @@ Fase 2, oitava parte: departamentos e centros de custo.
 - Cada **obra** pode ter um centro de custo (nos dados da obra). Os custos que lá vão cair chegam na fase 4.
 - Departamentos e centros de custo entram na exportação de dados e na auditoria.
 
-## 0.8.0 — 2026-11-09
+## 0.8.0 — 2026-11-03
 
 Fase 2, sétima parte: clientes e calendários de trabalho.
 
@@ -33,7 +47,7 @@ Fase 2, sétima parte: clientes e calendários de trabalho.
 - **Diário**: os feriados aparecem junto ao dia; "Ainda não há registo de hoje" não aparece em dias sem trabalho; numa obra em curso, lista dos dias úteis do mês já passados sem registo (cada um abre o registo desse dia).
 - Clientes e calendários entram na exportação de dados e na auditoria.
 
-## 0.7.0 — 2026-11-08
+## 0.7.0 — 2026-11-03
 
 Fase 2, sexta parte: modo sem rede no diário de obra.
 
@@ -43,7 +57,7 @@ Fase 2, sexta parte: modo sem rede no diário de obra.
 - A aplicação abre sem rede: o service worker guarda todos os ecrãs compilados (lidos de `build/manifest.json`) e atualiza o shell a cada versão; a última sessão, obra, estrutura e diário vistos ficam numa cópia local, apagada ao sair da conta. O service worker continua a não guardar respostas da API.
 - Indicadores "Sem rede", "N por enviar" e "N com problema"; registos só no telemóvel aparecem na lista do diário.
 
-## 0.6.0 — 2026-11-07
+## 0.6.0 — 2026-11-03
 
 Fase 2, quinta parte: ligar o diário, as fotografias e os documentos à estrutura.
 
@@ -53,7 +67,7 @@ Fase 2, quinta parte: ligar o diário, as fotografias e os documentos à estrutu
 - Não se apagam locais nem elementos com ligações (para não perder histórico).
 - Ligações sempre dentro da mesma obra (validação) e da mesma empresa (chaves estrangeiras compostas).
 
-## 0.5.0 — 2026-11-06
+## 0.5.0 — 2026-11-03
 
 Fase 2, quarta parte: estrutura da obra.
 
@@ -63,7 +77,7 @@ Fase 2, quarta parte: estrutura da obra.
 - Permissão nova `structure.manage` (diretor técnico, diretor de obra, preparador, medidor-orçamentista); quem vê a obra vê a estrutura.
 - Só se apaga uma localização vazia; elementos podem mudar de localização. Estrutura na exportação de dados.
 
-## 0.4.0 — 2026-11-05
+## 0.4.0 — 2026-11-03
 
 Fase 2, terceira parte: documentos da obra.
 
@@ -74,7 +88,7 @@ Fase 2, terceira parte: documentos da obra.
 - Permissões novas `documents.view`, `documents.upload` (inclui versões dos documentos que a própria pessoa enviou) e `documents.manage` (pastas, mover, apagar, versões de qualquer documento), obra a obra.
 - Quota de armazenamento; apagar um documento apaga todas as versões e liberta o espaço. Lista na exportação de dados.
 
-## 0.3.0 — 2026-11-04
+## 0.3.0 — 2026-11-03
 
 Fase 2, segunda parte: fotografias no diário de obra.
 

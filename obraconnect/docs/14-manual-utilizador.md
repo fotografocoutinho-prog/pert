@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.10.0)
+# Manual do utilizador (versão 0.11.0)
 
 ## Entrar
 
@@ -102,6 +102,32 @@ No separador **Documentos** da obra:
 - Toque num documento para ver as **versões**. **Enviar nova versão** guarda a anterior sem alterações; escreva o que mudou. **Abrir** mostra PDF e imagens no browser; **Descarregar** guarda o ficheiro.
 - Quem enviou um documento pode mudar o título e juntar versões; mover, apagar e versões de documentos de outras pessoas ficam para quem gere os documentos.
 - Cada abertura ou descarga fica registada (o número aparece em cada versão).
+
+## Listas de verificação
+
+Em **Listas de verificação** (para quem as gere) criam-se os modelos usados nas inspeções, por exemplo "Betonagem de lajes".
+
+- Cada **ponto** diz o que se verifica e, se for preciso, as evidências: **Exige fotografia** (com o número mínimo) e **Exige medição** (unidade e, se quiser, mínimo e máximo — um valor fora deles fica assinalado). As **indicações** ajudam quem inspeciona.
+- Cada inspeção guarda uma **cópia** dos pontos. Se mudar os pontos de uma lista, ela passa à versão seguinte e as inspeções já criadas não mudam.
+- Uma lista usada em inspeções não se apaga: **Arquive-a** e deixa de aparecer ao criar inspeções.
+
+## Inspeções
+
+No separador **Inspeções** da obra:
+
+1. **Nova inspeção**: escolha uma lista de verificação (ou escreva os pontos), o local ou elemento, a especialidade e a data pretendida. Marque **Inspeção remota** se for feita por fotografias. Fica em **Rascunho**: ainda pode mudar tudo.
+2. **Pedir inspeção**: os pontos ficam fixos e a inspeção passa a **Pedida**.
+3. Quem faz inspeções pode **Agendar** (data e hora) e **Começar a inspeção**.
+4. **Em curso**, em cada ponto: **Conforme**, **Não conforme** ou **Não aplicável**, o valor medido, observações e fotografias (**Tirar fotografia** abre a câmara do telemóvel). Uma não conformidade tem de ser descrita.
+5. O quadro **Evidências** mostra o índice (0–100 %) e o que falta, ponto a ponto. **Submeter para apreciação** só fica disponível quando não falta nada obrigatório; depois disso os pontos e as fotografias ficam fechados.
+6. Quem decide: **Aprovar** (só sem não conformidades), **Aprovar com reservas**, **Rejeitar** ou **Devolver para completar** (volta a "em curso"). Reservas, rejeição e devolução pedem uma justificação.
+7. Depois de rejeitada ou aprovada com reservas, **Pedir reinspeção** cria um rascunho novo com os mesmos pontos, ligado ao anterior.
+
+Uma inspeção pedida, agendada ou em curso pode ser **cancelada** (com motivo); um rascunho apaga-se.
+
+O **Histórico** mostra cada passo, quem o deu e quando. Cada passo fica selado com o código (hash) do anterior: a mensagem **Cadeia íntegra** confirma que nada foi alterado depois.
+
+Por omissão: pedem inspeções o diretor técnico, o diretor de obra, o encarregado, o preparador, o técnico de qualidade e o subempreiteiro (nas obras da equipa); fazem-nas o fiscal, o coordenador de segurança e o técnico de qualidade; decidem o fiscal e o coordenador de segurança. O administrador pode tudo.
 
 ## No telemóvel
 

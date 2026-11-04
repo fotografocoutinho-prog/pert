@@ -15,7 +15,7 @@ final class PermissionRegistry
     public const ALL_PROJECTS = 'projects.all';
 
     /** Módulos cujas permissões valem obra a obra. */
-    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure'];
+    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure', 'inspections'];
 
     /** Exceções nesses módulos: valem para a empresa. */
     private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
@@ -125,6 +125,20 @@ final class PermissionRegistry
                     'documents.view' => 'Consultar e descarregar documentos',
                     'documents.upload' => 'Enviar documentos (e novas versões dos que enviou)',
                     'documents.manage' => 'Gerir pastas, mover e apagar documentos, novas versões de qualquer documento',
+                ],
+            ],
+            'checklists' => [
+                'label' => 'Listas de verificação',
+                'permissions' => [
+                    'checklists.manage' => 'Gerir os modelos de listas de verificação da empresa',
+                ],
+            ],
+            'inspections' => [
+                'label' => 'Inspeções',
+                'permissions' => [
+                    'inspections.request' => 'Preparar e pedir inspeções, pedir reinspeções e cancelar as que ainda não foram decididas',
+                    'inspections.perform' => 'Agendar e fazer inspeções: verificar os pontos e juntar evidências',
+                    'inspections.approve' => 'Decidir inspeções: aprovar, aprovar com reservas, rejeitar ou devolver para completar',
                 ],
             ],
         ];

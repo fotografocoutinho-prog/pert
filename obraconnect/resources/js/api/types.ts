@@ -554,3 +554,125 @@ export interface StructureLinks {
     photos: MediaItem[] | null;
     documents: ProjectDocument[] | null;
 }
+
+/** Ponto de uma lista de verificação (modelo ou inspeção) e as evidências que exige. */
+export interface ChecklistItemDef {
+    id?: number;
+    text: string;
+    guidance: string | null;
+    requires_photo: boolean;
+    min_photos: number;
+    requires_measure: boolean;
+    measure_unit: string | null;
+    measure_min: number | null;
+    measure_max: number | null;
+}
+
+export interface ChecklistTemplate {
+    id: number;
+    name: string;
+    description: string | null;
+    specialty_id: number | null;
+    specialty: SpecialtyRef | null;
+    version: number;
+    archived: boolean;
+    items_count: number;
+    inspections_count: number;
+    updated_at: string | null;
+    items?: (ChecklistItemDef & { id: number })[];
+}
+
+export type InspectionStatus =
+    | 'draft'
+    | 'requested'
+    | 'scheduled'
+    | 'in_progress'
+    | 'submitted'
+    | 'approved'
+    | 'approved_with_reservations'
+    | 'rejected'
+    | 'cancelled';
+
+export type InspectionResultValue = 'ok' | 'nok' | 'na';
+
+export interface InspectionItem extends ChecklistItemDef {
+    id: number;
+    number: number;
+    result: InspectionResultValue | null;
+    result_label: string | null;
+    measure_value: number | null;
+    out_of_tolerance: boolean;
+    notes: string | null;
+    answered_by: string | null;
+    answered_at: string | null;
+    photos: MediaItem[];
+}
+
+/** Índice de suficiência das evidências, explicado critério a critério. */
+export interface EvidenceIndex {
+    score: number | null;
+    can_submit: boolean;
+    criteria: { key: string; label: string; required: boolean; met: number; total: number; missing: number[] }[];
+}
+
+export interface InspectionEvent {
+    sequence: number;
+    action: string;
+    label: string;
+    from_status: InspectionStatus | null;
+    to_status: InspectionStatus;
+    user_name: string;
+    reason: string | null;
+    scheduled_for: string | null;
+    evidence_score: number | null;
+    hash: string;
+    created_at: string;
+}
+
+export interface Inspection {
+    id: number;
+    project_id: number;
+    number: number;
+    title: string;
+    status: InspectionStatus;
+    status_label: string;
+    remote: boolean;
+    location_id: number | null;
+    element_id: number | null;
+    specialty_id: number | null;
+    specialty?: SpecialtyRef | null;
+    template?: { id: number; name: string; version: number | null } | null;
+    scheduled_for: string | null;
+    requested_at: string | null;
+    started_at: string | null;
+    submitted_at: string | null;
+    decided_at: string | null;
+    decision_note: string | null;
+    evidence_score: number | null;
+    requested_by?: string | null;
+    inspector?: string | null;
+    decided_by?: string | null;
+    reinspection_of?: { id: number; number: number } | null;
+    items_count?: number;
+    answered_count?: number;
+    nok_count?: number;
+    created_at: string | null;
+}
+
+/** Ficha completa (GET de uma inspeção). */
+export interface InspectionDetail extends Inspection {
+    description: string | null;
+    created_by: string | null;
+    items: InspectionItem[];
+    reinspections: { id: number; number: number; status_label: string }[];
+    evidence: EvidenceIndex;
+    events: InspectionEvent[];
+    chain: { valid: boolean; broken_at: number | null; last_hash: string | null };
+    can: {
+        edit: boolean;
+        fill: boolean;
+        reinspect: boolean;
+        has_nok: boolean;
+        actions: { key: string; label: string; reason: boolean }[];
+    };
+}
