@@ -28,6 +28,7 @@ import type {
     ProjectMember,
     ProjectStructure,
     Role,
+    Specialty,
     StructureLinks,
     Subscription,
     SupportGrant,
@@ -223,6 +224,15 @@ export const departmentsApi = {
         (await http.put<{ data: Department }>(`/api/v1/departments/${id}/members`, { membership_ids: membershipIds })).data.data,
 };
 
+export const specialtiesApi = {
+    list: () => getData<Specialty[]>('/api/v1/specialties'),
+    create: async (payload: { code: string; name: string }) => (await http.post<{ data: Specialty }>('/api/v1/specialties', payload)).data.data,
+    update: async (id: number, payload: { code?: string; name?: string; archived?: boolean }) =>
+        (await http.put<{ data: Specialty }>(`/api/v1/specialties/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/specialties/${id}`),
+    addDefaults: async () => (await http.post<{ data: { added: number } }>('/api/v1/specialties/defaults')).data.data.added,
+};
+
 export const costCentersApi = {
     list: () => getData<CostCenter[]>('/api/v1/cost-centers'),
     create: async (payload: { code?: string | null; name: string; parent_id?: number | null }) =>
@@ -308,13 +318,14 @@ function upload<T>(url: string, form: FormData, onProgress?: (percent: number) =
 }
 
 export const documentsApi = {
-    list: (projectId: number, params: { folder_id?: number; search?: string; tree?: 1 }) =>
+    list: (projectId: number, params: { folder_id?: number; search?: string; specialty_id?: number; tree?: 1 }) =>
         getData<DocumentListing>(`/api/v1/projects/${projectId}/documents`, params),
     get: (projectId: number, id: number) => getData<ProjectDocument>(`/api/v1/projects/${projectId}/documents/${id}`),
-    upload: (projectId: number, file: File, folderId: number | null, onProgress?: (percent: number) => void) => {
+    upload: (projectId: number, file: File, folderId: number | null, onProgress?: (percent: number) => void, specialtyId?: number | null) => {
         const form = new FormData();
         form.append('file', file);
         if (folderId) form.append('folder_id', String(folderId));
+        if (specialtyId) form.append('specialty_id', String(specialtyId));
         return upload<ProjectDocument>(`/api/v1/projects/${projectId}/documents`, form, onProgress);
     },
     addVersion: (projectId: number, id: number, file: File, note: string | null, onProgress?: (percent: number) => void) => {
@@ -326,7 +337,14 @@ export const documentsApi = {
     update: async (
         projectId: number,
         id: number,
-        payload: { title?: string; description?: string | null; folder_id?: number | null; location_id?: number | null; element_id?: number | null },
+        payload: {
+            title?: string;
+            description?: string | null;
+            folder_id?: number | null;
+            location_id?: number | null;
+            element_id?: number | null;
+            specialty_id?: number | null;
+        },
     ) =>
         (await http.patch<{ data: ProjectDocument }>(`/api/v1/projects/${projectId}/documents/${id}`, payload)).data.data,
     remove: (projectId: number, id: number) => http.delete(`/api/v1/projects/${projectId}/documents/${id}`),

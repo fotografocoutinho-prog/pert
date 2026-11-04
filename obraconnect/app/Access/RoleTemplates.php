@@ -29,7 +29,7 @@ final class RoleTemplates
                 'description' => 'Responsável técnico da empresa.',
                 'permissions' => [
                     'company.view', 'members.view', 'members.invite', 'roles.view', 'audit.view', 'subscription.view',
-                    'clients.view', 'clients.manage', 'calendars.manage', 'cost_centers.manage',
+                    'clients.view', 'clients.manage', 'calendars.manage', 'cost_centers.manage', 'specialties.manage',
                     'projects.all', 'projects.view', 'projects.create', 'projects.update', 'projects.team', 'projects.archive', 'structure.manage',
                     'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
@@ -77,7 +77,7 @@ final class RoleTemplates
             'administrativo' => [
                 'name' => 'Administrativo',
                 'description' => 'Gestão administrativa e documental.',
-                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'clients.view', 'clients.manage', 'calendars.manage', 'departments.manage', 'cost_centers.manage', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage'],
+                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'clients.view', 'clients.manage', 'calendars.manage', 'departments.manage', 'cost_centers.manage', 'specialties.manage', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage'],
             ],
             'trabalhador' => [
                 'name' => 'Trabalhador',

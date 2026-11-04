@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { documentsApi } from '@/api';
+import { documentsApi, specialtiesApi } from '@/api';
 import { ApiError } from '@/api/http';
-import type { DocumentListing, Project } from '@/api/types';
+import type { DocumentListing, Project, Specialty } from '@/api/types';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
 import { appUrl } from '@/utils/base';
@@ -30,6 +30,12 @@ const listing = ref<DocumentListing | null>(null);
 const loading = ref(true);
 const search = ref('');
 const folderId = computed(() => (route.query.pasta ? Number(route.query.pasta) : null));
+const specialties = ref<Specialty[]>([]);
+/** Filtro por especialidade (em todas as pastas). Os documentos enviados com o filtro ficam com ela. */
+const specialtyId = ref<number | ''>('');
+const everywhere = computed(() => search.value.trim() !== '' || specialtyId.value !== '');
+const specialtyCode = (id: number | null | undefined) => specialties.value.find((s) => s.id === id)?.code ?? null;
+specialtiesApi.list().then((list) => (specialties.value = list), () => undefined);
 
 const writable = computed(() => props.project.status !== 'archived' && !session.isReadOnly);
 const canUpload = computed(() => writable.value && props.project.permissions.includes('documents.upload'));
@@ -41,6 +47,7 @@ async function load(): Promise<void> {
         listing.value = await documentsApi.list(props.project.id, {
             folder_id: folderId.value ?? undefined,
             search: search.value.trim() || undefined,
+            specialty_id: specialtyId.value || undefined,
             tree: 1,
         });
     } catch (e) {
@@ -51,6 +58,8 @@ async function load(): Promise<void> {
 }
 watch(folderId, load, { immediate: true });
 
+watch(specialtyId, load);
+
 let timer: number | undefined;
 watch(search, () => {
     window.clearTimeout(timer);
@@ -59,6 +68,7 @@ watch(search, () => {
 
 function open(folder: number | null): void {
     search.value = '';
+    specialtyId.value = '';
     router.replace({ query: { ...route.query, pasta: folder ?? undefined } });
 }
 
@@ -81,10 +91,16 @@ async function onFiles(event: Event): Promise<void> {
 
     for (const [key, file] of files) {
         try {
-            await documentsApi.upload(props.project.id, file, folderId.value, (p) => {
-                const live = queue.value.find((q) => q.key === key);
-                if (live) live.progress = Math.max(p, 1);
-            });
+            await documentsApi.upload(
+                props.project.id,
+                file,
+                folderId.value,
+                (p) => {
+                    const live = queue.value.find((q) => q.key === key);
+                    if (live) live.progress = Math.max(p, 1);
+                },
+                specialtyId.value || null,
+            );
             queue.value = queue.value.filter((q) => q.key !== key);
         } catch (e) {
             const live = queue.value.find((q) => q.key === key);
@@ -129,8 +145,17 @@ const detailId = ref<number | null>(null);
     <AppCard>
         <div class="mb-4 flex flex-wrap items-center gap-2">
             <AppInput v-model="search" placeholder="Pesquisar em todas as pastas" aria-label="Pesquisar documentos" class="w-full max-w-xs" />
+            <select
+                v-if="specialties.length"
+                v-model="specialtyId"
+                aria-label="Filtrar por especialidade"
+                class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm sm:text-sm"
+            >
+                <option value="">Todas as especialidades</option>
+                <option v-for="s in specialties.filter((x) => !x.archived || x.id === specialtyId)" :key="s.id" :value="s.id">{{ s.code }} · {{ s.name }}</option>
+            </select>
             <div class="ml-auto flex flex-wrap gap-2">
-                <AppButton v-if="canManage && !search" variant="secondary" @click="newFolder">Nova pasta</AppButton>
+                <AppButton v-if="canManage && !everywhere" variant="secondary" @click="newFolder">Nova pasta</AppButton>
                 <label v-if="canUpload" class="inline-flex cursor-pointer items-center rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
                     Enviar documentos
                     <input type="file" multiple class="sr-only" :accept="EXTENSIONS.map((e) => `.${e}`).join(',')" @change="onFiles" />
@@ -138,7 +163,10 @@ const detailId = ref<number | null>(null);
             </div>
         </div>
 
-        <nav v-if="!search" class="mb-3 flex flex-wrap items-center gap-1 text-sm" aria-label="Pasta atual">
+        <p v-if="specialtyId && canUpload" class="mb-3 text-xs text-slate-500">
+            Os documentos enviados agora ficam com a especialidade {{ specialtyCode(specialtyId) }}{{ folderId ? ' e na pasta aberta' : '' }}.
+        </p>
+        <nav v-if="!everywhere" class="mb-3 flex flex-wrap items-center gap-1 text-sm" aria-label="Pasta atual">
             <button type="button" class="font-medium text-brand-700 hover:underline" @click="open(null)">Documentos</button>
             <template v-for="p in listing?.path ?? []" :key="p.id">
                 <span class="text-slate-400">›</span>
@@ -160,8 +188,8 @@ const detailId = ref<number | null>(null);
         <div v-if="loading && !listing" class="flex justify-center py-10"><AppSpinner class="h-6 w-6 text-brand-700" /></div>
         <EmptyState
             v-else-if="listing && listing.folders.length === 0 && listing.documents.length === 0"
-            :title="search ? 'Nenhum documento encontrado' : 'Pasta vazia'"
-            :description="canUpload && !search ? 'Envie projetos, desenhos, cadernos de encargos ou outros documentos da obra.' : undefined"
+            :title="everywhere ? 'Nenhum documento encontrado' : 'Pasta vazia'"
+            :description="canUpload && !everywhere ? 'Envie projetos, desenhos, cadernos de encargos ou outros documentos da obra.' : undefined"
         />
         <ul v-else-if="listing" class="divide-y divide-slate-100">
             <li v-for="folder in listing.folders" :key="`f${folder.id}`" class="flex items-center justify-between gap-3 py-2.5">
@@ -179,7 +207,12 @@ const detailId = ref<number | null>(null);
                 <button type="button" class="flex min-w-0 flex-1 items-start gap-2 text-left" @click="detailId = doc.id">
                     <span aria-hidden="true" class="text-lg">📄</span>
                     <span class="min-w-0">
-                        <span class="block truncate font-medium text-slate-900">{{ doc.title }}</span>
+                        <span class="block truncate font-medium text-slate-900">
+                            {{ doc.title }}
+                            <span v-if="specialtyCode(doc.specialty_id)" class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">{{
+                                specialtyCode(doc.specialty_id)
+                            }}</span>
+                        </span>
                         <span v-if="doc.current_version" class="block text-xs text-slate-500">
                             v{{ doc.current_version.number }} · {{ formatBytes(doc.current_version.size_bytes) }} · {{ formatDate(doc.current_version.created_at) }}<template v-if="doc.current_version.uploaded_by"> · {{ doc.current_version.uploaded_by }}</template>
                         </span>
@@ -192,6 +225,13 @@ const detailId = ref<number | null>(null);
             </li>
         </ul>
 
-        <DocumentDetailModal :project="project" :document-id="detailId" :tree="listing?.tree ?? []" @close="detailId = null" @changed="load" />
+        <DocumentDetailModal
+            :project="project"
+            :document-id="detailId"
+            :tree="listing?.tree ?? []"
+            :specialties="specialties"
+            @close="detailId = null"
+            @changed="load"
+        />
     </AppCard>
 </template>

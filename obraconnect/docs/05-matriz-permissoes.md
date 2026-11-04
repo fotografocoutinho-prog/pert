@@ -61,8 +61,9 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 
 | `departments.manage` | Departamentos e quem está em cada um | ● | | | | | | | | | ● | | | | |
 | `cost_centers.manage` | Centros de custo | ● | ● | | | | | | | | ● | | | | |
+| `specialties.manage` | Especialidades | ● | ● | | | | | | | | ● | | | | |
 
-Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); departamentos e centros de custo (0.9.0) consultam-se com `company.view` (os centros também com `projects.create`/`projects.update`, para os escolher nas obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
+Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); departamentos e centros de custo (0.9.0) consultam-se com `company.view`; as especialidades (0.10.0) também com `projects.view`, porque subempreiteiros e fornecedores classificam os documentos que enviam (os centros também com `projects.create`/`projects.update`, para os escolher nas obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
 
 Estrutura (0.5.0): ver a estrutura só exige `projects.view`. O medidor-orçamentista gere a estrutura em todas as obras (tem `projects.all`).
 

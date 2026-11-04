@@ -12,6 +12,7 @@ use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\DocumentVersion;
 use App\Models\Project;
+use App\Models\Specialty;
 use App\Structure\Place;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -41,7 +42,10 @@ class DocumentController extends Controller
         $this->authorize('documents.view', $project);
 
         $search = trim((string) $request->query('search'));
-        $folder = $search === '' && $request->filled('folder_id')
+        $specialty = $request->integer('specialty_id') ?: null;
+        // Pesquisa ou filtro por especialidade: em todas as pastas.
+        $everywhere = $search !== '' || $specialty !== null;
+        $folder = ! $everywhere && $request->filled('folder_id')
             ? $project->folders()->findOrFail((int) $request->query('folder_id'))
             : null;
 
@@ -52,12 +56,14 @@ class DocumentController extends Controller
                 $like = '%'.addcslashes($search, '%_\\').'%';
                 $q->where(fn ($w) => $w->where('title', 'like', $like)
                     ->orWhereHas('versions', fn ($v) => $v->where('original_name', 'like', $like)));
-            }, fn ($q) => $q->where('folder_id', $folder?->id))
+            })
+            ->when($specialty !== null, fn ($q) => $q->where('specialty_id', $specialty))
+            ->when(! $everywhere, fn ($q) => $q->where('folder_id', $folder?->id))
             ->orderBy('title')
             ->limit(500)
             ->get();
 
-        $folders = $search !== '' ? collect() : $project->folders()
+        $folders = $everywhere ? collect() : $project->folders()
             ->where('parent_id', $folder?->id)
             ->withCount(['children', 'documents'])
             ->orderBy('name')
@@ -91,7 +97,8 @@ class DocumentController extends Controller
             'title' => ['nullable', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:5000'],
             'folder_id' => ['nullable', 'integer', Rule::exists('document_folders', 'id')->where('project_id', $project->id)],
-        ] + Place::rules($project), $this->fileMessages(), ['title' => 'título', 'folder_id' => 'pasta']);
+            'specialty_id' => Specialty::rules(),
+        ] + Place::rules($project), $this->fileMessages(), ['title' => 'título', 'folder_id' => 'pasta', 'specialty_id' => 'especialidade']);
 
         $file = $request->file('file');
         $this->storage->assertQuota($file);
@@ -101,6 +108,7 @@ class DocumentController extends Controller
                 'title' => filled($data['title'] ?? null) ? trim($data['title']) : (pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) ?: 'Documento'),
                 'description' => $data['description'] ?? null,
                 'folder_id' => $data['folder_id'] ?? null,
+                'specialty_id' => $data['specialty_id'] ?? null,
             ] + Place::normalize($project, array_intersect_key($data, array_flip(['location_id', 'element_id'])) + ['location_id' => null, 'element_id' => null]));
             $document->created_by_user_id = $request->user()->id;
             $document->save();
@@ -135,7 +143,8 @@ class DocumentController extends Controller
             'title' => ['sometimes', 'required', 'string', 'max:200'],
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'folder_id' => ['sometimes', 'nullable', 'integer', Rule::exists('document_folders', 'id')->where('project_id', $project->id)],
-        ] + Place::rules($project), [], ['title' => 'título', 'folder_id' => 'pasta']);
+            'specialty_id' => Specialty::rules($document->specialty_id),
+        ] + Place::rules($project), [], ['title' => 'título', 'folder_id' => 'pasta', 'specialty_id' => 'especialidade']);
         if (array_key_exists('element_id', $data) || array_key_exists('location_id', $data)) {
             $data = Place::normalize($project, $data);
         }

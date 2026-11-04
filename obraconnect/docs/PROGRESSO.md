@@ -1,5 +1,24 @@
 # Registo de progresso
 
+## v0.10.0 — Fase 2, parte 9: especialidades (2026-11-11)
+
+| Área | Verificação |
+| --- | --- |
+| Lista habitual no registo e por botão (só as que faltam), código único sem maiúsculas, arquivar em vez de apagar com ligações, arquivada não se escolhe | Testes + browser (empresa anterior: "Usar a lista habitual" juntou 13) |
+| Elemento com especialidade (estrutura devolve a lista; código junto ao elemento) | Testes + browser |
+| Documento com especialidade (envio, janela do documento), filtro em todas as pastas, envio com o filtro ativo | Testes + browser |
+| Permissões (subempreiteiro consulta a lista; só specialties.manage altera), isolamento, exportação | Testes |
+| Erro na consola ao abrir Documentos (janela do documento, desde a 0.4.0) | Corrigido e confirmado no browser |
+
+Total: **149 testes, 979 asserções**.
+
+Com esta parte, a **Fase 2 fica concluída**: obras e equipas, diário com fotografias e modo sem rede, documentos com versões, estrutura ligada, clientes, calendários de trabalho, departamentos, centros de custo e especialidades.
+
+### Limitações
+
+- A especialidade ainda não se usa em inspeções nem em subempreiteiros (fases 3 e 4).
+- Fotografias e linhas do diário não têm especialidade (herdam-na do elemento, se estiverem ligadas a um).
+
 ## v0.9.0 — Fase 2, parte 8: departamentos e centros de custo (2026-11-10)
 
 | Área | Verificação |

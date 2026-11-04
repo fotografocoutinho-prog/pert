@@ -110,6 +110,18 @@ export interface Department {
     members_count: number;
 }
 
+export interface SpecialtyRef {
+    id: number;
+    code: string;
+    name: string;
+    archived: boolean;
+}
+
+export interface Specialty extends SpecialtyRef {
+    elements_count: number;
+    documents_count: number;
+}
+
 export interface CostCenter {
     id: number;
     parent_id: number | null;
@@ -470,6 +482,7 @@ export interface ProjectDocument {
     folder_id: number | null;
     location_id?: number | null;
     element_id?: number | null;
+    specialty_id?: number | null;
     created_by?: string | null;
     created_by_me: boolean;
     created_at: string | null;
@@ -512,12 +525,14 @@ export interface ConstructionElementItem {
     code: string;
     name: string | null;
     notes: string | null;
+    specialty_id: number | null;
 }
 
 export interface ProjectStructure {
     locations: ProjectLocationItem[];
     elements: ConstructionElementItem[];
     element_types: { value: string; label: string; prefix: string }[];
+    specialties: SpecialtyRef[];
 }
 
 export interface StructureLinks {

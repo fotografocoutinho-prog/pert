@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { costCentersApi, departmentsApi, membersApi } from '@/api';
+import { costCentersApi, departmentsApi, membersApi, specialtiesApi } from '@/api';
 import { ApiError } from '@/api/http';
-import type { CostCenter, Department, Member } from '@/api/types';
+import type { CostCenter, Department, Member, Specialty } from '@/api/types';
 import { useForm } from '@/composables/useForm';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
@@ -23,13 +23,15 @@ const toast = useToastStore();
 
 const canDepartments = computed(() => session.can('departments.manage') && !session.isReadOnly);
 const canCostCenters = computed(() => session.can('cost_centers.manage') && !session.isReadOnly);
+const canSpecialties = computed(() => session.can('specialties.manage') && !session.isReadOnly);
 
 const departments = ref<Department[]>([]);
 const centers = ref<CostCenter[]>([]);
+const specialties = ref<Specialty[]>([]);
 const loading = ref(true);
 
 async function load(): Promise<void> {
-    [departments.value, centers.value] = await Promise.all([departmentsApi.list(), costCentersApi.list()]);
+    [departments.value, centers.value, specialties.value] = await Promise.all([departmentsApi.list(), costCentersApi.list(), specialtiesApi.list()]);
     loading.value = false;
 }
 
@@ -192,6 +194,58 @@ async function saveCenter(): Promise<void> {
     }
 }
 
+// ---- Especialidades ----
+const showArchivedSpecialties = ref(false);
+const visibleSpecialties = computed(() => specialties.value.filter((s) => showArchivedSpecialties.value || !s.archived));
+const archivedSpecialties = computed(() => specialties.value.filter((s) => s.archived).length);
+const specialtyOpen = ref(false);
+const editingSpecialty = ref<Specialty | null>(null);
+const specialtyForm = useForm({ code: '', name: '', archived: false });
+
+function openSpecialty(specialty: Specialty | null): void {
+    editingSpecialty.value = specialty;
+    specialtyForm.reset({ code: specialty?.code ?? '', name: specialty?.name ?? '', archived: specialty?.archived ?? false });
+    specialtyOpen.value = true;
+}
+
+async function saveSpecialty(): Promise<void> {
+    const f = specialtyForm.data;
+    const id = editingSpecialty.value?.id;
+    const saved = await specialtyForm.submit(
+        () => (id ? specialtiesApi.update(id, { code: f.code, name: f.name, archived: f.archived }) : specialtiesApi.create({ code: f.code, name: f.name })),
+        { success: id ? 'Especialidade guardada.' : 'Especialidade criada.' },
+    );
+    if (saved) {
+        specialtyOpen.value = false;
+        specialties.value = await specialtiesApi.list();
+    }
+}
+
+async function removeSpecialty(specialty: Specialty): Promise<void> {
+    if (!window.confirm(`Apagar a especialidade ${specialty.code} · ${specialty.name}?`)) return;
+    try {
+        await specialtiesApi.remove(specialty.id);
+        specialties.value = specialties.value.filter((s) => s.id !== specialty.id);
+        toast.success('Especialidade apagada.');
+    } catch (e) {
+        fail(e, 'Não foi possível apagar.');
+    }
+}
+
+const addingDefaults = ref(false);
+async function addDefaults(): Promise<void> {
+    addingDefaults.value = true;
+    try {
+        const added = await specialtiesApi.addDefaults();
+        specialties.value = await specialtiesApi.list();
+        toast.success(added ? `${added} especialidade(s) juntada(s).` : 'A lista habitual já estava toda.');
+    } catch (e) {
+        fail(e, 'Não foi possível juntar a lista.');
+    } finally {
+        addingDefaults.value = false;
+    }
+}
+
 async function removeCenter(center: CostCenter): Promise<void> {
     if (!window.confirm(`Apagar o centro de custo ${center.code} · ${center.name}?`)) return;
     try {
@@ -207,8 +261,8 @@ async function removeCenter(center: CostCenter): Promise<void> {
 <template>
     <div>
         <PageHeader
-            title="Departamentos e centros de custo"
-            description="Como a empresa está organizada: em que departamento está cada pessoa e para que centro de custo vai cada obra."
+            title="Organização da empresa"
+            description="Em que departamento está cada pessoa, para que centro de custo vai cada obra e as especialidades usadas nos elementos e documentos."
         />
 
         <div v-if="loading" class="flex justify-center py-16"><AppSpinner class="h-6 w-6 text-brand-700" /></div>
@@ -278,6 +332,40 @@ async function removeCenter(center: CostCenter): Promise<void> {
                     <AppCheckbox v-model="showArchived" :label="`Mostrar arquivados (${archivedCount})`" />
                 </div>
             </AppCard>
+
+            <AppCard title="Especialidades" description="Classificam os elementos da estrutura e os documentos das obras.">
+                <template #actions>
+                    <AppButton v-if="canSpecialties" size="sm" @click="openSpecialty(null)">Nova especialidade</AppButton>
+                </template>
+                <EmptyState v-if="visibleSpecialties.length === 0" title="Sem especialidades">
+                    <AppButton v-if="canSpecialties" class="mt-3" :loading="addingDefaults" @click="addDefaults">Usar a lista habitual</AppButton>
+                </EmptyState>
+                <ul v-else class="divide-y divide-slate-100">
+                    <li v-for="s in visibleSpecialties" :key="s.id" class="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                        <div class="min-w-0">
+                            <p :class="s.archived ? 'text-slate-400' : 'text-slate-900'">
+                                <span class="font-mono text-sm font-semibold">{{ s.code }}</span>
+                                <span class="ml-2 font-medium">{{ s.name }}</span>
+                            </p>
+                            <p class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                                <AppBadge v-if="s.archived">Arquivada</AppBadge>
+                                <span v-if="s.elements_count">{{ s.elements_count === 1 ? '1 elemento' : `${s.elements_count} elementos` }}</span>
+                                <span v-if="s.documents_count">{{ s.documents_count === 1 ? '1 documento' : `${s.documents_count} documentos` }}</span>
+                            </p>
+                        </div>
+                        <div v-if="canSpecialties" class="flex flex-wrap gap-1">
+                            <AppButton size="sm" variant="ghost" @click="openSpecialty(s)">Editar</AppButton>
+                            <AppButton v-if="!s.elements_count && !s.documents_count" size="sm" variant="ghost" class="text-red-700" @click="removeSpecialty(s)">
+                                Apagar
+                            </AppButton>
+                        </div>
+                    </li>
+                </ul>
+                <div v-if="archivedSpecialties || (canSpecialties && visibleSpecialties.length)" class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                    <AppCheckbox v-if="archivedSpecialties" v-model="showArchivedSpecialties" :label="`Mostrar arquivadas (${archivedSpecialties})`" />
+                    <AppButton v-if="canSpecialties" size="sm" variant="ghost" :loading="addingDefaults" @click="addDefaults">Juntar as da lista habitual que faltam</AppButton>
+                </div>
+            </AppCard>
         </div>
 
         <AppModal :open="departmentOpen" :title="editingDepartment ? 'Editar departamento' : 'Novo departamento'" @close="departmentOpen = false">
@@ -310,6 +398,34 @@ async function removeCenter(center: CostCenter): Promise<void> {
             <template #footer>
                 <AppButton variant="secondary" @click="peopleFor = null">Cancelar</AppButton>
                 <AppButton :loading="savingPeople" :disabled="loadingPeople" @click="savePeople">Guardar</AppButton>
+            </template>
+        </AppModal>
+
+        <AppModal :open="specialtyOpen" :title="editingSpecialty ? 'Editar especialidade' : 'Nova especialidade'" @close="specialtyOpen = false">
+            <form id="specialty-form" class="space-y-4" novalidate @submit.prevent="saveSpecialty">
+                <AppAlert v-if="specialtyForm.message.value" type="error">{{ specialtyForm.message.value }}</AppAlert>
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <AppInput v-model="specialtyForm.data.code" label="Código" required :maxlength="10" placeholder="Ex.: GEO" :error="specialtyForm.errors.value.code" />
+                    <AppInput
+                        v-model="specialtyForm.data.name"
+                        label="Nome"
+                        required
+                        :maxlength="100"
+                        placeholder="Ex.: Geotecnia"
+                        class="sm:col-span-2"
+                        :error="specialtyForm.errors.value.name"
+                    />
+                </div>
+                <AppCheckbox
+                    v-if="editingSpecialty"
+                    v-model="specialtyForm.data.archived"
+                    label="Arquivada"
+                    description="Deixa de aparecer para escolher; os elementos e documentos que já a têm mantêm-na."
+                />
+            </form>
+            <template #footer>
+                <AppButton variant="secondary" @click="specialtyOpen = false">Cancelar</AppButton>
+                <AppButton type="submit" form="specialty-form" :loading="specialtyForm.processing.value">Guardar</AppButton>
             </template>
         </AppModal>
 

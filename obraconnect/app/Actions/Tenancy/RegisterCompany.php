@@ -9,6 +9,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Membership;
 use App\Models\Plan;
 use App\Models\Role;
+use App\Models\Specialty;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
@@ -18,7 +19,7 @@ use RuntimeException;
 
 /**
  * Cria uma empresa nova com perfis, o utilizador como administrador, o período experimental
- * e o calendário de trabalho por omissão.
+ * o calendário de trabalho por omissão e a lista habitual de especialidades.
  */
 class RegisterCompany
 {
@@ -56,6 +57,7 @@ class RegisterCompany
 
                 $this->startTrial($tenant, $plan);
                 $this->calendars->createDefault();
+                Specialty::addDefaults();
 
                 $this->auditor->record('tenant.registered', $tenant, ['name' => $tenant->name], actor: $owner, actorType: 'user');
             });

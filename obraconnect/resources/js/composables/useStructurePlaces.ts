@@ -24,7 +24,7 @@ export function useStructurePlaces(projectId: Ref<number> | number, options: { f
             structure.value = await cache.get(id())!;
         } catch {
             cache.delete(id());
-            structure.value = { locations: [], elements: [], element_types: [] };
+            structure.value = { locations: [], elements: [], element_types: [], specialties: [] };
         }
     }
 

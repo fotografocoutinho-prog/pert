@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** Elemento construtivo (pilar, viga, laje...) numa localização da obra. Código único na obra. */
-#[Fillable(['location_id', 'element_type', 'code', 'name', 'notes'])]
+#[Fillable(['location_id', 'element_type', 'code', 'name', 'notes', 'specialty_id'])]
 class ConstructionElement extends Model
 {
     use BelongsToTenant;
@@ -23,6 +23,11 @@ class ConstructionElement extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function specialty(): BelongsTo
+    {
+        return $this->belongsTo(Specialty::class);
     }
 
     public function location(): BelongsTo

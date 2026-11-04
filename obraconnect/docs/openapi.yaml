@@ -502,6 +502,14 @@ paths:
   /api/v1/cost-centers/{costCenter}:
     put: { tags: [Organização], summary: "Código, nome, pai (sem ciclos), archived (cost_centers.manage)", parameters: [{ name: costCenter, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
     delete: { tags: [Organização], summary: "Apagar sem filhos nem obras (cost_centers.manage)", parameters: [{ name: costCenter, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: COST_CENTER_IN_USE } } }
+  /api/v1/specialties:
+    get: { tags: [Organização], summary: "Especialidades com contagens de elementos e documentos (company.view, projects.view ou specialties.manage)", responses: { "200": { description: "[{id, code, name, archived, elements_count, documents_count}]" } } }
+    post: { tags: [Organização], summary: "Criar (specialties.manage)", requestBody: { content: { application/json: { schema: { type: object, required: [code, name], properties: { code: { type: string, maxLength: 10 }, name: { type: string } } } } } }, responses: { "201": { description: Criada }, "422": { description: Código repetido } } }
+  /api/v1/specialties/defaults:
+    post: { tags: [Organização], summary: "Juntar as da lista habitual que faltam (specialties.manage)", responses: { "200": { description: "{added}" } } }
+  /api/v1/specialties/{specialty}:
+    put: { tags: [Organização], summary: "Código, nome, archived (specialties.manage)", parameters: [{ name: specialty, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Organização], summary: "Apagar sem ligações (specialties.manage)", parameters: [{ name: specialty, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: SPECIALTY_IN_USE } } }
   /api/v1/clients:
     get: { tags: [Clientes], summary: "Lista paginada (clients.view)", parameters: [{ name: search, in: query, schema: { type: string } }, { name: status, in: query, schema: { type: string, enum: [active, archived, all], default: active } }], responses: { "200": { description: OK } } }
     post: { tags: [Clientes], summary: "Criar (clients.manage). NIF português validado e único na empresa", requestBody: { content: { application/json: { schema: { type: object, required: [type, name], properties: { type: { type: string, enum: [private, company, public] }, name: { type: string }, nif: { type: string }, country_code: { type: string, default: PT }, email: { type: string }, phone: { type: string }, contact_name: { type: string }, address: { type: string }, postal_code: { type: string }, city: { type: string }, notes: { type: string } } } } } }, responses: { "201": { description: Criado }, "422": { description: NIF inválido ou repetido } } }

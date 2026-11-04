@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.10.0 — 2026-11-11
+
+Fase 2, nona parte: especialidades. Fecha a Fase 2.
+
+- **Especialidades** (Arquitetura, Estruturas, Águas e esgotos, Instalações elétricas, ITED, AVAC, SCIE…): código curto único na empresa, sem distinguir maiúsculas. As empresas novas começam com a lista habitual de 13; as anteriores juntam-na com **Usar a lista habitual**. Com elementos ou documentos não se apagam: arquivam-se. Permissão `specialties.manage`.
+- **Elementos construtivos** com especialidade (o código aparece junto ao elemento na estrutura; também sem rede).
+- **Documentos** com especialidade: escolhe-se na janela do documento; filtro por especialidade em todas as pastas; com o filtro ativo, os documentos enviados ficam com essa especialidade.
+- O ecrã "Departamentos e centros de custo" passa a **Organização** (departamentos, centros de custo e especialidades).
+- Corrigido: a janela de um documento registava um erro na consola ao abrir o separador Documentos (variável usada antes de declarada); não tinha efeito visível.
+- Especialidades entram na exportação de dados e na auditoria.
+
 ## 0.9.0 — 2026-11-10
 
 Fase 2, oitava parte: departamentos e centros de custo.

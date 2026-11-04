@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.9.0)
+# Manual do utilizador (versão 0.10.0)
 
 ## Entrar
 
@@ -57,6 +57,7 @@ No separador **Estrutura** da obra descreve-se a obra em **edifícios**, **pisos
 - **+ Zona** cria uma zona num piso (ou diretamente no edifício, para arranjos exteriores).
 - **+ Elemento** junta um pilar, viga, laje, etc. Se deixar o código vazio, é numerado sozinho por tipo (P1, P2, V1, L1...). Toque num elemento para o corrigir, mudar de localização ou apagar.
 - Só se apaga um edifício, piso ou zona vazio, e só se apaga um local ou elemento que não tenha registos ligados.
+- Cada elemento pode ter uma **especialidade** (ex.: pilares em EST); o código aparece junto ao elemento.
 - **Histórico** (em cada local) ou um toque num elemento mostra tudo o que lhe está ligado: linhas do diário (com o dia), fotografias e documentos. Num piso, inclui as zonas e os elementos desse piso.
 
 **Ligar à estrutura.** Nas linhas do diário (campo **Onde?**), em cada fotografia e na janela de cada documento (**Refere-se a**) pode escolher o edifício, piso, zona ou elemento. Ao escolher um elemento (por exemplo, P1), o piso fica preenchido sozinho.
@@ -70,15 +71,16 @@ Em **Clientes** ficam os clientes da empresa: particulares, empresas e entidades
 - Um cliente com obras não se apaga: **Arquivar** tira-o das escolhas, mas as obras que já o têm continuam a mostrá-lo. **Reativar** volta a pô-lo na lista.
 - Por omissão, gerem clientes o administrador, o diretor técnico e o administrativo; o diretor de obra, o preparador e o medidor-orçamentista consultam.
 
-## Departamentos e centros de custo
+## Organização (departamentos, centros de custo e especialidades)
 
-Em **Departamentos e centros de custo** organiza-se a empresa.
+Em **Organização** organiza-se a empresa.
 
 - **Novo departamento** (ex.: Produção, Orçamentação, Compras). Em **Escolher pessoas** marque quem lá está: cada pessoa fica num só departamento, por isso quem escolher sai do departamento onde estava. **Ver pessoas** abre a lista de utilizadores já filtrada. Apagar um departamento não apaga ninguém: as pessoas ficam sem departamento.
 - **Novo centro de custo** cria um centro na raiz; **+ Dentro** cria um dentro de outro. Se deixar o código vazio, é numerado sozinho (1, 2… na raiz; 1.01, 1.02… dentro do 1). Uma organização comum: **1 Obras**, com um centro por obra lá dentro, e **2 Estrutura** (Administração, Armazém, Viaturas).
 - Nos **dados da obra** escolhe-se o centro de custo da obra.
 - Um centro com obras, ou com centros dentro, não se apaga: em **Editar**, marque **Arquivado**. Deixa de aparecer para escolher; as obras que já o têm mantêm-no.
-- Por omissão, gerem departamentos o administrador e o administrativo; centros de custo, o administrador, o diretor técnico e o administrativo. Quem vê a empresa consulta ambos.
+- **Especialidades** (Arquitetura, Estruturas, AVAC…): as empresas novas começam com a lista habitual; numa empresa anterior, use **Usar a lista habitual**. Pode criar outras (código curto, ex.: GEO, e nome), mudar nomes e arquivar as que não usa. Uma especialidade com elementos ou documentos não se apaga: arquiva-se.
+- Por omissão, gerem departamentos o administrador e o administrativo; centros de custo e especialidades, o administrador, o diretor técnico e o administrativo. Quem vê a empresa consulta tudo.
 
 ## Calendários de trabalho
 
@@ -90,6 +92,8 @@ Em **Calendários de trabalho** definem-se os dias e horas de trabalho e os dias
 - **Marcar dia ou período**: feriado municipal (ex.: São João), feriado facultativo ou paragem da empresa. Num período (por exemplo, férias coletivas de 3 a 14 de agosto) só ficam marcados os dias de trabalho; aparece numa só linha e retira-se de uma vez.
 
 ## Documentos da obra
+
+**Especialidade.** Na janela de cada documento escolhe-se a especialidade (ex.: ARQ, EST, AVAC). O filtro **Todas as especialidades**, ao lado da pesquisa, mostra os documentos dessa especialidade em todas as pastas; enquanto o filtro estiver ativo, os documentos que enviar ficam com essa especialidade.
 
 No separador **Documentos** da obra:
 

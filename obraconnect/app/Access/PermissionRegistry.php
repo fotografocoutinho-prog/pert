@@ -78,6 +78,7 @@ final class PermissionRegistry
                 'permissions' => [
                     'departments.manage' => 'Gerir departamentos e as pessoas de cada um',
                     'cost_centers.manage' => 'Gerir centros de custo',
+                    'specialties.manage' => 'Gerir especialidades (Arquitetura, Estruturas, AVAC...)',
                 ],
             ],
             'clients' => [

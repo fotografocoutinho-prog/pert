@@ -13,6 +13,7 @@ use App\Models\ConstructionElement;
 use App\Models\DiaryItem;
 use App\Models\Project;
 use App\Models\ProjectLocation;
+use App\Models\Specialty;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -40,6 +41,9 @@ class StructureController extends Controller
                 ->map(fn (ConstructionElement $e) => $this->presentElement($e)),
             'element_types' => collect(ElementType::cases())
                 ->map(fn (ElementType $t) => ['value' => $t->value, 'label' => $t->label(), 'prefix' => $t->prefix()]),
+            // Para mostrar e escolher a especialidade de cada elemento (também sem rede).
+            'specialties' => Specialty::query()->orderBy('sort_order')->orderBy('code')->get()
+                ->map(fn (Specialty $s) => ['id' => $s->id, 'code' => $s->code, 'name' => $s->name, 'archived' => $s->isArchived()]),
         ]]);
     }
 
@@ -243,8 +247,10 @@ class StructureController extends Controller
                 Rule::unique('construction_elements', 'code')->where('project_id', $project->id)->ignore($element?->id)],
             'name' => ['sometimes', 'nullable', 'string', 'max:150'],
             'notes' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'specialty_id' => Specialty::rules($element?->specialty_id),
         ], ['code.unique' => 'Já existe um elemento com este código nesta obra.'], [
             'location_id' => 'localização',
+            'specialty_id' => 'especialidade',
             'element_type' => 'tipo',
             'code' => 'código',
         ]);
@@ -285,6 +291,7 @@ class StructureController extends Controller
             'code' => $e->code,
             'name' => $e->name,
             'notes' => $e->notes,
+            'specialty_id' => $e->specialty_id,
         ];
     }
 }

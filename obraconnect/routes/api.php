@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectMemberController;
 use App\Http\Controllers\Api\V1\PublicPlanController;
 use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\SpecialtyController;
 use App\Http\Controllers\Api\V1\StructureController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
@@ -98,6 +99,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('cost-centers', [CostCenterController::class, 'store'])->name('cost-centers.store');
             Route::put('cost-centers/{costCenter}', [CostCenterController::class, 'update'])->name('cost-centers.update');
             Route::delete('cost-centers/{costCenter}', [CostCenterController::class, 'destroy'])->name('cost-centers.destroy');
+
+            Route::get('specialties', [SpecialtyController::class, 'index'])->name('specialties.index');
+            Route::post('specialties', [SpecialtyController::class, 'store'])->name('specialties.store');
+            Route::post('specialties/defaults', [SpecialtyController::class, 'addDefaults'])->name('specialties.defaults');
+            Route::put('specialties/{specialty}', [SpecialtyController::class, 'update'])->name('specialties.update');
+            Route::delete('specialties/{specialty}', [SpecialtyController::class, 'destroy'])->name('specialties.destroy');
 
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
             Route::get('clients/options', [ClientController::class, 'options'])->name('clients.options');

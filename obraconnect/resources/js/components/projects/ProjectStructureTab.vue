@@ -80,6 +80,17 @@ const locationOptions = computed(() => {
     };
     return rows.value.map(({ loc }) => ({ value: loc.id, label: label(loc) }));
 });
+/** Arquivadas só aparecem se forem a atual do elemento. */
+const specialtyOptions = computed(() => [
+    { value: "", label: "—" },
+    ...(structure.value?.specialties ?? [])
+        .filter((s) => !s.archived || s.id === editing.value?.specialty_id)
+        .map((s) => ({ value: s.id, label: `${s.code} · ${s.name}` })),
+]);
+const specialtyCode = (id: number | null) =>
+    structure.value?.specialties?.find((s) => s.id === id)?.code ?? null;
+const specialtyName = (id: number | null) =>
+    structure.value?.specialties?.find((s) => s.id === id)?.name ?? null;
 const typeOptions = computed(() =>
     (structure.value?.element_types ?? []).map((t) => ({
         value: t.value,
@@ -221,6 +232,7 @@ const form = useForm({
     code: "",
     name: "",
     notes: "",
+    specialty_id: "" as number | "",
 });
 
 function openElement(
@@ -236,6 +248,7 @@ function openElement(
                   code: element.code,
                   name: element.name ?? "",
                   notes: element.notes ?? "",
+                  specialty_id: element.specialty_id ?? "",
               }
             : { location_id: location?.id ?? null },
     );
@@ -251,6 +264,7 @@ async function saveElement(): Promise<void> {
             (editing.value ? editing.value.code : null),
         name: form.data.name.trim() || null,
         notes: form.data.notes.trim() || null,
+        specialty_id: form.data.specialty_id || null,
     };
     const saved = await form.submit(
         () =>
@@ -383,7 +397,12 @@ async function removeElement(): Promise<void> {
                             type="button"
                             class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-700 hover:border-brand-300 disabled:cursor-default"
                             :title="
-                                [el.element_type_label, el.name, el.notes]
+                                [
+                                    el.element_type_label,
+                                    el.name,
+                                    specialtyName(el.specialty_id),
+                                    el.notes,
+                                ]
                                     .filter(Boolean)
                                     .join(' · ')
                             "
@@ -391,6 +410,11 @@ async function removeElement(): Promise<void> {
                         >
                             <strong>{{ el.code }}</strong>
                             {{ el.name ?? el.element_type_label }}
+                            <span
+                                v-if="specialtyCode(el.specialty_id)"
+                                class="ml-0.5 text-[10px] font-semibold text-slate-500"
+                                >{{ specialtyCode(el.specialty_id) }}</span
+                            >
                         </button>
                     </li>
                 </ul>
@@ -432,6 +456,13 @@ async function removeElement(): Promise<void> {
                     :options="locationOptions"
                     required
                     :error="form.errors.value.location_id"
+                />
+                <AppSelect
+                    v-if="structure?.specialties?.length"
+                    v-model="form.data.specialty_id"
+                    label="Especialidade"
+                    :options="specialtyOptions"
+                    :error="form.errors.value.specialty_id"
                 />
                 <AppInput
                     v-model="form.data.code"

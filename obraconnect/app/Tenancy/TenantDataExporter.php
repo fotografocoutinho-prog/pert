@@ -13,6 +13,7 @@ use App\Models\Media;
 use App\Models\Membership;
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\Specialty;
 use App\Models\SupportAccessGrant;
 use App\Models\Tenant;
 use App\Models\WorkCalendar;
@@ -82,6 +83,11 @@ class TenantDataExporter
         $this->sections['cost_centers'] = fn () => CostCenter::query()->orderBy('code')->get()
             ->map(fn (CostCenter $c) => $c->only(['id', 'parent_id', 'code', 'name', 'created_at']) + [
                 'archived_at' => $c->archived_at?->toIso8601String(),
+            ]);
+
+        $this->sections['specialties'] = fn () => Specialty::query()->orderBy('sort_order')->get()
+            ->map(fn (Specialty $s) => $s->only(['id', 'code', 'name', 'created_at']) + [
+                'archived_at' => $s->archived_at?->toIso8601String(),
             ]);
 
         $this->sections['clients'] = fn () => Client::query()->orderBy('id')->get()
@@ -171,6 +177,7 @@ class TenantDataExporter
                 'description' => $d->description,
                 'location_id' => $d->location_id,
                 'element_id' => $d->element_id,
+                'specialty_id' => $d->specialty_id,
                 'versions' => $d->versions->map(fn ($v) => [
                     'number' => $v->number,
                     'original_name' => $v->original_name,
@@ -193,6 +200,7 @@ class TenantDataExporter
                     'code' => $e->code,
                     'name' => $e->name,
                     'notes' => $e->notes,
+                    'specialty_id' => $e->specialty_id,
                 ]),
             ]);
 

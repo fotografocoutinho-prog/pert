@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Documento da obra. O conteúdo está nas versões (imutáveis); a atual é a de número mais alto.
  * Criar versões e apagar passa por App\Documents\DocumentStorage (quota da empresa).
  */
-#[Fillable(['title', 'description', 'folder_id', 'location_id', 'element_id'])]
+#[Fillable(['title', 'description', 'folder_id', 'location_id', 'element_id', 'specialty_id'])]
 class Document extends Model
 {
     use BelongsToTenant;
