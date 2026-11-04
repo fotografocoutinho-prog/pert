@@ -1,5 +1,22 @@
 # Registo de progresso
 
+## v0.9.0 — Fase 2, parte 8: departamentos e centros de custo (2026-11-10)
+
+| Área | Verificação |
+| --- | --- |
+| Departamentos: nome único, pessoas (uma por departamento; mudar tira do anterior), apagar deixa as pessoas sem departamento, pessoas de outra empresa recusadas | Testes + browser |
+| Utilizadores: departamento e filtro (incluindo "sem departamento", e vindo de "Ver pessoas") | Testes + browser |
+| Centros de custo: códigos automáticos (1, 1.01…), código manual único sem distinguir maiúsculas, sem ciclos, arquivar em vez de apagar com obras ou filhos, arquivado não se escolhe | Testes + browser |
+| Obra com centro de custo; permissões e isolamento; exportação e auditoria | Testes + browser |
+
+Total: **145 testes, 921 asserções**.
+
+### Limitações
+
+- Os centros de custo ainda não recebem custos (fase 4: orçamentos, compras, custos realizados).
+- Um centro por obra é escolhido à mão; não é criado sozinho ao criar a obra.
+- Especialidades ficam para depois.
+
 ## v0.8.0 — Fase 2, parte 7: clientes e calendários de trabalho (2026-11-09)
 
 | Área | Verificação |

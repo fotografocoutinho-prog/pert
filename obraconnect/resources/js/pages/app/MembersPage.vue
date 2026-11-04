@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { invitationsApi, membersApi, rolesApi } from '@/api';
+import { useRoute } from 'vue-router';
+import { departmentsApi, invitationsApi, membersApi, rolesApi } from '@/api';
 import { ApiError } from '@/api/http';
-import type { Invitation, Member, Role } from '@/api/types';
+import type { Department, Invitation, Member, Role } from '@/api/types';
 import { useForm } from '@/composables/useForm';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
@@ -27,6 +28,10 @@ const invitations = ref<Invitation[]>([]);
 const roles = ref<Role[]>([]);
 const search = ref('');
 const page = ref(1);
+const route = useRoute();
+const departments = ref<Department[]>([]);
+/** '' = todos, 'none' = sem departamento, ou o id (vem de ?departamento= na página da organização). */
+const department = ref(typeof route.query.departamento === 'string' ? route.query.departamento : '');
 
 const canInvite = computed(() => session.can('members.invite') && !session.isReadOnly);
 const canManage = computed(() => session.can('members.manage') && !session.isReadOnly);
@@ -38,7 +43,11 @@ const assignableRoles = computed(() => {
 const roleOptions = computed(() => assignableRoles.value.map((r) => ({ value: r.id, label: r.name })));
 
 async function load(): Promise<void> {
-    const result = await membersApi.list({ search: search.value || undefined, page: page.value });
+    const result = await membersApi.list({
+        search: search.value || undefined,
+        page: page.value,
+        department_id: department.value === '' ? undefined : department.value === 'none' ? 'none' : Number(department.value),
+    });
     members.value = result.data;
     meta.value = result.meta;
 }
@@ -49,7 +58,17 @@ async function loadInvitations(): Promise<void> {
 
 onMounted(async () => {
     const needsRoles = session.can('roles.view') || canInvite.value || canManage.value;
-    await Promise.all([load(), loadInvitations(), needsRoles ? rolesApi.list().then((r) => (roles.value = r)) : null]);
+    await Promise.all([
+        load(),
+        loadInvitations(),
+        needsRoles ? rolesApi.list().then((r) => (roles.value = r)) : null,
+        departmentsApi.list().then((d) => (departments.value = d), () => undefined),
+    ]);
+});
+
+watch(department, () => {
+    page.value = 1;
+    load();
 });
 
 let timer: number | undefined;
@@ -124,7 +143,19 @@ async function run(action: () => Promise<unknown>, success: string): Promise<voi
         </PageHeader>
 
         <AppCard>
-            <AppInput v-model="search" placeholder="Pesquisar por nome ou email" class="mb-4 max-w-sm" />
+            <div class="mb-4 flex flex-wrap items-center gap-3">
+                <AppInput v-model="search" placeholder="Pesquisar por nome ou email" class="w-full max-w-sm" />
+                <select
+                    v-if="departments.length"
+                    v-model="department"
+                    aria-label="Filtrar por departamento"
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm sm:text-sm"
+                >
+                    <option value="">Todos os departamentos</option>
+                    <option value="none">Sem departamento</option>
+                    <option v-for="d in departments" :key="d.id" :value="String(d.id)">{{ d.name }}</option>
+                </select>
+            </div>
 
             <EmptyState v-if="members.length === 0" title="Sem resultados" />
             <div v-else class="-mx-5 overflow-x-auto">
@@ -157,6 +188,7 @@ async function run(action: () => Promise<unknown>, success: string): Promise<voi
                                     <option v-if="!assignableRoles.some((r) => r.id === member.role.id)" :value="member.role.id" disabled>{{ member.role.name }}</option>
                                 </select>
                                 <span v-else>{{ member.role.name }}</span>
+                                <p v-if="member.department" class="mt-1 text-xs text-slate-500">{{ member.department.name }}</p>
                             </td>
                             <td class="px-5 py-3">
                                 <AppBadge :color="member.status === 'active' ? 'green' : 'red'">{{ member.status_label }}</AppBadge>

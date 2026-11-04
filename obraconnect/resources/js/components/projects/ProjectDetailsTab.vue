@@ -134,6 +134,9 @@ async function changeStatus(to: ProjectStatus, label: string): Promise<void> {
                 </div>
                 <div v-if="project.owner_name"><dt class="text-slate-500">Dono de obra</dt><dd class="font-medium">{{ project.owner_name }}</dd></div>
                 <div><dt class="text-slate-500">Tipo</dt><dd class="font-medium">{{ project.type_label ?? '—' }}</dd></div>
+                <div v-if="project.cost_center">
+                    <dt class="text-slate-500">Centro de custo</dt><dd class="font-medium">{{ project.cost_center.code }} · {{ project.cost_center.name }}</dd>
+                </div>
                 <div class="sm:col-span-2">
                     <dt class="text-slate-500">Morada</dt>
                     <dd class="font-medium">{{ [project.address, project.postal_code, project.city].filter(Boolean).join(', ') || '—' }}</dd>

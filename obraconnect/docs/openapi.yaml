@@ -50,6 +50,7 @@ tags:
   - name: Diário de obra
   - name: Documentos
   - name: Estrutura
+  - name: Organização
   - name: Clientes
   - name: Calendários
   - name: Plataforma
@@ -487,6 +488,20 @@ paths:
     get: { tags: [Estrutura], summary: "Histórico do local e de tudo o que está dentro dele", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: location, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "{diary_items, photos, documents}" } } }
   /api/v1/projects/{project}/calendar:
     get: { tags: [Calendários], summary: "Mês do calendário da obra (dias úteis, feriados, paragens) e prazo em dias úteis (projects.view)", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: month, in: query, schema: { type: string, example: "2026-11" } }], responses: { "200": { description: "{calendar, month, today, days[], working_days, missing_holiday_years, term}" } } }
+  /api/v1/departments:
+    get: { tags: [Organização], summary: "Departamentos com as pessoas (membership_ids) (company.view, members.view ou departments.manage)", responses: { "200": { description: "[{id, name, description, membership_ids, members_count}]" } } }
+    post: { tags: [Organização], summary: "Criar (departments.manage)", requestBody: { content: { application/json: { schema: { type: object, required: [name], properties: { name: { type: string }, description: { type: string } } } } } }, responses: { "201": { description: Criado }, "422": { description: Nome repetido } } }
+  /api/v1/departments/{department}:
+    put: { tags: [Organização], summary: "Nome e descrição (departments.manage)", parameters: [{ name: department, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Organização], summary: "Apagar; as pessoas ficam sem departamento (departments.manage)", parameters: [{ name: department, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/departments/{department}/members:
+    put: { tags: [Organização], summary: "Quem fica no departamento (saem do anterior) (departments.manage)", parameters: [{ name: department, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [membership_ids], properties: { membership_ids: { type: array, items: { type: integer } } } } } } }, responses: { "200": { description: OK } } }
+  /api/v1/cost-centers:
+    get: { tags: [Organização], summary: "Lista plana por código (company.view, cost_centers.manage, projects.create ou projects.update)", responses: { "200": { description: "[{id, parent_id, code, name, archived, projects_count, children_count}]" } } }
+    post: { tags: [Organização], summary: "Criar; code vazio = automático (cost_centers.manage)", requestBody: { content: { application/json: { schema: { type: object, required: [name], properties: { code: { type: string }, name: { type: string }, parent_id: { type: integer } } } } } }, responses: { "201": { description: Criado }, "422": { description: Código repetido ou pai arquivado } } }
+  /api/v1/cost-centers/{costCenter}:
+    put: { tags: [Organização], summary: "Código, nome, pai (sem ciclos), archived (cost_centers.manage)", parameters: [{ name: costCenter, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+    delete: { tags: [Organização], summary: "Apagar sem filhos nem obras (cost_centers.manage)", parameters: [{ name: costCenter, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK }, "409": { description: COST_CENTER_IN_USE } } }
   /api/v1/clients:
     get: { tags: [Clientes], summary: "Lista paginada (clients.view)", parameters: [{ name: search, in: query, schema: { type: string } }, { name: status, in: query, schema: { type: string, enum: [active, archived, all], default: active } }], responses: { "200": { description: OK } } }
     post: { tags: [Clientes], summary: "Criar (clients.manage). NIF português validado e único na empresa", requestBody: { content: { application/json: { schema: { type: object, required: [type, name], properties: { type: { type: string, enum: [private, company, public] }, name: { type: string }, nif: { type: string }, country_code: { type: string, default: PT }, email: { type: string }, phone: { type: string }, contact_name: { type: string }, address: { type: string }, postal_code: { type: string }, city: { type: string }, notes: { type: string } } } } } }, responses: { "201": { description: Criado }, "422": { description: NIF inválido ou repetido } } }

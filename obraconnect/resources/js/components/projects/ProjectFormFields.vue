@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { calendarsApi, clientsApi } from '@/api';
+import { calendarsApi, clientsApi, costCentersApi } from '@/api';
 import { ApiError } from '@/api/http';
-import type { ClientOption, ClientType, WorkCalendar } from '@/api/types';
+import type { ClientOption, ClientType, CostCenter, WorkCalendar } from '@/api/types';
 import { useSessionStore } from '@/stores/session';
 import { CLIENT_TYPE_OPTIONS } from '@/utils/clients';
 import { PROJECT_TYPE_OPTIONS, type ProjectFormData } from '@/utils/projects';
@@ -17,13 +17,23 @@ const data = defineModel<ProjectFormData>({ required: true });
 const session = useSessionStore();
 const clients = ref<ClientOption[]>([]);
 const calendars = ref<WorkCalendar[]>([]);
+const costCenters = ref<CostCenter[]>([]);
 
 onMounted(async () => {
     // Sem rede ou sem permissão, os campos ficam só com o valor atual.
-    const [c, w] = await Promise.allSettled([clientsApi.options(data.value.client_id || null), calendarsApi.list()]);
+    const [c, w, cc] = await Promise.allSettled([clientsApi.options(data.value.client_id || null), calendarsApi.list(), costCentersApi.list()]);
     if (c.status === 'fulfilled') clients.value = c.value;
     if (w.status === 'fulfilled') calendars.value = w.value;
+    if (cc.status === 'fulfilled') costCenters.value = cc.value;
 });
+
+/** Arquivados só aparecem se forem o atual da obra. */
+const costCenterOptions = computed(() => [
+    { value: '', label: 'Nenhum' },
+    ...costCenters.value
+        .filter((c) => !c.archived || c.id === data.value.cost_center_id)
+        .map((c) => ({ value: c.id, label: `${c.code} · ${c.name}${c.archived ? ' (arquivado)' : ''}` })),
+]);
 
 const clientOptions = computed(() => [
     { value: '', label: 'Sem cliente' },
@@ -109,6 +119,14 @@ async function createClient(): Promise<void> {
             :options="calendarOptions"
             class="sm:col-span-3"
             :error="errors.work_calendar_id"
+        />
+        <AppSelect
+            v-if="costCenters.length || data.cost_center_id"
+            v-model="data.cost_center_id"
+            label="Centro de custo"
+            :options="costCenterOptions"
+            class="sm:col-span-3"
+            :error="errors.cost_center_id"
         />
         <AppInput v-model="data.address" label="Morada da obra" :maxlength="255" class="sm:col-span-6" :error="errors.address" />
         <AppInput v-model="data.postal_code" label="Código postal" :maxlength="20" placeholder="0000-000" class="sm:col-span-2" :error="errors.postal_code" />

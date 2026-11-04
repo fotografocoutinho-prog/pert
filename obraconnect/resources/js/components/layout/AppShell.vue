@@ -30,6 +30,7 @@ const tenantNav = computed<NavItem[]>(() => [
     { to: '/app/clientes', label: 'Clientes', show: session.can('clients.view') },
     { to: '/app/calendarios', label: 'Calendários de trabalho', show: session.can('company.view') },
     { to: '/app/empresa', label: 'Empresa', show: session.can('company.view') },
+    { to: '/app/organizacao', label: 'Departamentos e centros de custo', show: session.can('company.view') },
     { to: '/app/utilizadores', label: 'Utilizadores', show: session.can('members.view') },
     { to: '/app/perfis', label: 'Perfis e permissões', show: session.can('roles.view') },
     { to: '/app/auditoria', label: 'Auditoria', show: session.can('audit.view') },

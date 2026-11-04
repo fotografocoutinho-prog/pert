@@ -14,6 +14,7 @@ export interface ProjectFormData extends Record<string, unknown> {
     starts_on: string;
     planned_end_on: string;
     work_calendar_id: number | '';
+    cost_center_id: number | '';
     description: string;
 }
 
@@ -31,6 +32,7 @@ export function projectToForm(project?: Project | null): ProjectFormData {
         starts_on: project?.starts_on ?? '',
         planned_end_on: project?.planned_end_on ?? '',
         work_calendar_id: project?.work_calendar_id ?? '',
+        cost_center_id: project?.cost_center_id ?? '',
         description: project?.description ?? '',
     };
 }

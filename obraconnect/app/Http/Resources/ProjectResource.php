@@ -35,6 +35,10 @@ class ProjectResource extends JsonResource
             'work_calendar' => $this->whenLoaded('workCalendar', fn () => $this->workCalendar
                 ? ['id' => $this->workCalendar->id, 'name' => $this->workCalendar->name]
                 : null),
+            'cost_center_id' => $this->cost_center_id,
+            'cost_center' => $this->whenLoaded('costCenter', fn () => $this->costCenter
+                ? ['id' => $this->costCenter->id, 'code' => $this->costCenter->code, 'name' => $this->costCenter->name]
+                : null),
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'description' => $this->description,

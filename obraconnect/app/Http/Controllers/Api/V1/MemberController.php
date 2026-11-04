@@ -22,11 +22,13 @@ class MemberController extends Controller
         $search = trim((string) $request->query('search'));
 
         $members = Membership::query()
-            ->with(['user', 'role'])
+            ->with(['user', 'role', 'department:id,name'])
             ->when($search !== '', fn ($q) => $q->whereHas('user', fn ($u) => $u->where(fn ($w) => $w
                 ->where('name', 'like', '%'.addcslashes($search, '%_\\').'%')
                 ->orWhere('email', 'like', '%'.addcslashes($search, '%_\\').'%'))))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
+            ->when($request->query('department_id') === 'none', fn ($q) => $q->whereNull('department_id'))
+            ->when(ctype_digit((string) $request->query('department_id')), fn ($q) => $q->where('department_id', (int) $request->query('department_id')))
             ->orderBy('id')
             ->paginate(min((int) $request->query('per_page', 25), 100));
 

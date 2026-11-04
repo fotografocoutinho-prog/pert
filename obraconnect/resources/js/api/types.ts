@@ -98,7 +98,26 @@ export interface Member {
     joined_at: string | null;
     user: { id: number; name: string; email: string; two_factor_enabled: boolean; last_login_at: string | null };
     role: { id: number; key: string; name: string };
+    department: { id: number; name: string } | null;
     is_me: boolean;
+}
+
+export interface Department {
+    id: number;
+    name: string;
+    description: string | null;
+    membership_ids: number[];
+    members_count: number;
+}
+
+export interface CostCenter {
+    id: number;
+    parent_id: number | null;
+    code: string;
+    name: string;
+    archived: boolean;
+    projects_count: number;
+    children_count: number;
 }
 
 export interface Invitation {
@@ -264,6 +283,8 @@ export interface Project {
     /** null = calendário por omissão da empresa. */
     work_calendar_id: number | null;
     work_calendar: { id: number; name: string } | null;
+    cost_center_id: number | null;
+    cost_center: { id: number; code: string; name: string } | null;
     status: ProjectStatus;
     status_label: string;
     description: string | null;

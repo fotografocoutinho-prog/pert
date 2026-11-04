@@ -29,6 +29,11 @@ class Membership extends Model
         ];
     }
 
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

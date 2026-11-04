@@ -29,6 +29,7 @@ class MembershipResource extends JsonResource
                 'key' => $this->role->key,
                 'name' => $this->role->name,
             ],
+            'department' => $this->department ? ['id' => $this->department->id, 'name' => $this->department->name] : null,
             'is_me' => $this->user_id === $request->user()?->id,
         ];
     }

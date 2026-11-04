@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.8.0)
+# Manual do utilizador (versão 0.9.0)
 
 ## Entrar
 
@@ -69,6 +69,16 @@ Em **Clientes** ficam os clientes da empresa: particulares, empresas e entidades
 - Na ficha do cliente vê os contactos e as obras dele (só as obras a que tem acesso).
 - Um cliente com obras não se apaga: **Arquivar** tira-o das escolhas, mas as obras que já o têm continuam a mostrá-lo. **Reativar** volta a pô-lo na lista.
 - Por omissão, gerem clientes o administrador, o diretor técnico e o administrativo; o diretor de obra, o preparador e o medidor-orçamentista consultam.
+
+## Departamentos e centros de custo
+
+Em **Departamentos e centros de custo** organiza-se a empresa.
+
+- **Novo departamento** (ex.: Produção, Orçamentação, Compras). Em **Escolher pessoas** marque quem lá está: cada pessoa fica num só departamento, por isso quem escolher sai do departamento onde estava. **Ver pessoas** abre a lista de utilizadores já filtrada. Apagar um departamento não apaga ninguém: as pessoas ficam sem departamento.
+- **Novo centro de custo** cria um centro na raiz; **+ Dentro** cria um dentro de outro. Se deixar o código vazio, é numerado sozinho (1, 2… na raiz; 1.01, 1.02… dentro do 1). Uma organização comum: **1 Obras**, com um centro por obra lá dentro, e **2 Estrutura** (Administração, Armazém, Viaturas).
+- Nos **dados da obra** escolhe-se o centro de custo da obra.
+- Um centro com obras, ou com centros dentro, não se apaga: em **Editar**, marque **Arquivado**. Deixa de aparecer para escolher; as obras que já o têm mantêm-no.
+- Por omissão, gerem departamentos o administrador e o administrativo; centros de custo, o administrador, o diretor técnico e o administrativo. Quem vê a empresa consulta ambos.
 
 ## Calendários de trabalho
 

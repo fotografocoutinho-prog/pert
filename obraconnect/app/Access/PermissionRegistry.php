@@ -73,6 +73,13 @@ final class PermissionRegistry
                     'data.export' => 'Exportar todos os dados da empresa',
                 ],
             ],
+            'organization' => [
+                'label' => 'Organização da empresa',
+                'permissions' => [
+                    'departments.manage' => 'Gerir departamentos e as pessoas de cada um',
+                    'cost_centers.manage' => 'Gerir centros de custo',
+                ],
+            ],
             'clients' => [
                 'label' => 'Clientes',
                 'permissions' => [

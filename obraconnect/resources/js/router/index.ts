@@ -42,6 +42,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'obras/:id/diario/:entryId', component: () => import('@/pages/app/projects/DiaryEntryPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Diário de obra' } },
             { path: 'clientes', component: () => import('@/pages/app/clients/ClientsPage.vue'), meta: { tenant: true, permission: 'clients.view', title: 'Clientes' } },
             { path: 'clientes/:id', component: () => import('@/pages/app/clients/ClientPage.vue'), meta: { tenant: true, permission: 'clients.view', title: 'Cliente' } },
+            { path: 'organizacao', component: () => import('@/pages/app/OrganizationPage.vue'), meta: { tenant: true, permission: 'company.view', title: 'Organização' } },
             { path: 'calendarios', component: () => import('@/pages/app/CalendarsPage.vue'), meta: { tenant: true, permission: 'company.view', title: 'Calendários de trabalho' } },
             { path: 'empresa', component: () => import('@/pages/app/CompanyPage.vue'), meta: { tenant: true, permission: 'company.view', title: 'Empresa' } },
             { path: 'utilizadores', component: () => import('@/pages/app/MembersPage.vue'), meta: { tenant: true, permission: 'members.view', title: 'Utilizadores' } },

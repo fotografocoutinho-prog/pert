@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 #[Fillable([
     'code', 'name', 'client_id', 'owner_name', 'type', 'address', 'postal_code', 'city',
-    'contract_value_cents', 'starts_on', 'planned_end_on', 'work_calendar_id', 'status', 'description',
+    'contract_value_cents', 'starts_on', 'planned_end_on', 'work_calendar_id', 'cost_center_id', 'status', 'description',
 ])]
 class Project extends Model
 {
@@ -47,6 +47,11 @@ class Project extends Model
     public function workCalendar(): BelongsTo
     {
         return $this->belongsTo(WorkCalendar::class);
+    }
+
+    public function costCenter(): BelongsTo
+    {
+        return $this->belongsTo(CostCenter::class);
     }
 
     public function members(): HasMany

@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.9.0 — 2026-11-10
+
+Fase 2, oitava parte: departamentos e centros de custo.
+
+- **Departamentos** (ex.: Produção, Orçamentação, Compras): cada pessoa está num departamento ou em nenhum. Escolhem-se as pessoas de cada departamento (quem é escolhido sai do anterior); apagar um departamento deixa as pessoas sem departamento. Permissão `departments.manage`.
+- Em **Utilizadores**, o departamento aparece por baixo do perfil e há filtro por departamento (ou "sem departamento").
+- **Centros de custo** em árvore, com código automático (1, 2… na raiz; 1.01, 1.02… dentro de 1) ou escrito à mão, único na empresa sem distinguir maiúsculas. Não ficam dentro de si próprios; com centros dentro ou obras não se apagam, arquivam-se. Permissão `cost_centers.manage`.
+- Cada **obra** pode ter um centro de custo (nos dados da obra). Os custos que lá vão cair chegam na fase 4.
+- Departamentos e centros de custo entram na exportação de dados e na auditoria.
+
 ## 0.8.0 — 2026-11-09
 
 Fase 2, sétima parte: clientes e calendários de trabalho.

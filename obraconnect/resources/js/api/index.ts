@@ -6,7 +6,9 @@ import type {
     Client,
     ClientOption,
     Company,
+    CostCenter,
     DataExport,
+    Department,
     DiaryEntry,
     DocumentListing,
     Holiday,
@@ -133,7 +135,7 @@ export const companyApi = {
 };
 
 export const membersApi = {
-    list: async (params: { search?: string; status?: string; page?: number }) =>
+    list: async (params: { search?: string; status?: string; page?: number; per_page?: number; department_id?: number | 'none' }) =>
         (await http.get<Paginated<Member>>('/api/v1/members', { params })).data,
     update: async (id: number, payload: { role_id?: number; status?: string; job_title?: string | null }) =>
         (await http.patch<{ data: Member }>(`/api/v1/members/${id}`, payload)).data.data,
@@ -208,6 +210,26 @@ export const projectsApi = {
     updateMember: async (id: number, memberId: number, roleId: number) =>
         (await http.patch<{ data: ProjectMember }>(`/api/v1/projects/${id}/members/${memberId}`, { role_id: roleId })).data.data,
     removeMember: (id: number, memberId: number) => http.delete(`/api/v1/projects/${id}/members/${memberId}`),
+};
+
+export const departmentsApi = {
+    list: () => getData<Department[]>('/api/v1/departments'),
+    create: async (payload: { name: string; description?: string | null }) =>
+        (await http.post<{ data: Department }>('/api/v1/departments', payload)).data.data,
+    update: async (id: number, payload: { name?: string; description?: string | null }) =>
+        (await http.put<{ data: Department }>(`/api/v1/departments/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/departments/${id}`),
+    setMembers: async (id: number, membershipIds: number[]) =>
+        (await http.put<{ data: Department }>(`/api/v1/departments/${id}/members`, { membership_ids: membershipIds })).data.data,
+};
+
+export const costCentersApi = {
+    list: () => getData<CostCenter[]>('/api/v1/cost-centers'),
+    create: async (payload: { code?: string | null; name: string; parent_id?: number | null }) =>
+        (await http.post<{ data: CostCenter }>('/api/v1/cost-centers', payload)).data.data,
+    update: async (id: number, payload: { code?: string | null; name?: string; parent_id?: number | null; archived?: boolean }) =>
+        (await http.put<{ data: CostCenter }>(`/api/v1/cost-centers/${id}`, payload)).data.data,
+    remove: (id: number) => http.delete(`/api/v1/cost-centers/${id}`),
 };
 
 export const clientsApi = {

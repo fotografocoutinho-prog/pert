@@ -11,6 +11,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProjectResource;
 use App\Models\Client;
+use App\Models\CostCenter;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -21,8 +22,8 @@ use Illuminate\Validation\ValidationException;
 
 class ProjectController extends Controller
 {
-    /** Só o nome do cliente e do calendário (a ficha do cliente pede clients.view). */
-    private const RELATIONS = ['client:id,name,type', 'workCalendar:id,name'];
+    /** Só o nome do cliente, do calendário e do centro de custo (a ficha do cliente pede clients.view). */
+    private const RELATIONS = ['client:id,name,type', 'workCalendar:id,name', 'costCenter:id,code,name'];
 
     public function __construct(
         private readonly Auditor $auditor,
@@ -158,6 +159,7 @@ class ProjectController extends Controller
             'starts_on' => ['sometimes', 'nullable', 'date'],
             'planned_end_on' => ['sometimes', 'nullable', 'date'],
             'work_calendar_id' => ['sometimes', 'nullable', 'integer', Rule::exists('work_calendars', 'id')->where('tenant_id', $tenantId)],
+            'cost_center_id' => ['sometimes', 'nullable', 'integer', Rule::exists('cost_centers', 'id')->where('tenant_id', $tenantId)],
             'status' => ['sometimes', Rule::enum(ProjectStatus::class)],
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ], [], [
@@ -166,6 +168,7 @@ class ProjectController extends Controller
             'client_id' => 'cliente',
             'owner_name' => 'dono de obra',
             'work_calendar_id' => 'calendário de trabalho',
+            'cost_center_id' => 'centro de custo',
             'contract_value_cents' => 'valor da adjudicação',
             'starts_on' => 'data de início',
             'planned_end_on' => 'data de fim prevista',
@@ -175,6 +178,11 @@ class ProjectController extends Controller
         if (! empty($data['client_id']) && (int) $data['client_id'] !== $project?->client_id
             && Client::query()->whereKey($data['client_id'])->whereNotNull('archived_at')->exists()) {
             throw ValidationException::withMessages(['client_id' => 'Este cliente está arquivado. Reative-o para o escolher.']);
+        }
+
+        if (! empty($data['cost_center_id']) && (int) $data['cost_center_id'] !== $project?->cost_center_id
+            && CostCenter::query()->whereKey($data['cost_center_id'])->whereNotNull('archived_at')->exists()) {
+            throw ValidationException::withMessages(['cost_center_id' => 'Este centro de custo está arquivado.']);
         }
 
         // Compara com a data guardada quando o pedido só altera uma das duas.

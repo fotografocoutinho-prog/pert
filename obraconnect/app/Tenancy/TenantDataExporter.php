@@ -4,6 +4,8 @@ namespace App\Tenancy;
 
 use App\Models\AuditLog;
 use App\Models\Client;
+use App\Models\CostCenter;
+use App\Models\Department;
 use App\Models\DiaryEntry;
 use App\Models\Document;
 use App\Models\Invitation;
@@ -35,11 +37,12 @@ class TenantDataExporter
             'postal_code', 'city', 'country_code', 'status', 'settings', 'created_at',
         ])];
 
-        $this->sections['members'] = fn () => Membership::query()->with(['user:id,name,email', 'role:id,key,name'])->get()
+        $this->sections['members'] = fn () => Membership::query()->with(['user:id,name,email', 'role:id,key,name', 'department:id,name'])->get()
             ->map(fn (Membership $m) => [
                 'name' => $m->user->name,
                 'email' => $m->user->email,
                 'role' => $m->role->name,
+                'department' => $m->department?->name,
                 'status' => $m->status->value,
                 'job_title' => $m->job_title,
                 'joined_at' => $m->joined_at?->toIso8601String(),
@@ -73,6 +76,14 @@ class TenantDataExporter
         $this->sections['support_access_grants'] = fn () => SupportAccessGrant::query()->get()
             ->map(fn (SupportAccessGrant $g) => $g->only(['reason', 'access_level', 'expires_at', 'revoked_at', 'last_used_at', 'created_at']));
 
+        $this->sections['departments'] = fn () => Department::query()->orderBy('name')->get()
+            ->map(fn (Department $d) => $d->only(['id', 'name', 'description', 'created_at']));
+
+        $this->sections['cost_centers'] = fn () => CostCenter::query()->orderBy('code')->get()
+            ->map(fn (CostCenter $c) => $c->only(['id', 'parent_id', 'code', 'name', 'created_at']) + [
+                'archived_at' => $c->archived_at?->toIso8601String(),
+            ]);
+
         $this->sections['clients'] = fn () => Client::query()->orderBy('id')->get()
             ->map(fn (Client $c) => $c->only([
                 'id', 'name', 'nif', 'country_code', 'email', 'phone', 'contact_name', 'address', 'postal_code', 'city', 'notes', 'created_at',
@@ -100,6 +111,7 @@ class TenantDataExporter
                 'planned_end_on' => $p->planned_end_on?->toDateString(),
                 'client_id' => $p->client_id,
                 'work_calendar_id' => $p->work_calendar_id,
+                'cost_center_id' => $p->cost_center_id,
                 'team' => $p->members->map(fn ($m) => [
                     'name' => $m->membership->user->name,
                     'email' => $m->membership->user->email,

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\CostCenterController;
+use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\DiaryEntryController;
 use App\Http\Controllers\Api\V1\DiaryPhotoController;
 use App\Http\Controllers\Api\V1\DocumentController;
@@ -85,6 +87,17 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('exports', [ExportController::class, 'index'])->name('exports.index');
             Route::post('exports', [ExportController::class, 'store'])->middleware('throttle:exports')->name('exports.store');
             Route::get('exports/{tenantExport}/download', [ExportController::class, 'download'])->name('exports.download');
+
+            Route::get('departments', [DepartmentController::class, 'index'])->name('departments.index');
+            Route::post('departments', [DepartmentController::class, 'store'])->name('departments.store');
+            Route::put('departments/{department}', [DepartmentController::class, 'update'])->name('departments.update');
+            Route::delete('departments/{department}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+            Route::put('departments/{department}/members', [DepartmentController::class, 'syncMembers'])->name('departments.members');
+
+            Route::get('cost-centers', [CostCenterController::class, 'index'])->name('cost-centers.index');
+            Route::post('cost-centers', [CostCenterController::class, 'store'])->name('cost-centers.store');
+            Route::put('cost-centers/{costCenter}', [CostCenterController::class, 'update'])->name('cost-centers.update');
+            Route::delete('cost-centers/{costCenter}', [CostCenterController::class, 'destroy'])->name('cost-centers.destroy');
 
             Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
             Route::get('clients/options', [ClientController::class, 'options'])->name('clients.options');
