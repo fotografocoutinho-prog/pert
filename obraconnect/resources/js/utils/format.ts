@@ -102,6 +102,7 @@ const EVENT_LABELS: Record<string, string> = {
     'inspection.reinspection': 'Reinspeção pedida',
     'inspection.photo_added': 'Evidência junta a uma inspeção',
     'inspection.hold_released': 'Ponto de paragem libertado',
+    'inspection.report': 'Relatório de inspeção gerado (PDF)',
     'issue.created': 'Ocorrência registada',
     'issue.updated': 'Ocorrência alterada',
     'issue.start': 'Ocorrência em resolução',

@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 0.13.0 — 2026-11-06
+
+Fase 3, terceira parte: aprovações em vários passos, relatório PDF e emails. Fecha a Fase 3.
+
+- **Aprovações em vários passos**: uma lista de verificação (e cada inspeção) diz quantas aprovações de **pessoas diferentes** são precisas (1 a 3). A inspeção fica em apreciação até as juntar todas; cada aprovação fica no histórico encadeado ("Aprovada (1 de 2)"); quem já aprovou não aprova outra vez; uma rejeição decide logo; devolver e voltar a submeter recomeça a contagem. Com reservas em qualquer uma, a decisão final é "aprovada com reservas", com a nota de cada pessoa.
+- **Relatório da inspeção em PDF** (botão **Relatório PDF**): empresa e obra, estado, local, especialidade, lista e versão, datas e pessoas, decisão e aprovações, índice de evidências explicado, pontos com resultados, medições, observações, miniaturas das fotografias e NC ligadas, histórico com o hash de cada passo, verificação da cadeia e código de verificação. Antes de decidida sai marcado como provisório. Gerado no momento (dompdf), não fica guardado.
+- **Emails de aviso** às pessoas da equipa da obra (nunca a quem fez a ação): inspeção pedida (a quem faz inspeções), submetida (a quem decide), decidida ou devolvida (a quem pediu e a quem fez), ponto de paragem libertado (a quem pediu, a quem fez e aos diretores de obra), ocorrência atribuída (ao responsável), resolvida (a quem a registou e aos diretores de obra) e reaberta (ao responsável). O texto escrito pelos utilizadores é escapado no email.
+- Segurança: bibliotecas Symfony atualizadas dentro da série 7.4 (http-foundation, http-kernel, mime, routing, serializer) para versões sem falhas conhecidas.
+
 ## 0.12.0 — 2026-11-04
 
 Fase 3, segunda parte: pontos de paragem e ocorrências / não conformidades.

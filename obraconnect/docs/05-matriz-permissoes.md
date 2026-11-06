@@ -79,6 +79,8 @@ Inspeções (0.11.0): vê as inspeções de uma obra quem tem lá qualquer uma d
 
 Ocorrências (0.12.0): `issues.resolve` só deixa resolver as ocorrências de que a pessoa é responsável (ou sem responsável), a menos que também tenha `issues.validate`; alterar uma ocorrência é de quem a registou ou de quem valida. O suporte técnico autorizado vê as ocorrências (é uma permissão `.view`).
 
+Aprovações em vários passos (0.13.0): contam aprovações de pessoas diferentes com `inspections.approve` na obra, dadas depois da última submissão. O relatório PDF tem a mesma regra que ver a inspeção. Os emails de aviso vão só para a equipa da obra, filtrada pela permissão de cada aviso (ex.: inspeção pedida → `inspections.perform`).
+
 Estrutura (0.5.0): ver a estrutura só exige `projects.view`. O medidor-orçamentista gere a estrutura em todas as obras (tem `projects.all`).
 
 Documentos (0.4.0): o medidor-orçamentista tem acesso a todas as obras, por isso consulta e envia em todas (a proposta tinha ○).

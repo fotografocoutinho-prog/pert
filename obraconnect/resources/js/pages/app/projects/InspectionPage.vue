@@ -8,7 +8,8 @@ import { useForm } from '@/composables/useForm';
 import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useToastStore } from '@/stores/toast';
 import { formatDateTime } from '@/utils/format';
-import { inspectionStatusColor } from '@/utils/inspections';
+import { APPROVAL_OPTIONS, inspectionStatusColor } from '@/utils/inspections';
+import { appUrl } from '@/utils/base';
 import ChecklistItemsEditor from '@/components/inspections/ChecklistItemsEditor.vue';
 import InspectionItemCard from '@/components/inspections/InspectionItemCard.vue';
 import AppAlert from '@/components/ui/AppAlert.vue';
@@ -59,6 +60,7 @@ function show(detail: InspectionDetail): void {
             scheduled_for: detail.scheduled_for ? detail.scheduled_for.slice(0, 16) : '',
             remote: detail.remote,
             hold_point: detail.hold_point,
+            approvals_required: detail.approvals_required,
             items: detail.items.map(({ text, guidance, requires_photo, min_photos, requires_measure, measure_unit, measure_min, measure_max }) => ({
                 text,
                 guidance,
@@ -85,6 +87,7 @@ const draft = useForm({
     scheduled_for: '',
     remote: false,
     hold_point: false,
+    approvals_required: 1,
     items: [] as ChecklistItemDef[],
 });
 const savedDraft = ref('');
@@ -105,6 +108,7 @@ async function saveDraft(quiet = false): Promise<boolean> {
                 scheduled_for: draft.data.scheduled_for || null,
                 remote: draft.data.remote,
                 hold_point: draft.data.hold_point,
+                approvals_required: Number(draft.data.approvals_required),
                 items: draft.data.items.filter((i) => i.text.trim() !== ''),
                 ...toIds(draft.data.place),
             }),
@@ -339,10 +343,15 @@ const closedNote = computed(() => {
             <AppAlert v-if="project?.status === 'archived'" class="mb-4">A obra está arquivada: pode consultar, mas não alterar.</AppAlert>
 
             <!-- Ações -->
-            <div
-                v-if="inspection.can.actions.length || inspection.can.reinspect || inspection.can.edit || inspection.can.release_hold || inspection.reinspections.length"
-                class="mb-5 flex flex-wrap items-center gap-2"
-            >
+            <AppAlert v-if="inspection.approvals.required > 1 && ['submitted', 'approved', 'approved_with_reservations'].includes(inspection.status)" class="mb-4">
+                <p class="font-semibold">Aprovações: {{ inspection.approvals.given.length }} de {{ inspection.approvals.required }} (pessoas diferentes)</p>
+                <p v-for="(a, i) in inspection.approvals.given" :key="i" class="text-sm">
+                    {{ a.user_name }} {{ a.with_reservations ? 'aprovou com reservas' : 'aprovou' }} a {{ formatDateTime(a.created_at) }}<template v-if="a.reason">: “{{ a.reason }}”</template>
+                </p>
+            </AppAlert>
+
+            <!-- Ações (o relatório PDF está sempre disponível fora do rascunho) -->
+            <div class="mb-5 flex flex-wrap items-center gap-2">
                 <AppButton v-if="inspection.can.release_hold" @click="(releaseNote = ''), (releasing = true)">Libertar ponto de paragem</AppButton>
                 <AppButton
                     v-for="a in inspection.can.actions"
@@ -356,6 +365,14 @@ const closedNote = computed(() => {
                     {{ a.label }}
                 </AppButton>
                 <AppButton v-if="inspection.can.reinspect" variant="secondary" @click="reinspect">Pedir reinspeção</AppButton>
+                <a
+                    v-if="!inspection.can.edit"
+                    :href="appUrl(`/api/v1/projects/${projectId}/inspections/${inspection.id}/report`)"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                    >Relatório PDF</a
+                >
                 <AppButton v-if="inspection.can.edit" variant="ghost" class="text-red-700" @click="removeDraft">Apagar rascunho</AppButton>
                 <span v-for="r in inspection.reinspections" :key="r.id" class="text-sm text-slate-600">
                     Reinspeção:
@@ -381,6 +398,7 @@ const closedNote = computed(() => {
                                 </div>
                                 <AppSelect v-model="draft.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="draft.errors.value.specialty_id" />
                                 <AppInput v-model="draft.data.scheduled_for" type="datetime-local" label="Data pretendida" :error="draft.errors.value.scheduled_for" />
+                                <AppSelect v-model="draft.data.approvals_required" label="Aprovações necessárias" :options="APPROVAL_OPTIONS" :error="draft.errors.value.approvals_required" />
                                 <div class="space-y-3 sm:pt-7">
                                     <AppCheckbox v-model="draft.data.remote" label="Inspeção remota" description="Feita por fotografias." />
                                     <AppCheckbox v-model="draft.data.hold_point" label="Ponto de paragem" description="Os trabalhos param até a inspeção ser aprovada e libertada." />

@@ -8,7 +8,7 @@ Estas ocorrências da empresa **{{ $companyName }}** passaram o prazo sem estare
 @endif
 
 @foreach ($issues as $issue)
-**{{ $issue['reference'] }} · {{ $issue['title'] }}**<br>
+**{{ $issue['reference'] }} · {{ \App\Mail\ProjectNoticeMail::escape($issue['title']) }}**<br>
 {{ $issue['project'] }}<br>
 Prazo: {{ $issue['due_on'] }} · Responsável: {{ $issue['mine'] ? 'você' : ($issue['assignee'] ?? 'ninguém atribuído') }}<br>
 [Abrir {{ $issue['reference'] }}]({{ $issue['url'] }})

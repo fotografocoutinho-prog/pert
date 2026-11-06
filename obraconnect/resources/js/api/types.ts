@@ -578,6 +578,7 @@ export interface ChecklistTemplate {
     specialty: SpecialtyRef | null;
     version: number;
     hold_point: boolean;
+    approvals_required: number;
     archived: boolean;
     items_count: number;
     inspections_count: number;
@@ -654,6 +655,7 @@ export interface Inspection {
     decision_note: string | null;
     evidence_score: number | null;
     hold_point: boolean;
+    approvals_required: number;
     hold_released_at: string | null;
     hold_released_by?: string | null;
     /** Ponto de paragem por libertar: trabalhos parados. */
@@ -675,6 +677,8 @@ export interface InspectionDetail extends Inspection {
     items: InspectionItem[];
     reinspections: { id: number; number: number; status_label: string }[];
     evidence: EvidenceIndex;
+    /** Aprovações dadas desde a última submissão. */
+    approvals: { required: number; given: { user_name: string; with_reservations: boolean; reason: string | null; created_at: string }[] };
     events: InspectionEvent[];
     chain: { valid: boolean; broken_at: number | null; last_hash: string | null };
     can: {

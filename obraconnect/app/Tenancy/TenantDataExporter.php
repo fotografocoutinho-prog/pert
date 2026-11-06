@@ -218,6 +218,7 @@ class TenantDataExporter
                 'specialty_id' => $t->specialty_id,
                 'version' => $t->version,
                 'hold_point' => $t->hold_point,
+                'approvals_required' => $t->approvals_required,
                 'archived_at' => $t->archived_at?->toIso8601String(),
                 'items' => $t->items->map(fn ($i) => $i->only(['text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max'])),
             ]);
@@ -244,6 +245,7 @@ class TenantDataExporter
                 'decision_note' => $i->decision_note,
                 'hold_point' => $i->hold_point,
                 'hold_released_at' => $i->hold_released_at?->toIso8601String(),
+                'approvals_required' => $i->approvals_required,
                 'items' => $i->items->map(fn ($item) => ['id' => $item->id] + $item->only([
                     'text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max',
                     'measure_value', 'notes',

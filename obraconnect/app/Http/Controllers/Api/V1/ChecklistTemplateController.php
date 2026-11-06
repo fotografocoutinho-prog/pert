@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Audit\Auditor;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Inspections\Approvals;
 use App\Inspections\ChecklistItems;
 use App\Inspections\InspectionWorkflow;
 use App\Models\ChecklistTemplate;
@@ -51,7 +52,7 @@ class ChecklistTemplateController extends Controller
         $items = ChecklistItems::normalize($data['items']);
 
         $template = DB::transaction(function () use ($data, $items, $request): ChecklistTemplate {
-            $template = new ChecklistTemplate(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point'])));
+            $template = new ChecklistTemplate(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point', 'approvals_required'])));
             $template->created_by_user_id = $request->user()->id;
             $template->save();
             $template->items()->createMany($items);
@@ -72,7 +73,7 @@ class ChecklistTemplateController extends Controller
         $template = $checklistTemplate;
 
         DB::transaction(function () use ($data, $template): void {
-            $template->fill(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point'])));
+            $template->fill(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point', 'approvals_required'])));
             if (array_key_exists('archived', $data) && (bool) $data['archived'] !== $template->isArchived()) {
                 $template->archived_at = $data['archived'] ? now() : null;
             }
@@ -130,6 +131,7 @@ class ChecklistTemplateController extends Controller
             'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'specialty_id' => Specialty::rules($template?->specialty_id),
             'hold_point' => ['sometimes', 'boolean'],
+            'approvals_required' => ['sometimes', 'integer', 'between:1,'.Approvals::MAX],
             'archived' => $template ? ['sometimes', 'boolean'] : ['prohibited'],
         ] + ChecklistItems::rules('items', required: $template === null), [], [
             'name' => 'nome',
@@ -166,6 +168,7 @@ class ChecklistTemplateController extends Controller
             'specialty' => $template->specialty ? ['id' => $template->specialty->id, 'code' => $template->specialty->code, 'name' => $template->specialty->name] : null,
             'version' => $template->version,
             'hold_point' => $template->hold_point,
+            'approvals_required' => $template->approvals_required,
             'archived' => $template->isArchived(),
             'items_count' => (int) $template->items_count,
             'inspections_count' => (int) $template->inspections_count,

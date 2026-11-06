@@ -181,6 +181,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('inspections', [InspectionController::class, 'index'])->name('inspections.index');
                 Route::post('inspections', [InspectionController::class, 'store'])->name('inspections.store');
                 Route::get('inspections/{inspection}', [InspectionController::class, 'show'])->name('inspections.show');
+                Route::get('inspections/{inspection}/report', [InspectionController::class, 'report'])->name('inspections.report');
                 Route::put('inspections/{inspection}', [InspectionController::class, 'update'])->name('inspections.update');
                 Route::delete('inspections/{inspection}', [InspectionController::class, 'destroy'])->name('inspections.destroy');
                 Route::post('inspections/{inspection}/actions/{action}', [InspectionController::class, 'transition'])

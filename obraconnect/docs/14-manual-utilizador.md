@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.12.0)
+# Manual do utilizador (versão 0.13.0)
 
 ## Entrar
 
@@ -128,6 +128,18 @@ Uma inspeção pedida, agendada ou em curso pode ser **cancelada** (com motivo);
 O **Histórico** mostra cada passo, quem o deu e quando. Cada passo fica selado com o código (hash) do anterior: a mensagem **Cadeia íntegra** confirma que nada foi alterado depois.
 
 Por omissão: pedem inspeções o diretor técnico, o diretor de obra, o encarregado, o preparador, o técnico de qualidade e o subempreiteiro (nas obras da equipa); fazem-nas o fiscal, o coordenador de segurança e o técnico de qualidade; decidem o fiscal e o coordenador de segurança. O administrador pode tudo.
+
+### Aprovações de várias pessoas
+
+Em trabalhos críticos, uma lista de verificação (ou uma inspeção, enquanto é rascunho) pode pedir **2 ou 3 aprovações**. Cada pessoa com permissão de decidir aprova uma vez; a inspeção fica **Em apreciação** — com a indicação "Aprovações: 1 de 2" — até juntar todas. Uma rejeição decide logo. Se for devolvida para completar, as aprovações recomeçam do zero na nova submissão.
+
+### Relatório em PDF
+
+Fora do rascunho, **Relatório PDF** abre o relatório da inspeção para imprimir, enviar ou arquivar: pontos, resultados, fotografias (miniaturas), índice de evidências, decisão, aprovações e o histórico com o **código de verificação**. Enquanto a inspeção não está decidida, o relatório diz que é provisório. Os originais das fotografias ficam na aplicação.
+
+### Avisos por email
+
+A aplicação avisa por email as pessoas da **equipa da obra** quando há algo para elas: uma inspeção para fazer ou para decidir, uma decisão sobre uma inspeção que pediram ou fizeram, um ponto de paragem libertado, uma ocorrência de que são responsáveis, resolvida (para validar) ou reaberta. Quem fez a ação não recebe o aviso. Quem vê todas as obras pelo perfil da empresa só recebe avisos das obras em cuja equipa está.
 
 ### Pontos de paragem
 

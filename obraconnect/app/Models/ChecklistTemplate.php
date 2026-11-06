@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Modelo de lista de verificação da empresa (ex.: "Betonagem de lajes"). Cada inspeção copia os
  * pontos no momento em que é criada; alterar o modelo depois não mexe nas inspeções já feitas.
  */
-#[Fillable(['name', 'description', 'specialty_id', 'hold_point'])]
+#[Fillable(['name', 'description', 'specialty_id', 'hold_point', 'approvals_required'])]
 class ChecklistTemplate extends Model
 {
     use BelongsToTenant;
@@ -20,6 +20,7 @@ class ChecklistTemplate extends Model
     protected $attributes = [
         'version' => 1,
         'hold_point' => false,
+        'approvals_required' => 1,
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class ChecklistTemplate extends Model
         return [
             'version' => 'integer',
             'hold_point' => 'boolean',
+            'approvals_required' => 'integer',
             'archived_at' => 'datetime',
         ];
     }

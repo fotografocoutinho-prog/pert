@@ -7,7 +7,7 @@ import { useForm } from '@/composables/useForm';
 import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useSessionStore } from '@/stores/session';
 import { formatDate, formatDateTime } from '@/utils/format';
-import { emptyChecklistItem, inspectionStatusColor } from '@/utils/inspections';
+import { APPROVAL_OPTIONS, emptyChecklistItem, inspectionStatusColor } from '@/utils/inspections';
 import ChecklistItemsEditor from '@/components/inspections/ChecklistItemsEditor.vue';
 import AppAlert from '@/components/ui/AppAlert.vue';
 import AppBadge from '@/components/ui/AppBadge.vue';
@@ -86,6 +86,7 @@ const form = useForm({
     scheduled_for: '',
     remote: false,
     hold_point: false,
+    approvals_required: 1,
     items: [] as ChecklistItemDef[],
 });
 
@@ -108,6 +109,7 @@ watch(
         const template = templates.value.find((t) => t.id === id);
         if (template?.specialty_id) form.data.specialty_id = template.specialty_id;
         form.data.hold_point = template?.hold_point ?? false;
+        form.data.approvals_required = template?.approvals_required ?? 1;
     },
 );
 
@@ -119,6 +121,7 @@ async function create(): Promise<void> {
         scheduled_for: form.data.scheduled_for || null,
         remote: form.data.remote,
         hold_point: form.data.hold_point,
+        approvals_required: Number(form.data.approvals_required),
         ...toIds(form.data.place),
     };
     if (fromTemplate) payload.checklist_template_id = Number(form.data.checklist_template_id);
@@ -224,6 +227,7 @@ async function create(): Promise<void> {
                     </div>
                     <AppSelect v-model="form.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="form.errors.value.specialty_id" />
                     <AppInput v-model="form.data.scheduled_for" type="datetime-local" label="Data pretendida" hint="Quem inspeciona confirma ao agendar." :error="form.errors.value.scheduled_for" />
+                    <AppSelect v-model="form.data.approvals_required" label="Aprovações necessárias" :options="APPROVAL_OPTIONS" :error="form.errors.value.approvals_required" />
                     <div class="space-y-3 sm:pt-7">
                         <AppCheckbox v-model="form.data.remote" label="Inspeção remota" description="Feita por fotografias: cada ponto deve ter pelo menos uma." />
                         <AppCheckbox v-model="form.data.hold_point" label="Ponto de paragem" description="Os trabalhos param até a inspeção ser aprovada e libertada." />

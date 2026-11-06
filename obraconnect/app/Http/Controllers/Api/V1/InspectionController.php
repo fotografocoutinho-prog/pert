@@ -9,9 +9,11 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsInspectionWrites;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InspectionResource;
+use App\Inspections\Approvals;
 use App\Inspections\ChecklistItems;
 use App\Inspections\EvidenceIndex;
 use App\Inspections\InspectionHistory;
+use App\Inspections\InspectionReport;
 use App\Inspections\InspectionWorkflow;
 use App\Models\ChecklistTemplate;
 use App\Models\ChecklistTemplateItem;
@@ -19,6 +21,7 @@ use App\Models\Inspection;
 use App\Models\InspectionItem;
 use App\Models\Project;
 use App\Models\Specialty;
+use App\Notifications\Notifier;
 use App\Structure\Place;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +53,7 @@ class InspectionController extends Controller
     public function __construct(
         private readonly Auditor $auditor,
         private readonly InspectionHistory $history,
+        private readonly Notifier $notifier,
     ) {}
 
     public function index(Request $request, Project $project): AnonymousResourceCollection
@@ -101,6 +105,7 @@ class InspectionController extends Controller
                 'title' => trim($data['title'] ?? '') ?: ($template?->name ?? "Inspeção n.º {$number}"),
                 'specialty_id' => array_key_exists('specialty_id', $data) ? $data['specialty_id'] : $template?->specialty_id,
                 'hold_point' => array_key_exists('hold_point', $data) ? (bool) $data['hold_point'] : (bool) $template?->hold_point,
+                'approvals_required' => $data['approvals_required'] ?? $template?->approvals_required ?? 1,
             ]);
             $inspection->number = $number;
             $inspection->checklist_template_id = $template?->id;
@@ -128,6 +133,22 @@ class InspectionController extends Controller
         $this->authorizeView($project);
 
         return $this->detail($project, $inspection);
+    }
+
+    /** Relatório em PDF, gerado no momento (abre no browser; "provisório" enquanto não estiver decidida). */
+    public function report(Request $request, Project $project, Inspection $inspection, InspectionReport $report): Response
+    {
+        $this->authorizeView($project);
+
+        $pdf = $report->render($project, $inspection, $request->user());
+        $this->auditor->record('inspection.report', $inspection, ['project' => $project->code, 'number' => $inspection->number, 'status' => $inspection->status->value]);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$report->filename($project, $inspection).'"',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /** Só em rascunho: cabeçalho e pontos (lista inteira). */
@@ -195,12 +216,13 @@ class InspectionController extends Controller
             $locked->load('items.photos');
             $from = $locked->status;
             $payload = null;
+            $to = null;
 
             switch ($action) {
                 case 'request':
                     $locked->requested_by_user_id = $user->id;
                     $locked->requested_at = now();
-                    $payload = ['items' => $this->snapshotRequested($locked), 'hold_point' => $locked->hold_point];
+                    $payload = ['items' => $this->snapshotRequested($locked), 'hold_point' => $locked->hold_point, 'approvals_required' => $locked->approvals_required];
                     break;
                 case 'schedule':
                     $locked->scheduled_for = $data['scheduled_for'];
@@ -232,6 +254,31 @@ class InspectionController extends Controller
                     }
                     // no break
                 case 'approve_with_reservations':
+                    // Cada pessoa aprova uma vez por submissão; só a última aprovação necessária decide.
+                    $round = Approvals::currentRound($locked->load('events'));
+                    if ($round->contains(fn ($e) => $e->user_id === $user->id)) {
+                        throw ApiException::conflict('Já aprovou esta inspeção. Falta a aprovação de outra pessoa.', 'ALREADY_APPROVED');
+                    }
+                    $required = max(1, $locked->approvals_required);
+                    $step = $round->count() + 1;
+                    $payload = ['evidence_score' => $locked->evidence_score, 'step' => $step, 'of' => $required];
+                    if ($step < $required) {
+                        $to = InspectionStatus::Submitted;
+                        break;
+                    }
+                    $reservations = $action === 'approve_with_reservations' || $round->contains(fn ($e) => $e->action === 'approve_with_reservations');
+                    $to = $reservations ? InspectionStatus::ApprovedWithReservations : InspectionStatus::Approved;
+                    $notes = $round->filter(fn ($e) => filled($e->reason))->map(fn ($e) => [$e->user_name, $e->reason])->all();
+                    if ($reason !== null) {
+                        $notes[] = [$user->name, $reason];
+                    }
+                    $locked->decided_by_user_id = $user->id;
+                    $locked->decided_at = now();
+                    // Com várias aprovações, cada nota leva o nome de quem a escreveu.
+                    $locked->decision_note = $required === 1
+                        ? $reason
+                        : (collect($notes)->map(fn ($n) => "{$n[0]}: {$n[1]}")->implode("\n") ?: null);
+                    break;
                 case 'reject':
                 case 'cancel':
                     $locked->decided_by_user_id = $user->id;
@@ -241,7 +288,7 @@ class InspectionController extends Controller
                     break;
             }
 
-            $locked->status = $definition['to'];
+            $locked->status = $to ?? $definition['to'];
             $locked->save();
             $this->history->record($locked, $action, $from, $locked->status, $user, $reason, $payload);
         });
@@ -253,6 +300,13 @@ class InspectionController extends Controller
             'status' => $inspection->status->value,
             'reason' => $reason,
         ]));
+
+        match ($action) {
+            'request' => $this->notifier->inspectionRequested($project, $inspection, $user),
+            'submit' => $this->notifier->inspectionSubmitted($project, $inspection, $user),
+            'approve', 'approve_with_reservations', 'reject', 'return' => $this->notifier->inspectionDecided($project, $inspection, $action, $user, $reason),
+            default => null,
+        };
 
         return $this->detail($project, $inspection);
     }
@@ -283,6 +337,7 @@ class InspectionController extends Controller
 
         $inspection->refresh();
         $this->auditor->record('inspection.hold_released', $inspection, ['project' => $project->code, 'number' => $inspection->number]);
+        $this->notifier->holdReleased($project, $inspection, $request->user(), $note);
 
         return $this->detail($project, $inspection);
     }
@@ -297,7 +352,7 @@ class InspectionController extends Controller
         $copy = DB::transaction(function () use ($project, $inspection, $request): Inspection {
             Inspection::query()->lockForUpdate()->findOrFail($inspection->id);
 
-            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote', 'hold_point']));
+            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote', 'hold_point', 'approvals_required']));
             $copy->title = Str::limit("Reinspeção da n.º {$inspection->number}: {$inspection->title}", 200, '');
             $copy->number = $this->nextNumber($project);
             $copy->checklist_template_id = $inspection->checklist_template_id;
@@ -347,6 +402,7 @@ class InspectionController extends Controller
             'scheduled_for' => ['sometimes', 'nullable', 'date'],
             'remote' => ['sometimes', 'boolean'],
             'hold_point' => ['sometimes', 'boolean'],
+            'approvals_required' => ['sometimes', 'integer', 'between:1,'.Approvals::MAX],
         ] + Place::rules($project) + ChecklistItems::rules('items', required: false), [
             'checklist_template_id.exists' => 'Essa lista de verificação não existe ou está arquivada.',
         ], [
@@ -365,7 +421,7 @@ class InspectionController extends Controller
      */
     private function headerFields(Project $project, array $data): array
     {
-        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote', 'hold_point']));
+        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote', 'hold_point', 'approvals_required']));
         if (array_key_exists('location_id', $data) || array_key_exists('element_id', $data)) {
             $place = Place::normalize($project, array_intersect_key($data, array_flip(['location_id', 'element_id'])) + ['location_id' => null, 'element_id' => null]);
             $fields['location_id'] = $place['location_id'];

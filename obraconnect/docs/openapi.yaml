@@ -529,7 +529,7 @@ paths:
   /api/v1/projects/{project}/inspections/{inspection}/actions/{action}:
     post:
       tags: [Inspeções]
-      summary: "Passagem de estado: request, schedule (scheduled_for), start, submit, return*, approve, approve_with_reservations*, reject*, cancel* (* exige reason)"
+      summary: "Passagem de estado: request, schedule (scheduled_for), start, submit, return*, approve, approve_with_reservations*, reject*, cancel* (* exige reason). Com approvals_required > 1, approve fica em apreciação até haver aprovações de pessoas diferentes suficientes (409 ALREADY_APPROVED se repetir)"
       parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: inspection, in: path, required: true, schema: { type: integer } }, { name: action, in: path, required: true, schema: { type: string, enum: [request, schedule, start, submit, return, approve, approve_with_reservations, reject, cancel] } }]
       requestBody: { content: { application/json: { schema: { type: object, properties: { reason: { type: string, maxLength: 2000 }, scheduled_for: { type: string, format: date-time } } } } } }
       responses: { "200": { description: "Ficha atualizada" }, "403": { description: Sem permissão para esta passagem }, "409": { description: "INSPECTION_STATUS, INSPECTION_HAS_NOK, PROJECT_ARCHIVED" }, "422": { description: "EVIDENCE_MISSING (meta.criteria) ou justificação em falta" } }
@@ -541,6 +541,8 @@ paths:
     post: { tags: [Inspeções], summary: "Em curso: fotografia de evidência (multipart, photo JPEG/PNG/WebP). Devolve {photo, evidence}", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: inspection, in: path, required: true, schema: { type: integer } }, { name: item, in: path, required: true, schema: { type: integer } }], responses: { "201": { description: OK }, "409": { description: INSPECTION_STATUS } } }
   /api/v1/projects/{project}/inspections/{inspection}/items/{item}/photos/{photo}:
     delete: { tags: [Inspeções], summary: "Em curso: retirar fotografia. Devolve {evidence}", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: inspection, in: path, required: true, schema: { type: integer } }, { name: item, in: path, required: true, schema: { type: integer } }, { name: photo, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: OK } } }
+  /api/v1/projects/{project}/inspections/{inspection}/report:
+    get: { tags: [Inspeções], summary: "Relatório em PDF (quem vê a inspeção); provisório enquanto não decidida. Criar/alterar aceitam approvals_required (1-3) e hold_point", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: inspection, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "application/pdf" } } }
   /api/v1/projects/{project}/inspections/{inspection}/release-hold:
     post: { tags: [Inspeções], summary: "Libertar o ponto de paragem de uma inspeção aprovada (inspections.release_hold_point); note opcional; fica no histórico encadeado", parameters: [{ name: project, in: path, required: true, schema: { type: integer } }, { name: inspection, in: path, required: true, schema: { type: integer } }], responses: { "200": { description: "Ficha da inspeção" }, "409": { description: "NO_HOLD_POINT, INSPECTION_STATUS" } } }
   /api/v1/projects/{project}/issues:

@@ -7,7 +7,7 @@ Testado localmente a partir do ZIP de release com Apache 2.4 + mod_php 8.3 + Mar
 | Requisito | Mínimo |
 | --- | --- |
 | PHP | 8.3 ou 8.4 (cPanel → **MultiPHP Manager**) |
-| Extensões PHP | pdo_mysql, mbstring, openssl, tokenizer, xml, dom, ctype, curl, fileinfo, zip, session (opcional: intl, gd) |
+| Extensões PHP | pdo_mysql, mbstring, openssl, tokenizer, xml, dom, ctype, curl, fileinfo, zip, session, gd (miniaturas das fotografias e imagens do relatório PDF; opcional: intl) |
 | Base de dados | MySQL 8.0+ ou MariaDB 10.6+ |
 | Tarefas cron | Sim, a cada minuto |
 | SSL | Certificado ativo no domínio (AutoSSL / Let's Encrypt) |

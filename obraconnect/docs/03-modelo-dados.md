@@ -196,6 +196,8 @@ O original de cada fotografia é guardado sem alterações (hash SHA-256 regista
 
 **Implementado na 0.12.0:** pontos de paragem em `checklist_templates.hold_point` e `inspections.hold_point` + `hold_released_at`/`hold_released_by_user_id` (sem atividades ainda: o ponto de paragem é da inspeção; a tabela `hold_points` fica para quando houver planeamento); `issues` (number único por obra, kind nonconformity/occurrence, severity minor/major/critical, status open/in_progress/resolved/closed/cancelled, local/elemento, specialty_id, inspection_id + inspection_item_id, **assignee_user_id** — utilizador da equipa, em vez de membership/subempreiteiro —, due_on, escalated_at, resolution_note, quem resolveu/fechou e quando); `issue_events` (created, comment, start, resolve, close, reopen, cancel, assigned, due_changed, escalated; user_name copiado; só se acrescenta); `media.issue_id`.
 
+**Implementado na 0.13.0:** `approvals_required` (1 a 3) em `checklist_templates` e `inspections`. A tabela genérica `approvals` não foi criada: as aprovações de uma inspeção são as linhas `approve`/`approve_with_reservations` do `inspection_events` depois da última `submit` (com `payload.step`/`payload.of`), já protegidas pela cadeia de hashes.
+
 | Tabela | Campos principais |
 | --- | --- |
 | `checklist_templates` | name, specialty_id, version, is_active |

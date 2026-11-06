@@ -20,6 +20,7 @@ use App\Models\Media;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\Specialty;
+use App\Notifications\Notifier;
 use App\Structure\Place;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class IssueController extends Controller
     public function __construct(
         private readonly Auditor $auditor,
         private readonly MediaStorage $media,
+        private readonly Notifier $notifier,
     ) {}
 
     public function index(Request $request, Project $project): AnonymousResourceCollection
@@ -141,6 +143,9 @@ class IssueController extends Controller
         });
 
         $this->auditor->record('issue.created', $issue, ['project' => $project->code, 'reference' => $issue->reference()]);
+        if ($issue->assignee_user_id !== null) {
+            $this->notifier->issueAssigned($project, $issue, $request->user());
+        }
 
         return $this->detail($project, $issue)->response()->setStatusCode(201);
     }
@@ -187,6 +192,9 @@ class IssueController extends Controller
         $changes = $this->auditor->changes($issue);
         if ($changes['new'] !== []) {
             $this->auditor->record('issue.updated', $issue, $changes);
+        }
+        if ($issue->assignee_user_id !== null && $issue->assignee_user_id !== $before['assignee']) {
+            $this->notifier->issueAssigned($project, $issue, $request->user());
         }
 
         return $this->detail($project, $issue);
@@ -238,6 +246,12 @@ class IssueController extends Controller
             'reference' => $issue->reference(),
             'reason' => $reason,
         ]));
+
+        match ($action) {
+            'resolve' => $this->notifier->issueResolved($project, $issue, $user),
+            'reopen' => $this->notifier->issueReopened($project, $issue, $user, $reason),
+            default => null,
+        };
 
         return $this->detail($project, $issue);
     }

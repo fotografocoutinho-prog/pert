@@ -329,11 +329,19 @@ function upload<T>(url: string, form: FormData, onProgress?: (percent: number) =
 export const checklistsApi = {
     list: () => getData<ChecklistTemplate[]>('/api/v1/checklist-templates'),
     get: (id: number) => getData<ChecklistTemplate>(`/api/v1/checklist-templates/${id}`),
-    create: async (payload: { name: string; description?: string | null; specialty_id?: number | null; hold_point?: boolean; items: ChecklistItemDef[] }) =>
+    create: async (payload: { name: string; description?: string | null; specialty_id?: number | null; hold_point?: boolean; approvals_required?: number; items: ChecklistItemDef[] }) =>
         (await http.post<{ data: ChecklistTemplate }>('/api/v1/checklist-templates', payload)).data.data,
     update: async (
         id: number,
-        payload: { name?: string; description?: string | null; specialty_id?: number | null; hold_point?: boolean; items?: ChecklistItemDef[]; archived?: boolean },
+        payload: {
+            name?: string;
+            description?: string | null;
+            specialty_id?: number | null;
+            hold_point?: boolean;
+            approvals_required?: number;
+            items?: ChecklistItemDef[];
+            archived?: boolean;
+        },
     ) => (await http.put<{ data: ChecklistTemplate }>(`/api/v1/checklist-templates/${id}`, payload)).data.data,
     remove: (id: number) => http.delete(`/api/v1/checklist-templates/${id}`),
 };

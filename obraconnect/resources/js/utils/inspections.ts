@@ -61,6 +61,12 @@ export function severityColor(severity: string): 'gray' | 'amber' | 'red' {
     return SEVERITY_COLORS[severity] ?? 'gray';
 }
 
+export const APPROVAL_OPTIONS = [
+    { value: 1, label: '1 aprovação' },
+    { value: 2, label: '2 aprovações (pessoas diferentes)' },
+    { value: 3, label: '3 aprovações (pessoas diferentes)' },
+];
+
 export const ISSUE_KINDS = [
     { value: 'nonconformity', label: 'Não conformidade' },
     { value: 'occurrence', label: 'Ocorrência' },

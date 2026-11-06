@@ -1,5 +1,26 @@
 # Registo de progresso
 
+## v0.13.0 — Fase 3, parte 3: aprovações em vários passos, relatório PDF e emails (2026-11-06)
+
+| Área | Verificação |
+| --- | --- |
+| Aprovações de 1 a 3 pessoas diferentes (herdadas da lista), "1 de 2" no histórico, quem já aprovou não repete, rejeição decide logo, devolução recomeça, reservas de qualquer uma passam à decisão com o nome de cada um | Testes + browser (1 de 2, botões de aprovar escondidos para quem já aprovou) |
+| Relatório PDF (decidida e provisória), só para quem vê inspeções, miniaturas embutidas, código de verificação | Testes + PDF aberto e conferido página a página |
+| Emails: pedido → quem faz; submissão → quem decide; decisão → quem pediu; ocorrência atribuída/resolvida/reaberta; nunca a quem fez a ação; texto dos utilizadores escapado | Testes (Mail::fake) |
+| Bibliotecas Symfony sem falhas conhecidas (`composer audit` limpo) | composer audit |
+
+Total: **166 testes, 1419 asserções**.
+
+Com esta parte, a **Fase 3 fica concluída**: listas de verificação, inspeções com 9 estados, evidências obrigatórias, índice de suficiência explicado, pontos de paragem, ocorrências/NC com escalonamento, aprovações em vários passos com cadeia imutável, relatório PDF e avisos por email.
+
+Decisões: "aprovações em vários passos" = número de aprovações de pessoas diferentes por inspeção (não um circuito de perfis fixos); o relatório é gerado a pedido e não guardado (o que conta como prova é o histórico encadeado, cujo último hash vai impresso); os avisos só vão para a equipa da obra.
+
+### Limitações
+
+- Não há forma de cada pessoa desligar os avisos por email.
+- O relatório mostra até 6 miniaturas por ponto (indica o total).
+- A ordem das aprovações não é imposta (qualquer pessoa com permissão pode ser a primeira).
+
 ## v0.12.0 — Fase 3, parte 2: pontos de paragem e ocorrências (2026-11-04)
 
 | Área | Verificação |

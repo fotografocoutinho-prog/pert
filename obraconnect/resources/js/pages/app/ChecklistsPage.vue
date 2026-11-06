@@ -6,7 +6,7 @@ import type { ChecklistItemDef, ChecklistTemplate, Specialty } from '@/api/types
 import { useForm } from '@/composables/useForm';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
-import { emptyChecklistItem, requirementsText } from '@/utils/inspections';
+import { APPROVAL_OPTIONS, emptyChecklistItem, requirementsText } from '@/utils/inspections';
 import { formatDate } from '@/utils/format';
 import ChecklistItemsEditor from '@/components/inspections/ChecklistItemsEditor.vue';
 import AppAlert from '@/components/ui/AppAlert.vue';
@@ -47,11 +47,11 @@ function replace(saved: ChecklistTemplate): void {
 const open = ref(false);
 const editing = ref<ChecklistTemplate | null>(null);
 const loadingTemplate = ref(false);
-const form = useForm({ name: '', description: '', specialty_id: '' as number | '', hold_point: false, items: [] as ChecklistItemDef[] });
+const form = useForm({ name: '', description: '', specialty_id: '' as number | '', hold_point: false, approvals_required: 1, items: [] as ChecklistItemDef[] });
 
 async function openEditor(template: ChecklistTemplate | null): Promise<void> {
     editing.value = template;
-    form.reset({ name: '', description: '', specialty_id: '', hold_point: false, items: [emptyChecklistItem()] });
+    form.reset({ name: '', description: '', specialty_id: '', hold_point: false, approvals_required: 1, items: [emptyChecklistItem()] });
     open.value = true;
     if (!template) return;
     loadingTemplate.value = true;
@@ -62,6 +62,7 @@ async function openEditor(template: ChecklistTemplate | null): Promise<void> {
             description: full.description ?? '',
             specialty_id: full.specialty_id ?? '',
             hold_point: full.hold_point,
+            approvals_required: full.approvals_required,
             items: (full.items ?? []).map((item) => ({ ...item, min_photos: item.min_photos || 1 })),
         });
     } finally {
@@ -82,6 +83,7 @@ async function save(): Promise<void> {
         description: form.data.description || null,
         specialty_id: form.data.specialty_id === '' ? null : Number(form.data.specialty_id),
         hold_point: form.data.hold_point,
+        approvals_required: Number(form.data.approvals_required),
         items: form.data.items.filter((i) => i.text.trim() !== ''),
     };
     const id = editing.value?.id;
@@ -141,6 +143,7 @@ async function view(template: ChecklistTemplate): Promise<void> {
                         <p class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                             <AppBadge v-if="t.archived">Arquivada</AppBadge>
                             <AppBadge v-if="t.hold_point" color="red">Ponto de paragem</AppBadge>
+                            <AppBadge v-if="t.approvals_required > 1" color="blue">{{ t.approvals_required }} aprovações</AppBadge>
                             <span v-if="t.specialty" class="font-mono font-semibold">{{ t.specialty.code }}</span>
                             <span>{{ t.items_count === 1 ? '1 ponto' : `${t.items_count} pontos` }}</span>
                             <span>· versão {{ t.version }}</span>
@@ -173,6 +176,12 @@ async function view(template: ChecklistTemplate): Promise<void> {
                     <AppSelect v-model="form.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="form.errors.value.specialty_id" />
                 </div>
                 <AppTextarea v-model="form.data.description" label="Descrição" :rows="2" :maxlength="2000" hint="Quando se usa, o que abrange (opcional)." />
+                <AppSelect
+                    v-model="form.data.approvals_required"
+                    label="Aprovações necessárias"
+                    :options="APPROVAL_OPTIONS"
+                    :error="form.errors.value.approvals_required"
+                />
                 <AppCheckbox
                     v-model="form.data.hold_point"
                     label="Ponto de paragem"

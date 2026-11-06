@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Enums\InspectionResult;
 use App\Enums\InspectionStatus;
+use App\Inspections\Approvals;
 use App\Inspections\ChecklistItems;
 use App\Inspections\EvidenceIndex;
 use App\Inspections\InspectionHistory;
@@ -49,6 +50,7 @@ class InspectionResource extends JsonResource
             'decision_note' => $this->decision_note,
             'evidence_score' => $this->evidence_score,
             'hold_point' => $this->hold_point,
+            'approvals_required' => $this->approvals_required,
             'hold_released_at' => $this->hold_released_at?->toIso8601String(),
             'hold_released_by' => $this->whenLoaded('holdReleasedBy', fn () => $this->holdReleasedBy?->name),
             'holding_work' => $this->hold_point && $this->hold_released_at === null && $this->status !== InspectionStatus::Cancelled
@@ -91,10 +93,23 @@ class InspectionResource extends JsonResource
                 ? $this->reinspections->map(fn (Inspection $r) => ['id' => $r->id, 'number' => $r->number, 'status_label' => $r->status->label()])->all()
                 : [],
             'evidence' => EvidenceIndex::evaluate($this->resource),
+            // Aprovações já dadas desde a última submissão.
+            'approvals' => [
+                'required' => $this->approvals_required,
+                'given' => $this->status === InspectionStatus::Submitted || in_array($this->status, [InspectionStatus::Approved, InspectionStatus::ApprovedWithReservations], true)
+                    ? Approvals::currentRound($this->resource)->map(fn (InspectionEvent $e) => [
+                        'user_name' => $e->user_name,
+                        'with_reservations' => $e->action === 'approve_with_reservations',
+                        'reason' => $e->reason,
+                        'created_at' => $e->created_at->toIso8601String(),
+                    ])->all()
+                    : [],
+            ],
             'events' => $this->events->map(fn (InspectionEvent $e) => [
                 'sequence' => $e->sequence,
                 'action' => $e->action,
-                'label' => InspectionWorkflow::eventLabel($e->action),
+                'label' => InspectionWorkflow::eventLabel($e->action)
+                    .(($e->payloadData()['of'] ?? 1) > 1 ? " ({$e->payloadData()['step']} de {$e->payloadData()['of']})" : ''),
                 'from_status' => $e->from_status,
                 'to_status' => $e->to_status,
                 'user_name' => $e->user_name,
@@ -126,7 +141,11 @@ class InspectionResource extends JsonResource
         $has = fn (array $permissions) => $open && Gate::any($permissions, $project);
 
         $actions = [];
+        $approvedAlready = $this->status === InspectionStatus::Submitted && Approvals::hasApproved($this->resource, (int) request()->user()?->id);
         foreach (InspectionWorkflow::actions() as $key => $action) {
+            if ($approvedAlready && in_array($key, Approvals::ACTIONS, true)) {
+                continue;
+            }
             if (in_array($this->status, $action['from'], true) && $has($action['permissions'])) {
                 $actions[] = ['key' => $key, 'label' => $action['label'], 'reason' => $action['reason']];
             }
