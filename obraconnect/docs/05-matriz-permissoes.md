@@ -67,10 +67,17 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 | `inspections.request` | Preparar, pedir, reinspeção, cancelar | ● | ● | ○ | ○ | ○ | | | | ○ | | | ○ | | |
 | `inspections.perform` | Agendar e fazer (pontos e evidências) | ● | | | | | | ○ | ○ | ○ | | | | | |
 | `inspections.approve` | Decidir, devolver, cancelar | ● | | | | | | ○ | ○ | | | | | | |
+| `inspections.release_hold_point` | Libertar pontos de paragem | ● | | | | | | ○ | | | | | | | |
+| `issues.view` | Consultar ocorrências e NC | ● | ● | ○ | ○ | ○ | | ○ | ○ | ○ | | ○ | ○ | | ○ |
+| `issues.create` | Registar, comentar, fotografias | ● | ● | ○ | ○ | ○ | | ○ | ○ | ○ | | ○ | ○ | | ○ |
+| `issues.resolve` | Resolver as que lhe estão atribuídas | ● | ● | ○ | ○ | | | | | | | | ○ | | |
+| `issues.validate` | Validar, reabrir, anular, mudar responsável e prazo | ● | ● | ○ | | | | ○ | ○ | ○ | | | | | |
 
 Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); departamentos e centros de custo (0.9.0) consultam-se com `company.view`; as especialidades (0.10.0) também com `projects.view`, porque subempreiteiros e fornecedores classificam os documentos que enviam (os centros também com `projects.create`/`projects.update`, para os escolher nas obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
 
-Inspeções (0.11.0): vê as inspeções de uma obra quem tem lá qualquer uma das três permissões de inspeção (não há `inspections.view`); as fotografias de evidência seguem a mesma regra, e não `diary.view`. As listas de verificação consultam-se com `checklists.manage` ou com uma permissão de inspeção (para as escolher ao criar). `inspections.release_hold_point` chega com os pontos de paragem.
+Inspeções (0.11.0): vê as inspeções de uma obra quem tem lá qualquer uma das três permissões de inspeção (não há `inspections.view`); as fotografias de evidência seguem a mesma regra, e não `diary.view`. As listas de verificação consultam-se com `checklists.manage` ou com uma permissão de inspeção (para as escolher ao criar). `inspections.release_hold_point` (0.12.0) liberta pontos de paragem só depois de a inspeção ser aprovada.
+
+Ocorrências (0.12.0): `issues.resolve` só deixa resolver as ocorrências de que a pessoa é responsável (ou sem responsável), a menos que também tenha `issues.validate`; alterar uma ocorrência é de quem a registou ou de quem valida. O suporte técnico autorizado vê as ocorrências (é uma permissão `.view`).
 
 Estrutura (0.5.0): ver a estrutura só exige `projects.view`. O medidor-orçamentista gere a estrutura em todas as obras (tem `projects.all`).
 

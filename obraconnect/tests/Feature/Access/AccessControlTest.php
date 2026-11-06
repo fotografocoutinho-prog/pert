@@ -26,7 +26,7 @@ class AccessControlTest extends TestCase
 
         // "Ver obras" sem projects.all: só vale nas obras de cuja equipa faz parte.
         $this->actingAs($worker)->getJson('/api/v1/me')
-            ->assertJsonPath('data.current.permissions', ['company.view', 'projects.view', 'documents.view']);
+            ->assertJsonPath('data.current.permissions', ['company.view', 'projects.view', 'documents.view', 'issues.view', 'issues.create']);
     }
 
     public function test_member_without_permission_gets_403(): void

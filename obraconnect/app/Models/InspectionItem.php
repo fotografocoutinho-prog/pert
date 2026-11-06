@@ -43,6 +43,11 @@ class InspectionItem extends Model
         return $this->hasMany(Media::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    public function issues(): HasMany
+    {
+        return $this->hasMany(Issue::class);
+    }
+
     public function answeredBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'answered_by_user_id');

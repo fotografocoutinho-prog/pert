@@ -51,7 +51,7 @@ class ChecklistTemplateController extends Controller
         $items = ChecklistItems::normalize($data['items']);
 
         $template = DB::transaction(function () use ($data, $items, $request): ChecklistTemplate {
-            $template = new ChecklistTemplate(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id'])));
+            $template = new ChecklistTemplate(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point'])));
             $template->created_by_user_id = $request->user()->id;
             $template->save();
             $template->items()->createMany($items);
@@ -72,7 +72,7 @@ class ChecklistTemplateController extends Controller
         $template = $checklistTemplate;
 
         DB::transaction(function () use ($data, $template): void {
-            $template->fill(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id'])));
+            $template->fill(array_intersect_key($data, array_flip(['name', 'description', 'specialty_id', 'hold_point'])));
             if (array_key_exists('archived', $data) && (bool) $data['archived'] !== $template->isArchived()) {
                 $template->archived_at = $data['archived'] ? now() : null;
             }
@@ -129,6 +129,7 @@ class ChecklistTemplateController extends Controller
             'name' => [$required, 'string', 'max:150'],
             'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'specialty_id' => Specialty::rules($template?->specialty_id),
+            'hold_point' => ['sometimes', 'boolean'],
             'archived' => $template ? ['sometimes', 'boolean'] : ['prohibited'],
         ] + ChecklistItems::rules('items', required: $template === null), [], [
             'name' => 'nome',
@@ -164,6 +165,7 @@ class ChecklistTemplateController extends Controller
             'specialty_id' => $template->specialty_id,
             'specialty' => $template->specialty ? ['id' => $template->specialty->id, 'code' => $template->specialty->code, 'name' => $template->specialty->name] : null,
             'version' => $template->version,
+            'hold_point' => $template->hold_point,
             'archived' => $template->isArchived(),
             'items_count' => (int) $template->items_count,
             'inspections_count' => (int) $template->inspections_count,

@@ -87,6 +87,15 @@ const specialtyOptions = computed(() => [
         .filter((s) => !s.archived || s.id === editing.value?.specialty_id)
         .map((s) => ({ value: s.id, label: `${s.code} · ${s.name}` })),
 ]);
+/** Pontos de paragem por libertar: no elemento, ou no local (sem elemento). */
+const holdsOnElement = (id: number) =>
+    (structure.value?.holds ?? []).filter((h) => h.element_id === id);
+const holdsAtLocation = (id: number) =>
+    (structure.value?.holds ?? []).filter(
+        (h) => h.element_id === null && h.location_id === id,
+    );
+const holdTitle = (holds: { number: number }[]) =>
+    `Ponto de paragem por libertar: ${holds.map((h) => `inspeção n.º ${h.number}`).join(', ')}`;
 const specialtyCode = (id: number | null) =>
     structure.value?.specialties?.find((s) => s.id === id)?.code ?? null;
 const specialtyName = (id: number | null) =>
@@ -343,6 +352,14 @@ async function removeElement(): Promise<void> {
                         <span class="font-medium text-slate-900">{{
                             loc.name
                         }}</span>
+                        <RouterLink
+                            v-for="h in holdsAtLocation(loc.id)"
+                            :key="h.inspection_id"
+                            :to="`/app/obras/${project.id}/inspecoes/${h.inspection_id}`"
+                            class="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-800 hover:underline"
+                            :title="holdTitle([h])"
+                            >Parado · insp. {{ h.number }}</RouterLink
+                        >
                     </p>
                     <div class="flex flex-wrap gap-1">
                         <AppButton
@@ -395,13 +412,21 @@ async function removeElement(): Promise<void> {
                     <li v-for="el in elementsOf(loc.id)" :key="el.id">
                         <button
                             type="button"
-                            class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs text-slate-700 hover:border-brand-300 disabled:cursor-default"
+                            class="rounded-full border px-2.5 py-0.5 text-xs hover:border-brand-300 disabled:cursor-default"
+                            :class="
+                                holdsOnElement(el.id).length
+                                    ? 'border-red-300 bg-red-50 text-red-800'
+                                    : 'border-slate-200 bg-slate-50 text-slate-700'
+                            "
                             :title="
                                 [
                                     el.element_type_label,
                                     el.name,
                                     specialtyName(el.specialty_id),
                                     el.notes,
+                                    holdsOnElement(el.id).length
+                                        ? holdTitle(holdsOnElement(el.id))
+                                        : null,
                                 ]
                                     .filter(Boolean)
                                     .join(' · ')
@@ -414,6 +439,11 @@ async function removeElement(): Promise<void> {
                                 v-if="specialtyCode(el.specialty_id)"
                                 class="ml-0.5 text-[10px] font-semibold text-slate-500"
                                 >{{ specialtyCode(el.specialty_id) }}</span
+                            >
+                            <span
+                                v-if="holdsOnElement(el.id).length"
+                                class="ml-0.5 text-[10px] font-bold text-red-700"
+                                >PARADO</span
                             >
                         </button>
                     </li>

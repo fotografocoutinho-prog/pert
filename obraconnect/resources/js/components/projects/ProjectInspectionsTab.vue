@@ -34,6 +34,7 @@ const GROUPS = [
     { key: 'open', label: 'Por fazer' },
     { key: 'review', label: 'Em apreciação' },
     { key: 'closed', label: 'Fechadas' },
+    { key: 'holds', label: 'Pontos de paragem' },
     { key: 'all', label: 'Todas' },
 ];
 const group = ref('all');
@@ -84,6 +85,7 @@ const form = useForm({
     specialty_id: '' as number | '',
     scheduled_for: '',
     remote: false,
+    hold_point: false,
     items: [] as ChecklistItemDef[],
 });
 
@@ -105,6 +107,7 @@ watch(
     (id) => {
         const template = templates.value.find((t) => t.id === id);
         if (template?.specialty_id) form.data.specialty_id = template.specialty_id;
+        form.data.hold_point = template?.hold_point ?? false;
     },
 );
 
@@ -115,6 +118,7 @@ async function create(): Promise<void> {
         specialty_id: form.data.specialty_id === '' ? null : Number(form.data.specialty_id),
         scheduled_for: form.data.scheduled_for || null,
         remote: form.data.remote,
+        hold_point: form.data.hold_point,
         ...toIds(form.data.place),
     };
     if (fromTemplate) payload.checklist_template_id = Number(form.data.checklist_template_id);
@@ -161,7 +165,13 @@ async function create(): Promise<void> {
             <EmptyState
                 v-else-if="inspections.length === 0"
                 title="Sem inspeções"
-                :description="canRequest && group === 'all' && !search ? 'Prepare uma inspeção a partir de uma lista de verificação da empresa ou escreva os pontos à mão.' : undefined"
+                :description="
+                    group === 'holds'
+                        ? 'Nenhum trabalho parado à espera de libertação.'
+                        : canRequest && group === 'all' && !search
+                          ? 'Prepare uma inspeção a partir de uma lista de verificação da empresa ou escreva os pontos à mão.'
+                          : undefined
+                "
             />
             <ul v-else class="divide-y divide-slate-100">
                 <li v-for="i in inspections" :key="i.id">
@@ -182,6 +192,8 @@ async function create(): Promise<void> {
                         <div class="flex flex-wrap items-center gap-1.5">
                             <span v-if="i.items_count" class="text-xs text-slate-500">{{ i.answered_count }}/{{ i.items_count }}</span>
                             <AppBadge v-if="i.nok_count" color="red">{{ i.nok_count }} NC</AppBadge>
+                            <AppBadge v-if="i.holding_work" color="red">Parado</AppBadge>
+                            <AppBadge v-else-if="i.hold_point && i.hold_released_at" color="green">Libertado</AppBadge>
                             <AppBadge v-if="i.evidence_score !== null" color="blue" :title="'Índice de evidências'">{{ i.evidence_score }}%</AppBadge>
                             <AppBadge :color="inspectionStatusColor(i.status)">{{ i.status_label }}</AppBadge>
                         </div>
@@ -212,8 +224,9 @@ async function create(): Promise<void> {
                     </div>
                     <AppSelect v-model="form.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="form.errors.value.specialty_id" />
                     <AppInput v-model="form.data.scheduled_for" type="datetime-local" label="Data pretendida" hint="Quem inspeciona confirma ao agendar." :error="form.errors.value.scheduled_for" />
-                    <div class="sm:pt-7">
+                    <div class="space-y-3 sm:pt-7">
                         <AppCheckbox v-model="form.data.remote" label="Inspeção remota" description="Feita por fotografias: cada ponto deve ter pelo menos uma." />
+                        <AppCheckbox v-model="form.data.hold_point" label="Ponto de paragem" description="Os trabalhos param até a inspeção ser aprovada e libertada." />
                     </div>
                 </div>
                 <div v-if="form.data.checklist_template_id === ''">

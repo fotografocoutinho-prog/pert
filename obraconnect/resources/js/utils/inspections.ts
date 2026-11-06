@@ -42,3 +42,32 @@ export function requirementsText(item: ChecklistItemDef): string[] {
 export function emptyChecklistItem(): ChecklistItemDef {
     return { text: '', guidance: null, requires_photo: false, min_photos: 1, requires_measure: false, measure_unit: null, measure_min: null, measure_max: null };
 }
+
+const ISSUE_STATUS_COLORS: Record<string, 'gray' | 'green' | 'amber' | 'red' | 'brand'> = {
+    open: 'red',
+    in_progress: 'brand',
+    resolved: 'amber',
+    closed: 'green',
+    cancelled: 'gray',
+};
+
+export function issueStatusColor(status: string): 'gray' | 'green' | 'amber' | 'red' | 'brand' {
+    return ISSUE_STATUS_COLORS[status] ?? 'gray';
+}
+
+const SEVERITY_COLORS: Record<string, 'gray' | 'amber' | 'red'> = { minor: 'gray', major: 'amber', critical: 'red' };
+
+export function severityColor(severity: string): 'gray' | 'amber' | 'red' {
+    return SEVERITY_COLORS[severity] ?? 'gray';
+}
+
+export const ISSUE_KINDS = [
+    { value: 'nonconformity', label: 'Não conformidade' },
+    { value: 'occurrence', label: 'Ocorrência' },
+];
+
+export const ISSUE_SEVERITIES = [
+    { value: 'minor', label: 'Menor' },
+    { value: 'major', label: 'Maior' },
+    { value: 'critical', label: 'Crítica' },
+];

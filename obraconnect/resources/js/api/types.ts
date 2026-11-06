@@ -532,6 +532,8 @@ export interface ProjectStructure {
     locations: ProjectLocationItem[];
     elements: ConstructionElementItem[];
     element_types: { value: string; label: string; prefix: string }[];
+    /** Pontos de paragem por libertar (versões antigas da cópia sem rede não têm). */
+    holds?: { inspection_id: number; number: number; title: string; status_label: string; location_id: number | null; element_id: number | null }[];
     specialties: SpecialtyRef[];
 }
 
@@ -575,6 +577,7 @@ export interface ChecklistTemplate {
     specialty_id: number | null;
     specialty: SpecialtyRef | null;
     version: number;
+    hold_point: boolean;
     archived: boolean;
     items_count: number;
     inspections_count: number;
@@ -606,6 +609,7 @@ export interface InspectionItem extends ChecklistItemDef {
     answered_by: string | null;
     answered_at: string | null;
     photos: MediaItem[];
+    issues: { id: number; number: number; status: IssueStatus; status_label: string }[];
 }
 
 /** Índice de suficiência das evidências, explicado critério a critério. */
@@ -649,6 +653,11 @@ export interface Inspection {
     decided_at: string | null;
     decision_note: string | null;
     evidence_score: number | null;
+    hold_point: boolean;
+    hold_released_at: string | null;
+    hold_released_by?: string | null;
+    /** Ponto de paragem por libertar: trabalhos parados. */
+    holding_work: boolean;
     requested_by?: string | null;
     inspector?: string | null;
     decided_by?: string | null;
@@ -672,7 +681,68 @@ export interface InspectionDetail extends Inspection {
         edit: boolean;
         fill: boolean;
         reinspect: boolean;
+        release_hold: boolean;
+        raise_issue: boolean;
         has_nok: boolean;
         actions: { key: string; label: string; reason: boolean }[];
     };
+}
+
+export type IssueStatus = 'open' | 'in_progress' | 'resolved' | 'closed' | 'cancelled';
+
+export interface Issue {
+    id: number;
+    project_id: number;
+    number: number;
+    reference: string;
+    kind: 'nonconformity' | 'occurrence';
+    kind_label: string;
+    severity: 'minor' | 'major' | 'critical';
+    severity_label: string;
+    status: IssueStatus;
+    status_label: string;
+    title: string;
+    location_id: number | null;
+    element_id: number | null;
+    specialty_id: number | null;
+    specialty?: SpecialtyRef | null;
+    assignee_user_id: number | null;
+    assignee?: string | null;
+    due_on: string | null;
+    overdue: boolean;
+    escalated_at: string | null;
+    inspection?: { id: number; number: number; title: string } | null;
+    photos_count?: number;
+    created_at: string | null;
+}
+
+export interface IssueEventItem {
+    id: number;
+    type: string;
+    label: string;
+    user_name: string | null;
+    body: string | null;
+    payload: Record<string, unknown> | null;
+    created_at: string;
+}
+
+export interface IssueDetail extends Issue {
+    description: string | null;
+    inspection_item_id: number | null;
+    inspection_item_number: number | null;
+    resolution_note: string | null;
+    resolved_by: string | null;
+    resolved_at: string | null;
+    closed_by: string | null;
+    closed_at: string | null;
+    created_by: string | null;
+    photos: (MediaItem & { can_remove: boolean })[];
+    events: IssueEventItem[];
+    can: { edit: boolean; validate: boolean; comment: boolean; photos: boolean; actions: { key: string; label: string; reason: boolean }[] };
+}
+
+export interface IssueAssignee {
+    user_id: number;
+    name: string;
+    role: string;
 }

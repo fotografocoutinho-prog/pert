@@ -31,6 +31,11 @@ Schedule::call(fn () => Artisan::call('obraconnect:subscriptions-sweep'))
     ->name('obraconnect-subscricoes')
     ->dailyAt('02:15')
     ->withoutOverlapping();
+Schedule::call(fn () => Artisan::call('obraconnect:escalate-issues'))
+    ->name('obraconnect-escalonamento')
+    ->dailyAt('07:30')
+    ->timezone('Europe/Lisbon')
+    ->withoutOverlapping();
 Schedule::call(fn () => Artisan::call('obraconnect:prune-exports'))->hourly()->name('obraconnect-exportacoes');
 Schedule::call(fn () => Artisan::call('sanctum:prune-expired', ['--hours' => 24]))->daily()->name('obraconnect-tokens');
 Schedule::call(fn () => Artisan::call('auth:clear-resets'))->daily()->name('obraconnect-reposicoes');

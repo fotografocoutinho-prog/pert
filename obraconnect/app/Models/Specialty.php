@@ -64,6 +64,11 @@ class Specialty extends Model
         return $this->hasMany(Inspection::class);
     }
 
+    public function issues(): HasMany
+    {
+        return $this->hasMany(Issue::class);
+    }
+
     public function isArchived(): bool
     {
         return $this->archived_at !== null;
@@ -72,7 +77,7 @@ class Specialty extends Model
     public function isReferenced(): bool
     {
         return $this->elements()->exists() || $this->documents()->exists()
-            || $this->checklistTemplates()->exists() || $this->inspections()->exists();
+            || $this->checklistTemplates()->exists() || $this->inspections()->exists() || $this->issues()->exists();
     }
 
     /**

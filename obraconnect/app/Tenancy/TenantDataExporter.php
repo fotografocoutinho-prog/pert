@@ -11,6 +11,7 @@ use App\Models\DiaryEntry;
 use App\Models\Document;
 use App\Models\Inspection;
 use App\Models\Invitation;
+use App\Models\Issue;
 use App\Models\Media;
 use App\Models\Membership;
 use App\Models\Project;
@@ -158,6 +159,7 @@ class TenantDataExporter
                 'diary_date' => $m->diaryEntry?->entry_date->toDateString(),
                 'inspection_id' => $m->inspectionItem?->inspection_id,
                 'inspection_item_id' => $m->inspection_item_id,
+                'issue_id' => $m->issue_id,
                 'original_name' => $m->original_name,
                 'mime' => $m->mime,
                 'size_bytes' => $m->size_bytes,
@@ -215,6 +217,7 @@ class TenantDataExporter
                 'description' => $t->description,
                 'specialty_id' => $t->specialty_id,
                 'version' => $t->version,
+                'hold_point' => $t->hold_point,
                 'archived_at' => $t->archived_at?->toIso8601String(),
                 'items' => $t->items->map(fn ($i) => $i->only(['text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max'])),
             ]);
@@ -239,6 +242,8 @@ class TenantDataExporter
                 'scheduled_for' => $i->scheduled_for?->toIso8601String(),
                 'evidence_score' => $i->evidence_score,
                 'decision_note' => $i->decision_note,
+                'hold_point' => $i->hold_point,
+                'hold_released_at' => $i->hold_released_at?->toIso8601String(),
                 'items' => $i->items->map(fn ($item) => ['id' => $item->id] + $item->only([
                     'text', 'guidance', 'requires_photo', 'min_photos', 'requires_measure', 'measure_unit', 'measure_min', 'measure_max',
                     'measure_value', 'notes',
@@ -246,6 +251,31 @@ class TenantDataExporter
                 'events' => $i->events->map(fn ($e) => $e->only([
                     'sequence', 'action', 'from_status', 'to_status', 'user_id', 'user_name', 'reason', 'payload', 'prev_hash', 'hash',
                 ]) + ['created_at' => $e->created_at->format('Y-m-d H:i:s')]),
+            ]);
+
+        $this->sections['issues'] = fn () => Issue::query()->with(['project:id,code', 'assignee:id,name', 'events'])
+            ->orderBy('project_id')->orderBy('number')->lazy(200)
+            ->map(fn (Issue $i) => [
+                'id' => $i->id,
+                'project' => $i->project->code,
+                'reference' => $i->reference(),
+                'kind' => $i->kind->value,
+                'severity' => $i->severity->value,
+                'status' => $i->status->value,
+                'title' => $i->title,
+                'description' => $i->description,
+                'location_id' => $i->location_id,
+                'element_id' => $i->element_id,
+                'specialty_id' => $i->specialty_id,
+                'inspection_id' => $i->inspection_id,
+                'inspection_item_id' => $i->inspection_item_id,
+                'assignee' => $i->assignee?->name,
+                'due_on' => $i->due_on?->toDateString(),
+                'escalated_at' => $i->escalated_at?->toIso8601String(),
+                'resolution_note' => $i->resolution_note,
+                'resolved_at' => $i->resolved_at?->toIso8601String(),
+                'closed_at' => $i->closed_at?->toIso8601String(),
+                'events' => $i->events->map(fn ($e) => $e->only(['type', 'user_name', 'body', 'payload']) + ['created_at' => $e->created_at->toIso8601String()]),
             ]);
 
         $this->sections['audit_logs'] = fn (Tenant $t) => AuditLog::query()->forTenant($t->id)->orderBy('id')->lazy(1000)

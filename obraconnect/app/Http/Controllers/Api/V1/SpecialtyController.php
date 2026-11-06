@@ -75,7 +75,7 @@ class SpecialtyController extends Controller
         $this->authorize('specialties.manage');
 
         if ($specialty->isReferenced()) {
-            throw ApiException::conflict('Há elementos, documentos, listas de verificação ou inspeções com esta especialidade. Arquive-a em vez de a apagar.', 'SPECIALTY_IN_USE');
+            throw ApiException::conflict('Há elementos, documentos, listas de verificação, inspeções ou ocorrências com esta especialidade. Arquive-a em vez de a apagar.', 'SPECIALTY_IN_USE');
         }
 
         $specialty->delete();

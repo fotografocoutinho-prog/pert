@@ -15,7 +15,7 @@ final class PermissionRegistry
     public const ALL_PROJECTS = 'projects.all';
 
     /** Módulos cujas permissões valem obra a obra. */
-    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure', 'inspections'];
+    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure', 'inspections', 'issues'];
 
     /** Exceções nesses módulos: valem para a empresa. */
     private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
@@ -139,6 +139,16 @@ final class PermissionRegistry
                     'inspections.request' => 'Preparar e pedir inspeções, pedir reinspeções e cancelar as que ainda não foram decididas',
                     'inspections.perform' => 'Agendar e fazer inspeções: verificar os pontos e juntar evidências',
                     'inspections.approve' => 'Decidir inspeções: aprovar, aprovar com reservas, rejeitar ou devolver para completar',
+                    'inspections.release_hold_point' => 'Libertar pontos de paragem (depois de a inspeção ser aprovada)',
+                ],
+            ],
+            'issues' => [
+                'label' => 'Ocorrências e não conformidades',
+                'permissions' => [
+                    'issues.view' => 'Consultar ocorrências e não conformidades',
+                    'issues.create' => 'Registar ocorrências e não conformidades, comentar e juntar fotografias',
+                    'issues.resolve' => 'Resolver as ocorrências de que é responsável',
+                    'issues.validate' => 'Validar e fechar, reabrir e anular ocorrências; mudar responsável e prazo de qualquer uma',
                 ],
             ],
         ];

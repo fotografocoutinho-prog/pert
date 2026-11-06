@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\InspectionStatus;
 use App\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Inspeção de uma obra. Em rascunho prepara-se (pontos, local, data pretendida); depois só
  * muda por App\Inspections\InspectionWorkflow e cada passagem fica no histórico encadeado.
  */
-#[Fillable(['title', 'description', 'location_id', 'element_id', 'specialty_id', 'scheduled_for', 'remote'])]
+#[Fillable(['title', 'description', 'location_id', 'element_id', 'specialty_id', 'scheduled_for', 'remote', 'hold_point'])]
 class Inspection extends Model
 {
     use BelongsToTenant;
@@ -21,6 +22,7 @@ class Inspection extends Model
     protected $attributes = [
         'status' => 'draft',
         'remote' => false,
+        'hold_point' => false,
     ];
 
     protected function casts(): array
@@ -36,6 +38,8 @@ class Inspection extends Model
             'submitted_at' => 'datetime',
             'decided_at' => 'datetime',
             'evidence_score' => 'integer',
+            'hold_point' => 'boolean',
+            'hold_released_at' => 'datetime',
         ];
     }
 
@@ -102,6 +106,35 @@ class Inspection extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function holdReleasedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'hold_released_by_user_id');
+    }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(Issue::class);
+    }
+
+    /**
+     * Ponto de paragem por libertar: os trabalhos estão parados. Uma inspeção cancelada não segura
+     * nada; uma que já tem reinspeção passa o ponto de paragem à reinspeção.
+     */
+    public function scopeHoldingWork(Builder $query): void
+    {
+        $query->where('hold_point', true)
+            ->whereNull('hold_released_at')
+            ->where('status', '!=', InspectionStatus::Cancelled->value)
+            ->whereDoesntHave('reinspections');
+    }
+
+    public function isHoldingWork(): bool
+    {
+        $hasReinspection = $this->relationLoaded('reinspections') ? $this->reinspections->isNotEmpty() : $this->reinspections()->exists();
+
+        return $this->hold_point && $this->hold_released_at === null && $this->status !== InspectionStatus::Cancelled && ! $hasReinspection;
     }
 
     public function isDraft(): bool

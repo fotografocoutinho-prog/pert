@@ -7,6 +7,7 @@ use App\Billing\StorageUsage;
 use App\Jobs\GeneratePhotoPreviews;
 use App\Models\DiaryEntry;
 use App\Models\InspectionItem;
+use App\Models\Issue;
 use App\Models\Media;
 use App\Models\Project;
 use App\Models\User;
@@ -37,6 +38,12 @@ class MediaStorage
     public function storeInspectionPhoto(Project $project, InspectionItem $item, UploadedFile $file, string $mime, ?string $caption, User $by): Media
     {
         return $this->store($project, ['inspection_item_id' => $item->id], (int) $item->photos()->max('sort_order') + 1, $file, $mime, $caption, $by);
+    }
+
+    /** Fotografia de uma ocorrência ou não conformidade. */
+    public function storeIssuePhoto(Project $project, Issue $issue, UploadedFile $file, string $mime, ?string $caption, User $by): Media
+    {
+        return $this->store($project, ['issue_id' => $issue->id], (int) $issue->photos()->max('sort_order') + 1, $file, $mime, $caption, $by);
     }
 
     /** @param  array<string, int>  $owner  coluna do dono => id */

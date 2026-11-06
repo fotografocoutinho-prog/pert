@@ -1,5 +1,27 @@
 # Registo de progresso
 
+## v0.12.0 — Fase 3, parte 2: pontos de paragem e ocorrências (2026-11-04)
+
+| Área | Verificação |
+| --- | --- |
+| Ponto de paragem por omissão a partir da lista, em rascunho editável; elemento parado na estrutura; só se liberta depois de aprovada e com a permissão; libertação no histórico encadeado; reinspeção herda; cancelada não para | Testes + browser (estrutura mostra PARADO e deixa de mostrar após libertar) |
+| Ocorrências: criar com responsável da equipa e prazo (não no passado), começar/resolver só pelo responsável, reabrir e fechar por quem valida, anular com motivo, comentários e fotografias, historial | Testes + browser (NC aberta, editada, resolvida e fechada) |
+| NC a partir de um ponto não conforme (texto, nota, local, especialidade; só pontos NC da mesma obra) e ligação mostrada no ponto | Testes + browser |
+| Escalonamento: só por resolver e atrasadas, uma vez por prazo, um email por pessoa (responsável + diretores de obra; sem diretor, administradores); mudar prazo volta a permitir | Testes (Mail::fake) + email montado à mão |
+| Permissões por perfil e equipa, edição só por quem registou ou valida, obra arquivada, isolamento, exportação | Testes |
+| Ecrãs em 360 px sem deslizamento lateral | Browser |
+
+Total: **162 testes, 1334 asserções**.
+
+Decisões: sem atividades (fase 4), o ponto de paragem pertence à inspeção e para o local/elemento dela; o responsável de uma ocorrência é um utilizador da equipa da obra (não um subempreiteiro como entidade, que chega na fase 4); "escala ao diretor de obra" = diretores de obra da equipa da obra, com os administradores como recurso.
+
+### Limitações
+
+- O escalonamento é diário e único por prazo; não há lembretes antes do prazo nem segundo nível de escalonamento.
+- O email só sai se a fila do servidor estiver a correr (cron do `schedule:run`, já configurado em produção).
+- Ocorrências e inspeções não funcionam sem rede.
+- Aprovações em vários passos, relatório PDF e restantes emails: parte seguinte da fase 3.
+
 ## v0.11.0 — Fase 3, parte 1: listas de verificação e inspeções (2026-11-04)
 
 | Área | Verificação |

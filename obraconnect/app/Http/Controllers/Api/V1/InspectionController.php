@@ -43,7 +43,8 @@ class InspectionController extends Controller
     private const DETAIL = [
         'items.photos.uploadedBy:id,name', 'items.answeredBy:id,name', 'events',
         'specialty:id,code,name', 'template:id,name', 'reinspectionOf:id,number', 'reinspections:id,number,status,reinspection_of_id',
-        'requestedBy:id,name', 'inspector:id,name', 'decidedBy:id,name', 'createdBy:id,name',
+        'requestedBy:id,name', 'inspector:id,name', 'decidedBy:id,name', 'createdBy:id,name', 'holdReleasedBy:id,name',
+        'items.issues:id,number,kind,status,inspection_item_id',
     ];
 
     public function __construct(
@@ -56,7 +57,7 @@ class InspectionController extends Controller
         $this->authorizeView($project);
 
         $filters = $request->validate([
-            'group' => ['nullable', Rule::in(['open', 'review', 'closed', 'all'])],
+            'group' => ['nullable', Rule::in(['open', 'review', 'closed', 'holds', 'all'])],
             'search' => ['nullable', 'string', 'max:100'],
         ]);
         $search = trim($filters['search'] ?? '');
@@ -68,7 +69,9 @@ class InspectionController extends Controller
                 'items as answered_count' => fn ($q) => $q->whereNotNull('result'),
                 'items as nok_count' => fn ($q) => $q->where('result', InspectionResult::Nok->value),
             ])
-            ->when(($filters['group'] ?? 'all') !== 'all', fn ($q) => $q->whereIn('status', InspectionStatus::group($filters['group'])))
+            ->withCount('reinspections')
+            ->when(($filters['group'] ?? 'all') === 'holds', fn ($q) => $q->holdingWork())
+            ->when(! in_array($filters['group'] ?? 'all', ['all', 'holds'], true), fn ($q) => $q->whereIn('status', InspectionStatus::group($filters['group'])))
             ->when($search !== '', fn ($q) => $q->where(fn ($w) => $w->where('title', 'like', '%'.addcslashes($search, '%_\\').'%')
                 ->when(ctype_digit($search), fn ($n) => $n->orWhere('number', (int) $search))))
             ->orderByDesc('number')
@@ -97,6 +100,7 @@ class InspectionController extends Controller
             $inspection = $project->inspections()->make($this->headerFields($project, $data) + [
                 'title' => trim($data['title'] ?? '') ?: ($template?->name ?? "Inspeção n.º {$number}"),
                 'specialty_id' => array_key_exists('specialty_id', $data) ? $data['specialty_id'] : $template?->specialty_id,
+                'hold_point' => array_key_exists('hold_point', $data) ? (bool) $data['hold_point'] : (bool) $template?->hold_point,
             ]);
             $inspection->number = $number;
             $inspection->checklist_template_id = $template?->id;
@@ -196,7 +200,7 @@ class InspectionController extends Controller
                 case 'request':
                     $locked->requested_by_user_id = $user->id;
                     $locked->requested_at = now();
-                    $payload = ['items' => $this->snapshotRequested($locked)];
+                    $payload = ['items' => $this->snapshotRequested($locked), 'hold_point' => $locked->hold_point];
                     break;
                 case 'schedule':
                     $locked->scheduled_for = $data['scheduled_for'];
@@ -253,6 +257,36 @@ class InspectionController extends Controller
         return $this->detail($project, $inspection);
     }
 
+    /**
+     * Liberta o ponto de paragem de uma inspeção aprovada (com ou sem reservas). Não muda o estado,
+     * mas fica no histórico encadeado como qualquer decisão.
+     */
+    public function releaseHold(Request $request, Project $project, Inspection $inspection): InspectionResource
+    {
+        $this->authorize('inspections.release_hold_point', $project);
+        $this->assertProjectOpen($project);
+        $note = $request->validate(['note' => ['nullable', 'string', 'max:2000']], [], ['note' => 'observação'])['note'] ?? null;
+        $note = filled($note) ? trim($note) : null;
+
+        DB::transaction(function () use ($inspection, $note, $request): void {
+            $locked = Inspection::query()->lockForUpdate()->findOrFail($inspection->id);
+            if (! $locked->hold_point || $locked->hold_released_at !== null) {
+                throw ApiException::conflict('Esta inspeção não tem um ponto de paragem por libertar.', 'NO_HOLD_POINT');
+            }
+            $this->assertStatus($locked, [InspectionStatus::Approved, InspectionStatus::ApprovedWithReservations], 'libertar o ponto de paragem antes de a aprovar');
+
+            $locked->hold_released_at = now();
+            $locked->hold_released_by_user_id = $request->user()->id;
+            $locked->save();
+            $this->history->record($locked, 'hold_released', $locked->status, $locked->status, $request->user(), $note);
+        });
+
+        $inspection->refresh();
+        $this->auditor->record('inspection.hold_released', $inspection, ['project' => $project->code, 'number' => $inspection->number]);
+
+        return $this->detail($project, $inspection);
+    }
+
     /** Nova inspeção (rascunho) com os mesmos pontos, depois de rejeitada ou aprovada com reservas. */
     public function reinspect(Request $request, Project $project, Inspection $inspection): JsonResponse
     {
@@ -263,7 +297,7 @@ class InspectionController extends Controller
         $copy = DB::transaction(function () use ($project, $inspection, $request): Inspection {
             Inspection::query()->lockForUpdate()->findOrFail($inspection->id);
 
-            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote']));
+            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote', 'hold_point']));
             $copy->title = Str::limit("Reinspeção da n.º {$inspection->number}: {$inspection->title}", 200, '');
             $copy->number = $this->nextNumber($project);
             $copy->checklist_template_id = $inspection->checklist_template_id;
@@ -312,6 +346,7 @@ class InspectionController extends Controller
             'specialty_id' => Specialty::rules($inspection?->specialty_id),
             'scheduled_for' => ['sometimes', 'nullable', 'date'],
             'remote' => ['sometimes', 'boolean'],
+            'hold_point' => ['sometimes', 'boolean'],
         ] + Place::rules($project) + ChecklistItems::rules('items', required: false), [
             'checklist_template_id.exists' => 'Essa lista de verificação não existe ou está arquivada.',
         ], [
@@ -330,7 +365,7 @@ class InspectionController extends Controller
      */
     private function headerFields(Project $project, array $data): array
     {
-        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote']));
+        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote', 'hold_point']));
         if (array_key_exists('location_id', $data) || array_key_exists('element_id', $data)) {
             $place = Place::normalize($project, array_intersect_key($data, array_flip(['location_id', 'element_id'])) + ['location_id' => null, 'element_id' => null]);
             $fields['location_id'] = $place['location_id'];

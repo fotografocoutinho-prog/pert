@@ -21,6 +21,8 @@ class MediaController extends Controller
         // Cada dono tem a sua regra: evidências de inspeção para quem vê inspeções, o resto pelo diário.
         if ($media->inspection_item_id !== null) {
             abort_unless(Gate::any(InspectionWorkflow::VIEW_PERMISSIONS, $project), 403);
+        } elseif ($media->issue_id !== null) {
+            $this->authorize('issues.view', $project);
         } else {
             $this->authorize('diary.view', $project);
         }

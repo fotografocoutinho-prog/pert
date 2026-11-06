@@ -34,6 +34,7 @@ final class RoleTemplates
                     'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage',
                     'inspections.request',
+                    'issues.view', 'issues.create', 'issues.resolve', 'issues.validate',
                 ],
             ],
             'diretor_obra' => [
@@ -43,17 +44,18 @@ final class RoleTemplates
                     'company.view', 'members.view', 'members.invite', 'clients.view',
                     'projects.view', 'projects.update', 'projects.team', 'structure.manage', 'diary.view', 'diary.write', 'diary.submit',
                     'documents.view', 'documents.upload', 'documents.manage', 'inspections.request',
+                    'issues.view', 'issues.create', 'issues.resolve', 'issues.validate',
                 ],
             ],
             'encarregado' => [
                 'name' => 'Encarregado',
                 'description' => 'Coordenação das equipas no terreno.',
-                'permissions' => ['company.view', 'members.view', 'projects.view', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload', 'inspections.request'],
+                'permissions' => ['company.view', 'members.view', 'projects.view', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload', 'inspections.request', 'issues.view', 'issues.create', 'issues.resolve'],
             ],
             'preparador' => [
                 'name' => 'Preparador de obra',
                 'description' => 'Preparação, compras e planeamento.',
-                'permissions' => ['company.view', 'members.view', 'clients.view', 'projects.view', 'projects.update', 'structure.manage', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage', 'inspections.request'],
+                'permissions' => ['company.view', 'members.view', 'clients.view', 'projects.view', 'projects.update', 'structure.manage', 'diary.view', 'documents.view', 'documents.upload', 'documents.manage', 'inspections.request', 'issues.view', 'issues.create'],
             ],
             'medidor_orcamentista' => [
                 'name' => 'Medidor-orçamentista',
@@ -63,17 +65,17 @@ final class RoleTemplates
             'fiscal' => [
                 'name' => 'Fiscal',
                 'description' => 'Fiscalização e aprovações.',
-                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.perform', 'inspections.approve'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.perform', 'inspections.approve', 'inspections.release_hold_point', 'issues.view', 'issues.create', 'issues.validate'],
             ],
             'coordenador_seguranca' => [
                 'name' => 'Coordenador de segurança',
                 'description' => 'Segurança e saúde em obra.',
-                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.perform', 'inspections.approve'],
+                'permissions' => ['company.view', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.perform', 'inspections.approve', 'issues.view', 'issues.create', 'issues.validate'],
             ],
             'tecnico_qualidade' => [
                 'name' => 'Técnico de qualidade',
                 'description' => 'Controlo de qualidade e não conformidades.',
-                'permissions' => ['company.view', 'checklists.manage', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.request', 'inspections.perform'],
+                'permissions' => ['company.view', 'checklists.manage', 'projects.view', 'diary.view', 'documents.view', 'documents.upload', 'inspections.request', 'inspections.perform', 'issues.view', 'issues.create', 'issues.validate'],
             ],
             'administrativo' => [
                 'name' => 'Administrativo',
@@ -83,12 +85,12 @@ final class RoleTemplates
             'trabalhador' => [
                 'name' => 'Trabalhador',
                 'description' => 'Registo de trabalho no terreno.',
-                'permissions' => ['company.view', 'projects.view', 'documents.view'],
+                'permissions' => ['company.view', 'projects.view', 'documents.view', 'issues.view', 'issues.create'],
             ],
             'subempreiteiro' => [
                 'name' => 'Subempreiteiro',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => ['projects.view', 'documents.view', 'documents.upload', 'inspections.request'],
+                'permissions' => ['projects.view', 'documents.view', 'documents.upload', 'inspections.request', 'issues.view', 'issues.create', 'issues.resolve'],
             ],
             'fornecedor' => [
                 'name' => 'Fornecedor',
@@ -98,7 +100,7 @@ final class RoleTemplates
             'dono_obra' => [
                 'name' => 'Dono de obra',
                 'description' => 'Utilizador externo. Acesso dado por obra.',
-                'permissions' => ['projects.view', 'diary.view', 'documents.view'],
+                'permissions' => ['projects.view', 'diary.view', 'documents.view', 'issues.view', 'issues.create'],
             ],
         ];
     }

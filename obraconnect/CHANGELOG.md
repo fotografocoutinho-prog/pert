@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.12.0 — 2026-11-04
+
+Fase 3, segunda parte: pontos de paragem e ocorrências / não conformidades.
+
+- **Pontos de paragem**: uma inspeção (ou, por omissão, todas as de uma lista de verificação) pode ser ponto de paragem. Os trabalhos nesse local ou elemento ficam **parados** até a inspeção ser aprovada e alguém com `inspections.release_hold_point` (por omissão, o fiscal) a **libertar**; a libertação fica no histórico encadeado. A estrutura da obra marca os elementos parados; o separador Inspeções tem o filtro **Pontos de paragem**. A reinspeção herda o ponto de paragem; uma inspeção cancelada não para nada.
+- **Ocorrências e não conformidades** (separador **Ocorrências e NC**): tipo, gravidade (menor, maior, crítica), local ou elemento, especialidade, responsável (da equipa da obra), prazo, fotografias, comentários e historial. Estados: aberta, em resolução, resolvida (por validar), fechada e anulada. Quem resolve é o responsável (`issues.resolve`); quem valida, reabre e anula tem `issues.validate`. Resolver, reabrir e anular pedem texto.
+- **NC a partir de uma inspeção**: num ponto não conforme, **Abrir não conformidade** cria-a já com o texto do ponto, a observação, o local e a especialidade; a inspeção mostra a NC ligada a cada ponto.
+- **Escalonamento**: todos os dias às 7h30, as ocorrências por resolver com o prazo ultrapassado são escalonadas uma vez — email ao responsável e aos diretores de obra da equipa (sem nenhum, aos administradores da empresa), um email por pessoa com todas as suas. Mudar o prazo ou reabrir volta a permitir escalonar.
+- Permissões novas: `inspections.release_hold_point`, `issues.view`, `issues.create`, `issues.resolve`, `issues.validate` (valores por omissão da matriz). Locais, elementos e especialidades com ocorrências não se apagam. Ocorrências na exportação de dados e na auditoria.
+
 ## 0.11.0 — 2026-11-04
 
 Fase 3, primeira parte: listas de verificação e inspeções.

@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.11.0)
+# Manual do utilizador (versão 0.12.0)
 
 ## Entrar
 
@@ -128,6 +128,31 @@ Uma inspeção pedida, agendada ou em curso pode ser **cancelada** (com motivo);
 O **Histórico** mostra cada passo, quem o deu e quando. Cada passo fica selado com o código (hash) do anterior: a mensagem **Cadeia íntegra** confirma que nada foi alterado depois.
 
 Por omissão: pedem inspeções o diretor técnico, o diretor de obra, o encarregado, o preparador, o técnico de qualidade e o subempreiteiro (nas obras da equipa); fazem-nas o fiscal, o coordenador de segurança e o técnico de qualidade; decidem o fiscal e o coordenador de segurança. O administrador pode tudo.
+
+### Pontos de paragem
+
+Marque **Ponto de paragem** numa inspeção (ou numa lista de verificação, para valer em todas as inspeções criadas a partir dela) quando os trabalhos não podem avançar sem a inspeção — por exemplo, verificar as armaduras antes de betonar.
+
+- Enquanto não for libertado, a inspeção mostra **Ponto de paragem: trabalhos parados** e, no separador **Estrutura**, o elemento aparece a vermelho com **PARADO**. O filtro **Pontos de paragem** no separador Inspeções lista todos.
+- Depois de a inspeção ser aprovada (com ou sem reservas), quem tem a permissão — por omissão, o fiscal — usa **Libertar ponto de paragem**, com uma observação opcional. Fica no histórico da inspeção.
+- Se a inspeção for rejeitada, a reinspeção herda o ponto de paragem. Uma inspeção cancelada não para nada.
+
+### Não conformidade a partir de um ponto
+
+Num ponto **Não conforme**, o botão **Abrir não conformidade** cria-a com o texto do ponto, a observação, o local e a especialidade da inspeção. Depois escolha o responsável e o prazo. A NC fica indicada no ponto.
+
+## Ocorrências e não conformidades
+
+No separador **Ocorrências e NC** da obra registam-se problemas que alguém tem de resolver até uma data.
+
+1. **Nova ocorrência**: tipo (não conformidade ou ocorrência), gravidade, título, descrição, local, especialidade, **responsável** (uma pessoa da equipa da obra) e **prazo**. Depois de registar, junte fotografias.
+2. O responsável usa **Começar a resolver** e, quando estiver feito, **Marcar como resolvida**, escrevendo o que foi feito.
+3. Quem valida (por omissão: diretor técnico, diretor de obra, fiscal, coordenador de segurança e técnico de qualidade) usa **Validar e fechar** ou **Reabrir** (com o motivo). Uma ocorrência registada por engano **anula-se**.
+4. Toda a gente que participa pode **comentar**; tudo fica no **Historial** (mudanças de responsável e de prazo incluídas).
+
+**Prazo ultrapassado.** Todas as manhãs (7h30), as ocorrências por resolver com o prazo ultrapassado recebem a marca **Atrasada** e o responsável e o diretor de obra da equipa recebem um email (sem diretor de obra na equipa, vai para os administradores da empresa). Cada ocorrência só é escalonada uma vez; se combinar um novo prazo, mude-o em **Editar**.
+
+Filtros: **Por resolver**, **Por validar**, **Atrasadas**, **Fechadas**, **Todas** e **Só as minhas**.
 
 ## No telemóvel
 

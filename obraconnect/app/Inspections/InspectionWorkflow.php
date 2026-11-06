@@ -74,6 +74,7 @@ final class InspectionWorkflow
         return match ($action) {
             'created' => 'Criada',
             'reinspection' => 'Pedida reinspeção',
+            'hold_released' => 'Ponto de paragem libertado',
             default => self::actions()[$action]['done'] ?? $action,
         };
     }

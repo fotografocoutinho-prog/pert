@@ -11,6 +11,7 @@ use App\Http\Resources\DocumentResource;
 use App\Http\Resources\MediaResource;
 use App\Models\ConstructionElement;
 use App\Models\DiaryItem;
+use App\Models\Inspection;
 use App\Models\Project;
 use App\Models\ProjectLocation;
 use App\Models\Specialty;
@@ -44,6 +45,9 @@ class StructureController extends Controller
             // Para mostrar e escolher a especialidade de cada elemento (também sem rede).
             'specialties' => Specialty::query()->orderBy('sort_order')->orderBy('code')->get()
                 ->map(fn (Specialty $s) => ['id' => $s->id, 'code' => $s->code, 'name' => $s->name, 'archived' => $s->isArchived()]),
+            // Pontos de paragem por libertar (trabalhos parados nesse local ou elemento).
+            'holds' => $project->inspections()->holdingWork()->orderBy('number')->get(['id', 'number', 'title', 'status', 'location_id', 'element_id'])
+                ->map(fn (Inspection $i) => ['inspection_id' => $i->id, 'number' => $i->number, 'title' => $i->title, 'status_label' => $i->status->label(), 'location_id' => $i->location_id, 'element_id' => $i->element_id]),
         ]]);
     }
 
@@ -102,7 +106,7 @@ class StructureController extends Controller
             throw ApiException::conflict('Só se apaga vazio: retire primeiro o que tem dentro (pisos, zonas ou elementos).', 'LOCATION_NOT_EMPTY');
         }
         if ($location->isReferenced()) {
-            throw ApiException::conflict('Há registos do diário, fotografias, documentos ou inspeções ligados a este local. Mude-os primeiro.', 'LOCATION_IN_USE');
+            throw ApiException::conflict('Há registos do diário, fotografias, documentos, inspeções ou ocorrências ligados a este local. Mude-os primeiro.', 'LOCATION_IN_USE');
         }
 
         $location->delete();
@@ -135,7 +139,7 @@ class StructureController extends Controller
 
         // O local das ligações segue o elemento (o "onde" de um elemento é sempre o dele).
         if ($element->wasChanged('location_id')) {
-            foreach ([$element->diaryItems(), $element->media(), $element->documents(), $element->inspections()] as $linked) {
+            foreach ([$element->diaryItems(), $element->media(), $element->documents(), $element->inspections(), $element->issues()] as $linked) {
                 $linked->update(['location_id' => $element->location_id]);
             }
         }
@@ -153,7 +157,7 @@ class StructureController extends Controller
         $this->authorizeWrite($project);
 
         if ($element->isReferenced()) {
-            throw ApiException::conflict('Há registos do diário, fotografias, documentos ou inspeções ligados a este elemento. Mude-os primeiro.', 'ELEMENT_IN_USE');
+            throw ApiException::conflict('Há registos do diário, fotografias, documentos, inspeções ou ocorrências ligados a este elemento. Mude-os primeiro.', 'ELEMENT_IN_USE');
         }
 
         $element->delete();

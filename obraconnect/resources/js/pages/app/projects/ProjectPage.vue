@@ -12,6 +12,7 @@ import ProjectDetailsTab from '@/components/projects/ProjectDetailsTab.vue';
 import ProjectDiaryTab from '@/components/projects/ProjectDiaryTab.vue';
 import ProjectDocumentsTab from '@/components/projects/ProjectDocumentsTab.vue';
 import ProjectInspectionsTab from '@/components/projects/ProjectInspectionsTab.vue';
+import ProjectIssuesTab from '@/components/projects/ProjectIssuesTab.vue';
 import ProjectStructureTab from '@/components/projects/ProjectStructureTab.vue';
 import ProjectTeamTab from '@/components/projects/ProjectTeamTab.vue';
 
@@ -30,6 +31,7 @@ const tabs = computed(() =>
             label: 'Inspeções',
             show: ['inspections.request', 'inspections.perform', 'inspections.approve'].some((p) => project.value?.permissions.includes(p)),
         },
+        { key: 'ocorrencias', label: 'Ocorrências e NC', show: project.value?.permissions.includes('issues.view') },
         { key: 'estrutura', label: 'Estrutura', show: true },
         { key: 'equipa', label: 'Equipa', show: true },
         { key: 'dados', label: 'Dados da obra', show: true },
@@ -94,6 +96,7 @@ function select(key: string): void {
             <ProjectDiaryTab v-if="tab === 'diario'" :project="project" />
             <ProjectDocumentsTab v-else-if="tab === 'documentos'" :project="project" />
             <ProjectInspectionsTab v-else-if="tab === 'inspecoes'" :project="project" />
+            <ProjectIssuesTab v-else-if="tab === 'ocorrencias'" :project="project" />
             <ProjectStructureTab v-else-if="tab === 'estrutura'" :project="project" />
             <ProjectTeamTab v-else-if="tab === 'equipa'" :project="project" @changed="load" />
             <ProjectDetailsTab v-else :project="project" @updated="(p) => (project = p)" />

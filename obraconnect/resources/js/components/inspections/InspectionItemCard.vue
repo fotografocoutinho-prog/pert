@@ -11,8 +11,8 @@ import AppBadge from '@/components/ui/AppBadge.vue';
 import AppButton from '@/components/ui/AppButton.vue';
 import AppModal from '@/components/ui/AppModal.vue';
 
-const props = defineProps<{ projectId: number; inspectionId: number; item: InspectionItem; editable: boolean; missing?: string[] }>();
-const emit = defineEmits<{ evidence: [evidence: EvidenceIndex]; changed: [item: InspectionItem] }>();
+const props = defineProps<{ projectId: number; inspectionId: number; item: InspectionItem; editable: boolean; missing?: string[]; canRaiseIssue?: boolean }>();
+const emit = defineEmits<{ evidence: [evidence: EvidenceIndex]; changed: [item: InspectionItem]; raise: [item: InspectionItem] }>();
 
 const toast = useToastStore();
 const MAX_MB = 20;
@@ -197,6 +197,26 @@ const resultBadge = computed(() => ({ ok: 'green', nok: 'red', na: 'gray' })[pro
                 </div>
                 <p v-else-if="item.notes" class="mt-2 text-sm whitespace-pre-line text-slate-700">{{ item.notes }}</p>
                 <p v-if="!editable && item.answered_by" class="mt-1 text-xs text-slate-500">{{ item.answered_by }}, {{ formatDateTime(item.answered_at) }}</p>
+
+                <!-- Não conformidades abertas a partir deste ponto -->
+                <div v-if="item.issues.length || (canRaiseIssue && item.result === 'nok')" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                    <RouterLink
+                        v-for="issue in item.issues"
+                        :key="issue.id"
+                        :to="`/app/obras/${projectId}/ocorrencias/${issue.id}`"
+                        class="font-medium text-brand-700 hover:underline"
+                    >
+                        NC {{ issue.number }} ({{ issue.status_label }})
+                    </RouterLink>
+                    <button
+                        v-if="canRaiseIssue && item.result === 'nok' && !item.issues.length"
+                        type="button"
+                        class="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 hover:bg-red-50"
+                        @click="emit('raise', item)"
+                    >
+                        Abrir não conformidade
+                    </button>
+                </div>
 
                 <!-- Fotografias -->
                 <div v-if="editable || item.photos.length" class="mt-3">

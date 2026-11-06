@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { inspectionsApi, projectsApi, specialtiesApi } from '@/api';
+import { inspectionsApi, issuesApi, projectsApi, specialtiesApi } from '@/api';
 import { ApiError } from '@/api/http';
 import type { ChecklistItemDef, EvidenceIndex, InspectionDetail, InspectionItem, Project, Specialty } from '@/api/types';
 import { useForm } from '@/composables/useForm';
@@ -58,6 +58,7 @@ function show(detail: InspectionDetail): void {
             specialty_id: detail.specialty_id ?? '',
             scheduled_for: detail.scheduled_for ? detail.scheduled_for.slice(0, 16) : '',
             remote: detail.remote,
+            hold_point: detail.hold_point,
             items: detail.items.map(({ text, guidance, requires_photo, min_photos, requires_measure, measure_unit, measure_min, measure_max }) => ({
                 text,
                 guidance,
@@ -83,6 +84,7 @@ const draft = useForm({
     specialty_id: '' as number | '',
     scheduled_for: '',
     remote: false,
+    hold_point: false,
     items: [] as ChecklistItemDef[],
 });
 const savedDraft = ref('');
@@ -102,6 +104,7 @@ async function saveDraft(quiet = false): Promise<boolean> {
                 specialty_id: draft.data.specialty_id === '' ? null : Number(draft.data.specialty_id),
                 scheduled_for: draft.data.scheduled_for || null,
                 remote: draft.data.remote,
+                hold_point: draft.data.hold_point,
                 items: draft.data.items.filter((i) => i.text.trim() !== ''),
                 ...toIds(draft.data.place),
             }),
@@ -179,6 +182,35 @@ async function reinspect(): Promise<void> {
         router.push(`/app/obras/${projectId.value}/inspecoes/${copy.id}`);
     } catch (e) {
         toast.error(e instanceof ApiError ? e.message : 'Não foi possível criar a reinspeção.');
+    }
+}
+
+// ---- Ponto de paragem ----
+const releasing = ref(false);
+const releaseNote = ref('');
+const releaseBusy = ref(false);
+async function releaseHold(): Promise<void> {
+    if (!inspection.value) return;
+    releaseBusy.value = true;
+    try {
+        show(await inspectionsApi.releaseHold(projectId.value, inspection.value.id, releaseNote.value.trim() || null));
+        releasing.value = false;
+        toast.success('Ponto de paragem libertado: os trabalhos podem avançar.');
+    } catch (e) {
+        toast.error(e instanceof ApiError ? e.message : 'Não foi possível libertar.');
+    } finally {
+        releaseBusy.value = false;
+    }
+}
+
+// ---- Não conformidade a partir de um ponto ----
+async function raiseIssue(item: InspectionItem): Promise<void> {
+    try {
+        const issue = await issuesApi.create(projectId.value, { inspection_item_id: item.id });
+        toast.success(`Aberta a ${issue.reference}. Escolha o responsável e o prazo.`);
+        router.push(`/app/obras/${projectId.value}/ocorrencias/${issue.id}`);
+    } catch (e) {
+        toast.error(e instanceof ApiError ? (e.firstError('inspection_item_id') ?? e.message) : 'Não foi possível abrir a não conformidade.');
     }
 }
 
@@ -270,7 +302,11 @@ const closedNote = computed(() => {
                         </RouterLink>
                     </p>
                 </div>
-                <AppBadge :color="inspectionStatusColor(inspection.status)">{{ inspection.status_label }}</AppBadge>
+                <div class="flex flex-wrap gap-1.5">
+                    <AppBadge v-if="inspection.holding_work" color="red">Ponto de paragem: trabalhos parados</AppBadge>
+                    <AppBadge v-else-if="inspection.hold_point && inspection.hold_released_at" color="green">Ponto de paragem libertado</AppBadge>
+                    <AppBadge :color="inspectionStatusColor(inspection.status)">{{ inspection.status_label }}</AppBadge>
+                </div>
             </div>
 
             <dl class="mb-4 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2 lg:grid-cols-4">
@@ -286,6 +322,10 @@ const closedNote = computed(() => {
                     <dt class="text-xs text-slate-500">Inspeção feita por</dt>
                     <dd>{{ inspection.inspector }}</dd>
                 </div>
+                <div v-if="inspection.hold_released_at">
+                    <dt class="text-xs text-slate-500">Ponto de paragem libertado</dt>
+                    <dd>{{ inspection.hold_released_by ?? '—' }}, {{ formatDateTime(inspection.hold_released_at) }}</dd>
+                </div>
                 <div v-if="inspection.evidence_score !== null">
                     <dt class="text-xs text-slate-500">Índice de evidências (submissão)</dt>
                     <dd>{{ inspection.evidence_score }}%</dd>
@@ -299,7 +339,11 @@ const closedNote = computed(() => {
             <AppAlert v-if="project?.status === 'archived'" class="mb-4">A obra está arquivada: pode consultar, mas não alterar.</AppAlert>
 
             <!-- Ações -->
-            <div v-if="inspection.can.actions.length || inspection.can.reinspect || inspection.can.edit || inspection.reinspections.length" class="mb-5 flex flex-wrap items-center gap-2">
+            <div
+                v-if="inspection.can.actions.length || inspection.can.reinspect || inspection.can.edit || inspection.can.release_hold || inspection.reinspections.length"
+                class="mb-5 flex flex-wrap items-center gap-2"
+            >
+                <AppButton v-if="inspection.can.release_hold" @click="(releaseNote = ''), (releasing = true)">Libertar ponto de paragem</AppButton>
                 <AppButton
                     v-for="a in inspection.can.actions"
                     :key="a.key"
@@ -337,8 +381,9 @@ const closedNote = computed(() => {
                                 </div>
                                 <AppSelect v-model="draft.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="draft.errors.value.specialty_id" />
                                 <AppInput v-model="draft.data.scheduled_for" type="datetime-local" label="Data pretendida" :error="draft.errors.value.scheduled_for" />
-                                <div class="sm:pt-7">
+                                <div class="space-y-3 sm:pt-7">
                                     <AppCheckbox v-model="draft.data.remote" label="Inspeção remota" description="Feita por fotografias." />
+                                    <AppCheckbox v-model="draft.data.hold_point" label="Ponto de paragem" description="Os trabalhos param até a inspeção ser aprovada e libertada." />
                                 </div>
                             </div>
                             <AppTextarea v-model="draft.data.description" label="Descrição" :rows="2" :maxlength="5000" />
@@ -368,7 +413,9 @@ const closedNote = computed(() => {
                                 :item="item"
                                 :editable="inspection.can.fill"
                                 :missing="missingByItem.get(item.number)"
+                                :can-raise-issue="inspection.can.raise_issue && inspection.status !== 'draft'"
                                 @changed="onItem"
+                                @raise="raiseIssue"
                                 @evidence="onEvidence"
                             />
                         </ol>
@@ -412,6 +459,15 @@ const closedNote = computed(() => {
                 </div>
             </div>
         </template>
+
+        <AppModal :open="releasing" title="Libertar ponto de paragem" @close="releasing = false">
+            <p class="mb-3 text-sm text-slate-600">Os trabalhos que dependiam desta inspeção podem avançar. Fica registado no histórico, com o seu nome.</p>
+            <AppTextarea v-model="releaseNote" label="Observação" hint="Opcional (ex.: pode betonar a partir das 14h)." :rows="3" :maxlength="2000" />
+            <template #footer>
+                <AppButton variant="secondary" @click="releasing = false">Voltar</AppButton>
+                <AppButton :loading="releaseBusy" @click="releaseHold">Libertar</AppButton>
+            </template>
+        </AppModal>
 
         <AppModal :open="scheduling" title="Agendar inspeção" @close="scheduling = false">
             <AppInput v-model="when" type="datetime-local" label="Data e hora" required />

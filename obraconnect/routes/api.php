@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\InspectionController;
 use App\Http\Controllers\Api\V1\InspectionItemController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
+use App\Http\Controllers\Api\V1\IssueController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MemberController;
@@ -185,11 +186,24 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('inspections/{inspection}/actions/{action}', [InspectionController::class, 'transition'])
                     ->where('action', '[a-z_]+')->name('inspections.transition');
                 Route::post('inspections/{inspection}/reinspection', [InspectionController::class, 'reinspect'])->name('inspections.reinspect');
+                Route::post('inspections/{inspection}/release-hold', [InspectionController::class, 'releaseHold'])->name('inspections.release-hold');
                 Route::patch('inspections/{inspection}/items/{item}', [InspectionItemController::class, 'update'])->name('inspections.items.update');
                 Route::post('inspections/{inspection}/items/{item}/photos', [InspectionItemController::class, 'storePhoto'])
                     ->middleware('throttle:uploads')->name('inspections.photos.store');
                 Route::delete('inspections/{inspection}/items/{item}/photos/{photo}', [InspectionItemController::class, 'destroyPhoto'])
                     ->name('inspections.photos.destroy');
+
+                Route::get('issues', [IssueController::class, 'index'])->name('issues.index');
+                Route::get('issues/assignees', [IssueController::class, 'assignees'])->name('issues.assignees');
+                Route::post('issues', [IssueController::class, 'store'])->name('issues.store');
+                Route::get('issues/{issue}', [IssueController::class, 'show'])->name('issues.show');
+                Route::put('issues/{issue}', [IssueController::class, 'update'])->name('issues.update');
+                Route::post('issues/{issue}/actions/{action}', [IssueController::class, 'transition'])
+                    ->where('action', '[a-z_]+')->name('issues.transition');
+                Route::post('issues/{issue}/comments', [IssueController::class, 'comment'])->name('issues.comment');
+                Route::post('issues/{issue}/photos', [IssueController::class, 'storePhoto'])
+                    ->middleware('throttle:uploads')->name('issues.photos.store');
+                Route::delete('issues/{issue}/photos/{photo}', [IssueController::class, 'destroyPhoto'])->name('issues.photos.destroy');
 
                 Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
                 Route::post('locations', [StructureController::class, 'storeLocation'])->name('locations.store');

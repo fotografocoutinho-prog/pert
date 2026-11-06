@@ -17,6 +17,9 @@ import type {
     Inspection,
     InspectionDetail,
     InspectionItem,
+    Issue,
+    IssueAssignee,
+    IssueDetail,
     EvidenceIndex,
     Invitation,
     MediaItem,
@@ -326,11 +329,11 @@ function upload<T>(url: string, form: FormData, onProgress?: (percent: number) =
 export const checklistsApi = {
     list: () => getData<ChecklistTemplate[]>('/api/v1/checklist-templates'),
     get: (id: number) => getData<ChecklistTemplate>(`/api/v1/checklist-templates/${id}`),
-    create: async (payload: { name: string; description?: string | null; specialty_id?: number | null; items: ChecklistItemDef[] }) =>
+    create: async (payload: { name: string; description?: string | null; specialty_id?: number | null; hold_point?: boolean; items: ChecklistItemDef[] }) =>
         (await http.post<{ data: ChecklistTemplate }>('/api/v1/checklist-templates', payload)).data.data,
     update: async (
         id: number,
-        payload: { name?: string; description?: string | null; specialty_id?: number | null; items?: ChecklistItemDef[]; archived?: boolean },
+        payload: { name?: string; description?: string | null; specialty_id?: number | null; hold_point?: boolean; items?: ChecklistItemDef[]; archived?: boolean },
     ) => (await http.put<{ data: ChecklistTemplate }>(`/api/v1/checklist-templates/${id}`, payload)).data.data,
     remove: (id: number) => http.delete(`/api/v1/checklist-templates/${id}`),
 };
@@ -348,6 +351,8 @@ export const inspectionsApi = {
         (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}/actions/${action}`, payload)).data.data,
     reinspect: async (projectId: number, id: number) =>
         (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}/reinspection`)).data.data,
+    releaseHold: async (projectId: number, id: number, note: string | null) =>
+        (await http.post<{ data: InspectionDetail }>(`/api/v1/projects/${projectId}/inspections/${id}/release-hold`, { note })).data.data,
     updateItem: async (
         projectId: number,
         id: number,
@@ -372,6 +377,27 @@ export const inspectionsApi = {
     },
     removePhoto: async (projectId: number, id: number, itemId: number, photoId: number) =>
         (await http.delete<{ data: { evidence: EvidenceIndex } }>(`/api/v1/projects/${projectId}/inspections/${id}/items/${itemId}/photos/${photoId}`)).data.data,
+};
+
+export const issuesApi = {
+    list: async (projectId: number, params: { group?: string; kind?: string; mine?: number; search?: string; page?: number; inspection_id?: number }) =>
+        (await http.get<Paginated<Issue>>(`/api/v1/projects/${projectId}/issues`, { params })).data,
+    assignees: (projectId: number) => getData<IssueAssignee[]>(`/api/v1/projects/${projectId}/issues/assignees`),
+    get: (projectId: number, id: number) => getData<IssueDetail>(`/api/v1/projects/${projectId}/issues/${id}`),
+    create: async (projectId: number, payload: Record<string, unknown>) =>
+        (await http.post<{ data: IssueDetail }>(`/api/v1/projects/${projectId}/issues`, payload)).data.data,
+    update: async (projectId: number, id: number, payload: Record<string, unknown>) =>
+        (await http.put<{ data: IssueDetail }>(`/api/v1/projects/${projectId}/issues/${id}`, payload)).data.data,
+    act: async (projectId: number, id: number, action: string, reason?: string | null) =>
+        (await http.post<{ data: IssueDetail }>(`/api/v1/projects/${projectId}/issues/${id}/actions/${action}`, { reason })).data.data,
+    comment: async (projectId: number, id: number, body: string) =>
+        (await http.post<{ data: IssueDetail }>(`/api/v1/projects/${projectId}/issues/${id}/comments`, { body })).data.data,
+    uploadPhoto: (projectId: number, id: number, file: File, onProgress?: (percent: number) => void) => {
+        const form = new FormData();
+        form.append('photo', file);
+        return upload<MediaItem & { can_remove: boolean }>(`/api/v1/projects/${projectId}/issues/${id}/photos`, form, onProgress);
+    },
+    removePhoto: (projectId: number, id: number, photoId: number) => http.delete(`/api/v1/projects/${projectId}/issues/${id}/photos/${photoId}`),
 };
 
 export const documentsApi = {

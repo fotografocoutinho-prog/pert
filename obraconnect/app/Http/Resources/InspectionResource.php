@@ -48,6 +48,11 @@ class InspectionResource extends JsonResource
             'decided_at' => $this->decided_at?->toIso8601String(),
             'decision_note' => $this->decision_note,
             'evidence_score' => $this->evidence_score,
+            'hold_point' => $this->hold_point,
+            'hold_released_at' => $this->hold_released_at?->toIso8601String(),
+            'hold_released_by' => $this->whenLoaded('holdReleasedBy', fn () => $this->holdReleasedBy?->name),
+            'holding_work' => $this->hold_point && $this->hold_released_at === null && $this->status !== InspectionStatus::Cancelled
+                && (isset($this->reinspections_count) ? (int) $this->reinspections_count === 0 : ! $this->relationLoaded('reinspections') || $this->reinspections->isEmpty()),
             'requested_by' => $this->whenLoaded('requestedBy', fn () => $this->requestedBy?->name),
             'inspector' => $this->whenLoaded('inspector', fn () => $this->inspector?->name),
             'decided_by' => $this->whenLoaded('decidedBy', fn () => $this->decidedBy?->name),
@@ -78,6 +83,9 @@ class InspectionResource extends JsonResource
                 'answered_by' => $item->relationLoaded('answeredBy') ? $item->answeredBy?->name : null,
                 'answered_at' => $item->answered_at?->toIso8601String(),
                 'photos' => MediaResource::collection($item->photos)->resolve(),
+                'issues' => $item->relationLoaded('issues')
+                    ? $item->issues->map(fn ($issue) => ['id' => $issue->id, 'number' => $issue->number, 'status' => $issue->status->value, 'status_label' => $issue->status->label()])->all()
+                    : [],
             ])->all(),
             'reinspections' => $this->relationLoaded('reinspections')
                 ? $this->reinspections->map(fn (Inspection $r) => ['id' => $r->id, 'number' => $r->number, 'status_label' => $r->status->label()])->all()
@@ -128,6 +136,10 @@ class InspectionResource extends JsonResource
             'edit' => $this->status === InspectionStatus::Draft && $has(['inspections.request']),
             'fill' => $this->status === InspectionStatus::InProgress && $has(['inspections.perform']),
             'reinspect' => in_array($this->status, [InspectionStatus::Rejected, InspectionStatus::ApprovedWithReservations], true) && $has(['inspections.request']),
+            'release_hold' => $this->hold_point && $this->hold_released_at === null
+                && in_array($this->status, [InspectionStatus::Approved, InspectionStatus::ApprovedWithReservations], true)
+                && $has(['inspections.release_hold_point']),
+            'raise_issue' => $has(['issues.create']),
             'actions' => $actions,
             'has_nok' => $this->items->contains(fn (InspectionItem $item) => $item->result === InspectionResult::Nok),
         ];
