@@ -15,7 +15,10 @@ final class PermissionRegistry
     public const ALL_PROJECTS = 'projects.all';
 
     /** Módulos cujas permissões valem obra a obra. */
-    private const PROJECT_SCOPED_MODULES = ['projects', 'diary', 'documents', 'structure', 'inspections', 'issues'];
+    private const PROJECT_SCOPED_MODULES = [
+        'projects', 'diary', 'documents', 'structure', 'inspections', 'issues',
+        'budgets', 'measurements', 'costs', 'purchases', 'workforce', 'equipment', 'planning', 'reports',
+    ];
 
     /** Exceções nesses módulos: valem para a empresa. */
     private const COMPANY_WIDE = [self::ALL_PROJECTS, 'projects.create'];
@@ -140,6 +143,65 @@ final class PermissionRegistry
                     'inspections.perform' => 'Agendar e fazer inspeções: verificar os pontos e juntar evidências',
                     'inspections.approve' => 'Decidir inspeções: aprovar, aprovar com reservas, rejeitar ou devolver para completar',
                     'inspections.release_hold_point' => 'Libertar pontos de paragem (depois de a inspeção ser aprovada)',
+                ],
+            ],
+            'budgets' => [
+                'label' => 'Orçamentos',
+                'permissions' => [
+                    'budgets.view' => 'Consultar orçamentos e a biblioteca de preços',
+                    'budgets.manage' => 'Fazer, aprovar e rever orçamentos; gerir a biblioteca de preços',
+                ],
+            ],
+            'measurements' => [
+                'label' => 'Medições e autos',
+                'permissions' => [
+                    'measurements.manage' => 'Registar medições e preparar autos de medição',
+                    'certificates.approve' => 'Aprovar autos de medição',
+                ],
+            ],
+            'purchases' => [
+                'label' => 'Compras e subempreitadas',
+                'permissions' => [
+                    'purchases.manage' => 'Gerir fornecedores e compras',
+                    'subcontractors.manage' => 'Gerir subempreiteiros e contratos de subempreitada',
+                ],
+            ],
+            'workforce' => [
+                'label' => 'Trabalhadores e horas',
+                'permissions' => [
+                    'workforce.view' => 'Consultar trabalhadores e horas',
+                    'workforce.manage' => 'Gerir a lista de trabalhadores e o custo/hora',
+                    'time.register_own' => 'Registar as próprias horas',
+                    'time.register_team' => 'Registar horas da equipa',
+                    'time.approve' => 'Aprovar e rejeitar horas',
+                    'time.export_payroll' => 'Exportar horas para processamento salarial',
+                ],
+            ],
+            'equipment' => [
+                'label' => 'Equipamentos',
+                'permissions' => [
+                    'equipment.manage' => 'Gerir equipamentos, utilização em obra e manutenções',
+                ],
+            ],
+            'costs' => [
+                'label' => 'Custos e finanças',
+                'permissions' => [
+                    'costs.view' => 'Consultar o mapa de custos da obra',
+                    'costs.manage' => 'Lançar custos e definir o teto de custo',
+                    'finance.view' => 'Ver o painel financeiro (faturado, custo e margem)',
+                ],
+            ],
+            'planning' => [
+                'label' => 'Planeamento',
+                'permissions' => [
+                    'planning.view' => 'Consultar o planeamento (Gantt, caminho crítico)',
+                    'planning.manage' => 'Gerir atividades, precedências e avanço',
+                ],
+            ],
+            'reports' => [
+                'label' => 'Relatórios',
+                'permissions' => [
+                    'reports.export' => 'Exportar relatórios (orçamento, custos, horas) em CSV',
                 ],
             ],
             'issues' => [

@@ -11,11 +11,15 @@ declare module 'vue-router' {
         auth?: boolean;
         tenant?: boolean;
         permission?: string;
+        /** Basta uma destas. */
+        anyPermission?: string[];
         platform?: boolean;
         platformRoles?: string[];
         title?: string;
     }
 }
+
+const EQUIPMENT = ['equipment.manage', 'costs.view', 'workforce.view'];
 
 const routes: RouteRecordRaw[] = [
     { path: '/', redirect: '/app' },
@@ -42,6 +46,23 @@ const routes: RouteRecordRaw[] = [
             { path: 'obras/:id/diario/:entryId', component: () => import('@/pages/app/projects/DiaryEntryPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Diário de obra' } },
             { path: 'obras/:id/inspecoes/:inspectionId', component: () => import('@/pages/app/projects/InspectionPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Inspeção' } },
             { path: 'obras/:id/ocorrencias/:issueId', component: () => import('@/pages/app/projects/IssuePage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Ocorrência' } },
+            { path: 'obras/:id/orcamentos/:budgetId', component: () => import('@/pages/app/projects/BudgetPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Orçamento' } },
+            { path: 'obras/:id/autos/:certId', component: () => import('@/pages/app/projects/CertificatePage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Auto de medição' } },
+            { path: 'financas', component: () => import('@/pages/app/FinancePage.vue'), meta: { tenant: true, permission: 'finance.view', title: 'Painel financeiro' } },
+            { path: 'precos', component: () => import('@/pages/app/PriceLibraryPage.vue'), meta: { tenant: true, anyPermission: ['budgets.view', 'budgets.manage'], title: 'Biblioteca de preços' } },
+            {
+                path: 'fornecedores',
+                component: () => import('@/pages/app/PartnersPage.vue'),
+                meta: { tenant: true, anyPermission: ['purchases.manage', 'subcontractors.manage', 'costs.view', 'workforce.manage'], title: 'Fornecedores e subempreiteiros' },
+            },
+            {
+                path: 'trabalhadores',
+                component: () => import('@/pages/app/WorkersPage.vue'),
+                meta: { tenant: true, anyPermission: ['workforce.view', 'workforce.manage', 'time.register_team', 'time.approve'], title: 'Trabalhadores' },
+            },
+            { path: 'equipamentos', component: () => import('@/pages/app/EquipmentPage.vue'), meta: { tenant: true, anyPermission: EQUIPMENT, title: 'Equipamentos' } },
+            { path: 'equipamentos/qr/:token', component: () => import('@/pages/app/EquipmentDetailPage.vue'), meta: { tenant: true, anyPermission: EQUIPMENT, title: 'Equipamento' } },
+            { path: 'equipamentos/:id', component: () => import('@/pages/app/EquipmentDetailPage.vue'), meta: { tenant: true, anyPermission: EQUIPMENT, title: 'Equipamento' } },
             { path: 'clientes', component: () => import('@/pages/app/clients/ClientsPage.vue'), meta: { tenant: true, permission: 'clients.view', title: 'Clientes' } },
             { path: 'clientes/:id', component: () => import('@/pages/app/clients/ClientPage.vue'), meta: { tenant: true, permission: 'clients.view', title: 'Cliente' } },
             { path: 'organizacao', component: () => import('@/pages/app/OrganizationPage.vue'), meta: { tenant: true, permission: 'company.view', title: 'Organização' } },
@@ -127,7 +148,7 @@ router.beforeEach(async (to) => {
             useToastStore().info('A sua empresa exige autenticação de dois fatores. Ative-a para continuar.');
             return '/app/conta';
         }
-        if (to.meta.permission && !session.can(to.meta.permission)) {
+        if ((to.meta.permission && !session.can(to.meta.permission)) || (to.meta.anyPermission && !to.meta.anyPermission.some((p) => session.can(p)))) {
             useToastStore().error('Não tem permissão para aceder a esta área.');
             return '/app';
         }

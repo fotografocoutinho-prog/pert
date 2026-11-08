@@ -1,4 +1,4 @@
-# Manual do administrador (versão 0.2.0)
+# Manual do administrador (versão 0.14.0)
 
 Dois tipos de administrador: **da empresa** (cliente) e **da plataforma** (equipa ObraConnect).
 
@@ -75,4 +75,15 @@ php artisan obraconnect:sync-permissions       # depois de atualizar
 php artisan obraconnect:subscriptions-sweep    # corre todos os dias às 02:15
 php artisan obraconnect:prune-exports          # corre de hora a hora
 php artisan obraconnect:install-sql            # regenera o SQL de instalação
+php artisan obraconnect:demo --admin=email@exemplo.pt          # cria a empresa de demonstração
+php artisan obraconnect:demo --fresh --admin=email@exemplo.pt  # apaga-a e volta a criar (datas de hoje)
 ```
+
+### Empresa de demonstração
+
+`obraconnect:demo` cria a **Atlântico Construções (demonstração)** com dados fictícios em todas as áreas (equipa de 15 pessoas, quatro obras, orçamentos, autos, compras, horas, custos, planeamento, diário com fotografias, documentos, inspeções e ocorrências). Demora cerca de 30 segundos e ocupa uns 3 MB.
+
+- A equipa fictícia usa o domínio reservado `atlantico-demo.test`: ninguém entra com essas contas (as passwords são aleatórias e não ficam escritas em lado nenhum) e nenhum email lhes chega — o envio de emails retira sempre os endereços de domínios reservados.
+- Para ver a demonstração, indique em `--admin` o email de um utilizador **já existente**: fica administrador da empresa de demonstração e muda de empresa no menu. A sua empresa atual não muda.
+- Sem `--fresh`, se a demonstração já existir, só junta os administradores indicados. Com `--fresh` apaga tudo da demonstração (dados, ficheiros e equipa fictícia) e cria de novo; as outras empresas não são tocadas.
+- A empresa de demonstração tem o plano Business ativo e conta como qualquer outra empresa no backoffice.

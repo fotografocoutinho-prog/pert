@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 #[Fillable([
     'code', 'name', 'client_id', 'owner_name', 'type', 'address', 'postal_code', 'city',
-    'contract_value_cents', 'starts_on', 'planned_end_on', 'work_calendar_id', 'cost_center_id', 'status', 'description',
+    'contract_value_cents', 'starts_on', 'planned_end_on', 'work_calendar_id', 'cost_center_id', 'status', 'description', 'cost_ceiling_cents',
 ])]
 class Project extends Model
 {
@@ -33,6 +33,7 @@ class Project extends Model
             'status' => ProjectStatus::class,
             'type' => ProjectType::class,
             'contract_value_cents' => 'integer',
+            'cost_ceiling_cents' => 'integer',
             'starts_on' => 'date',
             'planned_end_on' => 'date',
         ];
@@ -97,6 +98,51 @@ class Project extends Model
     public function issues(): HasMany
     {
         return $this->hasMany(Issue::class);
+    }
+
+    public function budgets(): HasMany
+    {
+        return $this->hasMany(Budget::class);
+    }
+
+    public function measurements(): HasMany
+    {
+        return $this->hasMany(Measurement::class);
+    }
+
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
+
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
+    public function costEntries(): HasMany
+    {
+        return $this->hasMany(CostEntry::class);
+    }
+
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(TimeEntry::class);
+    }
+
+    public function equipmentUsages(): HasMany
+    {
+        return $this->hasMany(EquipmentUsage::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(Activity::class);
     }
 
     public function createdBy(): BelongsTo

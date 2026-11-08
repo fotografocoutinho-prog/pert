@@ -74,10 +74,12 @@ function percent(item: UsageItem): number {
             </ul>
         </AppCard>
 
-        <AppAlert class="mt-6" title="Novo: obras e diário de obra">
-            Em <RouterLink to="/app/obras" class="font-semibold underline">Obras</RouterLink> pode criar obras, montar a equipa de
-            cada uma e escrever o diário de obra (tempo, trabalhos, mão de obra, equipamentos, materiais, ocorrências e visitas).
-            Fotografias, documentos e fiscalização chegam nas próximas versões.
+        <AppAlert class="mt-6" title="Novo: gestão económica da obra">
+            Em cada <RouterLink to="/app/obras" class="font-semibold underline">obra</RouterLink> há agora orçamento, medições e autos,
+            compras e subempreitadas, horas e equipamentos, custos com teto e planeamento com caminho crítico.
+            <template v-if="session.can('finance.view')">
+                O resumo de todas as obras está no <RouterLink to="/app/financas" class="font-semibold underline">painel financeiro</RouterLink>.
+            </template>
         </AppAlert>
     </div>
 </template>

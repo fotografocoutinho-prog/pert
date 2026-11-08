@@ -7,10 +7,11 @@ O primeiro produto que pode ser cobrado a uma empresa de construção correspond
 | Fase | Conteúdo | Estado |
 | --- | --- | --- |
 | 1 | Registo de empresas, utilizadores, perfis, permissões, subscrições manuais, auditoria, backoffice, suporte autorizado, exportação RGPD | **Implementada (v0.1.0)** |
-| 2 | Obras e estrutura, diário de obra, documentos e fotografias, tarefas, modo obra (telemóvel), offline básico | Por fazer |
+| 2 | Obras e estrutura, diário de obra, documentos e fotografias, tarefas, modo obra (telemóvel), offline básico | Feito (0.2.0 a 0.10.0) |
 | 3 | Inspeções e checklists, evidências, pontos de paragem, ocorrências/NC, aprovações, notificações por email | Feito (0.11.0 a 0.13.0) |
+| 4 | Orçamentos, medições e autos, compras, subempreitadas, horas, equipamentos, custos com teto, planeamento | Feito (0.14.0) |
 
-Fases 4 a 6 (orçamentação, custos, tempos, IA, pagamentos, integrações) entram como upgrades dos planos Professional e Business.
+Fases 4 a 6 (orçamentação, custos, tempos, IA, pagamentos, integrações) entram como upgrades dos planos Professional e Business. A Fase 4 já está feita (0.14.0); para mostrar o produto há a empresa de demonstração (`php artisan obraconnect:demo`).
 
 ## Critérios de aceitação — fase 1
 

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { checklistsApi, inspectionsApi, specialtiesApi } from '@/api';
 import type { ChecklistItemDef, ChecklistTemplate, Inspection, Project, Specialty } from '@/api/types';
+import { planningApi, type PlanActivity } from '@/api/economics';
 import { useForm } from '@/composables/useForm';
 import { useStructurePlaces } from '@/composables/useStructurePlaces';
 import { useSessionStore } from '@/stores/session';
@@ -87,14 +88,22 @@ const form = useForm({
     remote: false,
     hold_point: false,
     approvals_required: 1,
+    activity_id: '' as number | '',
     items: [] as ChecklistItemDef[],
 });
 
 async function startCreate(): Promise<void> {
     form.reset({ items: [emptyChecklistItem()] });
     creating.value = true;
-    [templates.value, specialties.value] = await Promise.all([checklistsApi.list(), specialtiesApi.list()]);
+    const withPlan = ['planning.view', 'planning.manage'].some((p) => props.project.permissions.includes(p));
+    [templates.value, specialties.value, activities.value] = await Promise.all([
+        checklistsApi.list(),
+        specialtiesApi.list(),
+        withPlan ? planningApi.get(props.project.id).then((p) => p.activities.filter((a) => !a.summary)).catch(() => [] as PlanActivity[]) : Promise.resolve([] as PlanActivity[]),
+    ]);
 }
+const activities = ref<PlanActivity[]>([]);
+const activityOptions = computed(() => [{ value: '', label: '—' }, ...activities.value.map((a) => ({ value: a.id, label: `${a.code} · ${a.name}` }))]);
 
 const templateOptions = computed(() => [
     { value: '', label: 'Sem modelo: escrevo os pontos' },
@@ -122,6 +131,7 @@ async function create(): Promise<void> {
         remote: form.data.remote,
         hold_point: form.data.hold_point,
         approvals_required: Number(form.data.approvals_required),
+        activity_id: form.data.activity_id === '' ? null : Number(form.data.activity_id),
         ...toIds(form.data.place),
     };
     if (fromTemplate) payload.checklist_template_id = Number(form.data.checklist_template_id);
@@ -227,6 +237,13 @@ async function create(): Promise<void> {
                     </div>
                     <AppSelect v-model="form.data.specialty_id" label="Especialidade" :options="specialtyOptions" :error="form.errors.value.specialty_id" />
                     <AppInput v-model="form.data.scheduled_for" type="datetime-local" label="Data pretendida" hint="Quem inspeciona confirma ao agendar." :error="form.errors.value.scheduled_for" />
+                    <AppSelect
+                        v-if="activities.length"
+                        v-model="form.data.activity_id"
+                        label="Atividade do planeamento"
+                        :options="activityOptions"
+                        :error="form.errors.value.activity_id"
+                    />
                     <AppSelect v-model="form.data.approvals_required" label="Aprovações necessárias" :options="APPROVAL_OPTIONS" :error="form.errors.value.approvals_required" />
                     <div class="space-y-3 sm:pt-7">
                         <AppCheckbox v-model="form.data.remote" label="Inspeção remota" description="Feita por fotografias: cada ponto deve ter pelo menos uma." />

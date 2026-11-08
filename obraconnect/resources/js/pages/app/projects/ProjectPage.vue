@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { projectsApi } from '@/api';
 import { ApiError } from '@/api/http';
@@ -16,12 +16,20 @@ import ProjectIssuesTab from '@/components/projects/ProjectIssuesTab.vue';
 import ProjectStructureTab from '@/components/projects/ProjectStructureTab.vue';
 import ProjectTeamTab from '@/components/projects/ProjectTeamTab.vue';
 
+const ProjectBudgetTab = defineAsyncComponent(() => import('@/components/projects/ProjectBudgetTab.vue'));
+const ProjectCostsTab = defineAsyncComponent(() => import('@/components/projects/ProjectCostsTab.vue'));
+const ProjectMeasurementsTab = defineAsyncComponent(() => import('@/components/projects/ProjectMeasurementsTab.vue'));
+const ProjectPlanningTab = defineAsyncComponent(() => import('@/components/projects/ProjectPlanningTab.vue'));
+const ProjectPurchasesTab = defineAsyncComponent(() => import('@/components/projects/ProjectPurchasesTab.vue'));
+const ProjectTimeTab = defineAsyncComponent(() => import('@/components/projects/ProjectTimeTab.vue'));
+
 const route = useRoute();
 const router = useRouter();
 
 const project = ref<Project | null>(null);
 const error = ref<string | null>(null);
 
+const any = (...permissions: string[]) => permissions.some((p) => project.value?.permissions.includes(p));
 const tabs = computed(() =>
     [
         { key: 'diario', label: 'Diário', show: project.value?.permissions.includes('diary.view') },
@@ -32,6 +40,12 @@ const tabs = computed(() =>
             show: ['inspections.request', 'inspections.perform', 'inspections.approve'].some((p) => project.value?.permissions.includes(p)),
         },
         { key: 'ocorrencias', label: 'Ocorrências e NC', show: project.value?.permissions.includes('issues.view') },
+        { key: 'orcamento', label: 'Orçamento', show: any('budgets.view', 'budgets.manage', 'costs.view') },
+        { key: 'medicoes', label: 'Medições e autos', show: any('measurements.manage', 'certificates.approve', 'budgets.view', 'costs.view') },
+        { key: 'compras', label: 'Compras e subempreitadas', show: any('purchases.manage', 'subcontractors.manage', 'costs.view') },
+        { key: 'horas', label: 'Horas e equipamentos', show: any('workforce.view', 'time.register_team', 'time.register_own', 'time.approve', 'equipment.manage', 'costs.view') },
+        { key: 'custos', label: 'Custos', show: any('costs.view', 'costs.manage', 'finance.view') },
+        { key: 'planeamento', label: 'Planeamento', show: any('planning.view', 'planning.manage') },
         { key: 'estrutura', label: 'Estrutura', show: true },
         { key: 'equipa', label: 'Equipa', show: true },
         { key: 'dados', label: 'Dados da obra', show: true },
@@ -93,13 +107,22 @@ function select(key: string): void {
                 </button>
             </nav>
 
-            <ProjectDiaryTab v-if="tab === 'diario'" :project="project" />
-            <ProjectDocumentsTab v-else-if="tab === 'documentos'" :project="project" />
-            <ProjectInspectionsTab v-else-if="tab === 'inspecoes'" :project="project" />
-            <ProjectIssuesTab v-else-if="tab === 'ocorrencias'" :project="project" />
-            <ProjectStructureTab v-else-if="tab === 'estrutura'" :project="project" />
-            <ProjectTeamTab v-else-if="tab === 'equipa'" :project="project" @changed="load" />
-            <ProjectDetailsTab v-else :project="project" @updated="(p) => (project = p)" />
+            <!-- Ao passar de uma obra para outra, o separador monta-se de novo (os dados são da outra obra). -->
+            <div :key="project.id">
+                <ProjectDiaryTab v-if="tab === 'diario'" :project="project" />
+                <ProjectDocumentsTab v-else-if="tab === 'documentos'" :project="project" />
+                <ProjectInspectionsTab v-else-if="tab === 'inspecoes'" :project="project" />
+                <ProjectIssuesTab v-else-if="tab === 'ocorrencias'" :project="project" />
+                <ProjectBudgetTab v-else-if="tab === 'orcamento'" :project="project" />
+                <ProjectMeasurementsTab v-else-if="tab === 'medicoes'" :project="project" />
+                <ProjectPurchasesTab v-else-if="tab === 'compras'" :project="project" />
+                <ProjectTimeTab v-else-if="tab === 'horas'" :project="project" />
+                <ProjectCostsTab v-else-if="tab === 'custos'" :project="project" />
+                <ProjectPlanningTab v-else-if="tab === 'planeamento'" :project="project" />
+                <ProjectStructureTab v-else-if="tab === 'estrutura'" :project="project" />
+                <ProjectTeamTab v-else-if="tab === 'equipa'" :project="project" @changed="load" />
+                <ProjectDetailsTab v-else :project="project" @updated="(p) => (project = p)" />
+            </div>
         </template>
     </div>
 </template>

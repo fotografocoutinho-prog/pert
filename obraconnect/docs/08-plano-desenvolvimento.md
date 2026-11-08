@@ -9,18 +9,16 @@ Cada fase termina com: código, migrações, testes automatizados a passar em CI
 | **1 · Fundação** | Laravel 13 + Vue 3, multi-tenant, autenticação com 2FA, RBAC, planos e subscrições manuais, backoffice, suporte auditado, exportação RGPD, instalação cPanel | — | **Concluída (v0.1.0)** |
 | **2 · Operacional** | Departamentos, centros de custo, calendários e feriados; clientes; obras e estrutura (edifício → piso → zona → elemento → atividade); equipas por obra; diário de obra; documentos com versões; fotografias com original preservado; modo obra no telemóvel; fila offline para fotografias e diário | Fase 1 | **Concluída (v0.10.0)** |
 | **3 · Fiscalização** | Checklists configuráveis, inspeções com 9 estados, evidências obrigatórias, índice de suficiência explicável, pontos de paragem, ocorrências/NC com escalonamento, aprovações com cadeia imutável, relatório PDF, notificações por email | Fase 2 | **Concluída (v0.13.0)** |
-| **4 · Económica** | Orçamentos (capítulos, artigos, preços compostos, importação Excel), medições, autos, custos previsto/comprometido/realizado, compras, subempreiteiros e portal, trabalhadores e tempos, equipamentos com QR, planeamento Gantt/CPM/PERT | Fases 2–3 | Próxima |
-| **5 · Inteligência** | Assistente documental com referências, apoio à fiscalização (sem aprovar), resumos e atas, previsões explicadas, voz em pt-PT, automações | Fases 2–4, fornecedor IA | Planeada |
-| **6 · Comercial e escala** | Pagamentos e faturação via software certificado, cupões, upgrades/downgrades self-service, integrações ERP/BIM/assinatura, API pública e webhooks, monitorização, bases dedicadas, internacionalização | Fases 1–4 | Planeada |
+| **4 · Económica** | Orçamentos (capítulos, artigos, preços compostos, importação Excel), medições, autos, custos previsto/comprometido/realizado, compras, subempreiteiros e portal, trabalhadores e tempos, equipamentos com QR, planeamento Gantt/CPM/PERT | Fases 2–3 | **Concluída (v0.14.0)** (sem portal próprio de subempreiteiros) |
+| **5 · Inteligência** | Assistente documental com referências, apoio à fiscalização (sem aprovar), resumos e atas, previsões explicadas, voz em pt-PT, automações | Fases 2–4, fornecedor IA | Próxima — falta escolher o fornecedor de IA (contrato de tratamento de dados, alojamento na UE) |
+| **6 · Comercial e escala** | Pagamentos e faturação via software certificado, cupões, upgrades/downgrades self-service, integrações ERP/BIM/assinatura, API pública e webhooks, monitorização, bases dedicadas, internacionalização | Fases 1–4 | Planeada — a faturação exige software certificado pela AT, a escolher |
 
-## Próximos passos imediatos (fase 2)
+## Próximos passos (fases 5 e 6)
 
-1. Tabelas de estrutura da empresa e clientes.
-2. `projects` + `project_members` e ativação das permissões por obra em `AccessResolver`.
-3. Contador `max_active_projects` em `PlanLimits`.
-4. Armazenamento de ficheiros: upload por blocos, hash SHA-256, quota, versões otimizadas em fila, antivírus opcional (ClamAV).
-5. Diário de obra com fotografias.
-6. Layout "modo obra" e fila offline (IndexedDB + sincronização com idempotência por UUID do cliente).
+Antes de começar, são precisas duas decisões do cliente:
+
+1. **Fase 5 — fornecedor de IA**: com contrato de tratamento de dados (RGPD) e alojamento/processamento na UE; definir o limite de custo mensal por empresa.
+2. **Fase 6 — faturação**: as faturas aos clientes têm de sair de um programa certificado pela AT; escolher qual (e se tem API) antes de ligar pagamentos e subscrições.
 
 ## Riscos
 

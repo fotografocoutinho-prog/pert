@@ -3,6 +3,7 @@
 namespace Tests\Feature\Access;
 
 use App\Access\PermissionRegistry;
+use App\Access\RoleTemplates;
 use App\Mail\InvitationMail;
 use App\Models\Invitation;
 use App\Models\Permission;
@@ -26,7 +27,7 @@ class AccessControlTest extends TestCase
 
         // "Ver obras" sem projects.all: só vale nas obras de cuja equipa faz parte.
         $this->actingAs($worker)->getJson('/api/v1/me')
-            ->assertJsonPath('data.current.permissions', ['company.view', 'projects.view', 'documents.view', 'issues.view', 'issues.create']);
+            ->assertJsonPath('data.current.permissions', fn (array $p) => collect($p)->sort()->values()->all() === collect(RoleTemplates::permissionsFor('trabalhador'))->sort()->values()->all());
     }
 
     public function test_member_without_permission_gets_403(): void

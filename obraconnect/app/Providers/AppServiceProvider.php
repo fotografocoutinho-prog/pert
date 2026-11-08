@@ -6,6 +6,7 @@ use App\Access\AccessResolver;
 use App\Access\PermissionRegistry;
 use App\Audit\AuthEventSubscriber;
 use App\Billing\PlanLimits;
+use App\Mail\DropReservedRecipients;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\TenantContext;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Log\Context\Repository as ContextRepository;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -48,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         Event::subscribe(AuthEventSubscriber::class);
+        // Endereços de domínios reservados (.test, .example, …), como os da empresa de demonstração, nunca recebem emails.
+        Event::listen(MessageSending::class, DropReservedRecipients::class);
 
         // Fortify corre sem vistas: os emails apontam para as páginas da SPA.
         ResetPassword::createUrlUsing(

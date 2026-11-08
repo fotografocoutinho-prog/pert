@@ -1,5 +1,33 @@
 # Registo de progresso
 
+## v0.14.0 — Fase 4: gestão económica + empresa de demonstração (2026-11-08)
+
+| Área | Verificação |
+| --- | --- |
+| Biblioteca de preços, orçamentos com composição, encargos e margem, IVA (taxa, autoliquidação, isento), capítulos, importação XLSX/CSV, exportação, aprovação e revisão | Testes (`BudgetTest`) + browser |
+| Medições por dimensões, autos ao dono de obra (anteriores, período, acumulado), aprovação, autos de subempreitada com retenção | Testes (`CostsTest`) + browser (medição 1 × 12,5 × 2,8 = 35 m2 registada; auto n.º 2 aberto) |
+| Compras (aprovada → comprometido, faturada → realizado), subempreitadas, lançamentos, teto e alertas (ok, perto, acima), painel financeiro | Testes + browser (as três situações de teto na demonstração) |
+| Horas (folha do dia, só as próprias sem `time.register_team`, aprovação, salários CSV), equipamentos com QR e manutenções | Testes + browser (aprovação de 1 registo, QR carregado) |
+| Planeamento CPM com FS/SS/FF/SF e desfasamentos, ciclos recusados, PERT, ponto de paragem impede concluir | Testes + browser (Gantt com caminho crítico e "PP") |
+| Empresa de demonstração: todas as áreas, cadeias de hash das inspeções íntegras, fotografias processadas, `--fresh` apaga tudo (dados, ficheiros, equipa fictícia) sem tocar nas outras empresas | Teste (`DemoCompanyTest`) + corrida local (~30 s, 2,8 MB) |
+| Emails para domínios reservados nunca saem | Teste (`ReservedRecipientsTest`) |
+| 360 px sem deslocamento horizontal em todos os ecrãs novos | Browser (corrigidos medições e trabalhadores) |
+
+Total: **175 testes, 1698 asserções**.
+
+Com esta versão, a **Fase 4 fica concluída**.
+
+Decisões: o custo previsto é o do orçamento aprovado (por natureza, a partir da composição dos preços); a "previsão final" é realizado + comprometido (o que falta contratar não entra); o teto, se não for escrito, é o custo do orçamento; as horas extra contam a 150%; o custo das horas e dos equipamentos usa o custo/hora do dia do registo (mudar o custo/hora não reescreve o passado); a demonstração usa um domínio reservado (`.test`) e um filtro no envio de emails garante que nada sai para esses endereços.
+
+### Limitações
+
+- Não há portal próprio de subempreiteiros: entram como utilizadores com o perfil Subempreiteiro e veem a obra conforme as permissões dele.
+- A biblioteca guarda só o custo atual (sem histórico de preços); os orçamentos guardam a cópia do dia.
+- As horas registam-se por dia (normais e extra), sem hora de entrada e saída nem localização.
+- O Gantt mostra e o editor altera, mas não se arrastam barras; não há nivelamento de recursos.
+- Os autos imprimem-se pelo browser (ainda não há PDF próprio).
+- Não há faturação: emitir faturas exige software certificado pela AT (Fase 6).
+
 ## v0.13.0 — Fase 3, parte 3: aprovações em vários passos, relatório PDF e emails (2026-11-06)
 
 | Área | Verificação |

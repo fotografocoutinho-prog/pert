@@ -1,5 +1,26 @@
 # Histórico de versões
 
+## 0.14.0 — 2026-11-08
+
+Fase 4 completa: gestão económica da obra. E uma empresa de demonstração com dados fictícios em todas as áreas.
+
+- **Biblioteca de preços** (menu **Biblioteca de preços**): recursos (mão de obra, materiais, equipamentos, subempreitadas) com custo unitário e **artigos compostos** (recurso × rendimento). Usados não se apagam: arquivam-se.
+- **Orçamentos** (separador **Orçamento** da obra): capítulos e subcapítulos, artigos da biblioteca ou escritos à mão, com a composição do preço. Preço de venda = custo × (1 + encargos) × (1 + margem), ou escrito à mão por artigo. IVA à taxa, autoliquidação ou isento. Totais por capítulo e custo por natureza. **Importar Excel/CSV** (Código, Descrição, Unidade, Quantidade, Custo unitário; linhas sem unidade são capítulos) e **Exportar CSV**. Rascunho → **aprovado** (passa a ser a base dos autos e do custo previsto) → **revisão** (nova versão em rascunho; ao aprovar, a anterior fica substituída).
+- **Medições e autos** (separador **Medições e autos**): medições por dimensões (n.º × comprimento × largura × altura) ou quantidade, sobre os artigos do orçamento aprovado, com o avanço por artigo. **Auto de medição** ao dono de obra: junta as medições ainda não autadas até ao fim do período, aos preços de venda; quantidades acertáveis em rascunho; rascunho → submetido → aprovado (`certificates.approve`); aviso quando o acumulado passa o contratado.
+- **Fornecedores e subempreiteiros** (menu): especialidades e documentos com validade (alvará, seguros, não dívida) com aviso de "a expirar" e "expirado".
+- **Compras** (separador **Compras e subempreitadas**): encomendas com linhas (ligadas a recursos e artigos do orçamento), natureza e centro de custo. Rascunho → aprovada (custo **comprometido**) → recebida → **faturada** (custo **realizado**, com n.º e valor da fatura) ou cancelada.
+- **Subempreitadas**: contrato com trabalhos e preços acordados e retenção de garantia. Rascunho → adjudicado (comprometido) → fechado. **Autos de subempreitada** com a retenção calculada; aprovados contam como realizado.
+- **Trabalhadores e horas**: trabalhadores da empresa ou de subempreiteiros, com custo/hora e ligação opcional a um utilizador (que regista as próprias horas). Separador **Horas e equipamentos**: grelha da semana, **folha do dia** (horas normais e extra por pessoa), aprovação em bloco, e **exportação mensal para salários** (CSV). O custo usa o custo/hora do dia do registo; as horas extra contam a 150%.
+- **Equipamentos** (menu): onde estão, custo/hora, situação, manutenções com próxima data (aviso de atraso), horas por obra (entram no custo) e **etiqueta QR** para imprimir, que abre a ficha no telemóvel.
+- **Custos** (separador **Custos**): previsto (orçamento aprovado), comprometido, realizado e previsão final por natureza, por centro de custo e por mês; lançamentos manuais (taxas, seguros, ajustes); **teto de custo** (por omissão, o custo do orçamento) com alerta perto (≥ 90%) e acima do teto; margem prevista; exportação CSV.
+- **Painel financeiro** (menu, `finance.view`): por obra, contrato, autado, realizado, comprometido, previsão, margem e situação face ao teto.
+- **Planeamento** (separador **Planeamento**): atividades e resumos, duração em dias úteis (calendário da obra, com feriados), precedências fim→início, início→início, fim→fim e início→fim com desfasamento, data "não antes de", **caminho crítico** (CPM), estimativa **PERT** (otimista / mais provável / pessimista), avanço e **gráfico de Gantt**. Uma atividade com **ponto de paragem** por libertar não se dá como concluída; as inspeções podem ligar-se a uma atividade.
+- Permissões novas: `workforce.manage` e as da Fase 4 que estavam só planeadas passam a existir (valores por omissão na matriz).
+- **Empresa de demonstração**: `php artisan obraconnect:demo --admin=email` cria a "Atlântico Construções (demonstração)" com equipa fictícia de 15 pessoas (emails `@atlantico-demo.test`), departamentos, centros de custo, clientes, biblioteca de preços, fornecedores e subempreiteiros, trabalhadores, equipamentos e quatro obras (em curso, em curso acima do teto, em preparação e concluída) com estrutura, diário com fotografias, documentos, inspeções com pontos de paragem, ocorrências e NC, orçamentos, autos, compras, subempreitadas, horas, custos e planeamento. As datas são relativas ao dia em que se corre. `--fresh` apaga e volta a criar. O utilizador indicado em `--admin` fica administrador e muda de empresa no menu.
+- **Emails para domínios reservados** (`.test`, `.example`, `.invalid`, `.localhost`, `example.com/.net/.org`) nunca saem: são retirados dos destinatários e, se não sobrar ninguém, o envio é cancelado.
+- Corrigido: ao mudar de empresa, a página aberta (por exemplo o painel) continuava com os dados da empresa anterior até se recarregar; e ao passar de uma obra para outra, o separador aberto mostrava os dados da obra anterior.
+- Os separadores novos da obra só se carregam quando são abertos (a página da obra ficou com metade do tamanho).
+
 ## 0.13.0 — 2026-11-06
 
 Fase 3, terceira parte: aprovações em vários passos, relatório PDF e emails. Fecha a Fase 3.

@@ -24,10 +24,16 @@ const menuOpen = ref(false);
 
 watch(() => route.fullPath, () => (menuOpen.value = false));
 
+const anyOf = (...permissions: string[]) => permissions.some((p) => session.can(p));
 const tenantNav = computed<NavItem[]>(() => [
     { to: '/app', label: 'Painel', show: true },
     { to: '/app/obras', label: 'Obras', show: session.can('projects.view') },
     { to: '/app/clientes', label: 'Clientes', show: session.can('clients.view') },
+    { to: '/app/financas', label: 'Painel financeiro', show: session.can('finance.view') },
+    { to: '/app/precos', label: 'Biblioteca de preços', show: anyOf('budgets.view', 'budgets.manage') },
+    { to: '/app/fornecedores', label: 'Fornecedores e subempreiteiros', show: anyOf('purchases.manage', 'subcontractors.manage', 'costs.view', 'workforce.manage') },
+    { to: '/app/trabalhadores', label: 'Trabalhadores', show: anyOf('workforce.view', 'workforce.manage', 'time.register_team', 'time.approve') },
+    { to: '/app/equipamentos', label: 'Equipamentos', show: anyOf('equipment.manage', 'costs.view', 'workforce.view') },
     { to: '/app/calendarios', label: 'Calendários de trabalho', show: session.can('company.view') },
     { to: '/app/empresa', label: 'Empresa', show: session.can('company.view') },
     { to: '/app/organizacao', label: 'Organização', show: session.can('company.view') },
@@ -178,7 +184,8 @@ async function logout(): Promise<void> {
             </div>
 
             <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:py-8">
-                <RouterView />
+                <!-- Ao mudar de empresa, as páginas montam-se de novo (os dados são de outra empresa). -->
+                <RouterView :key="session.current?.tenant.id ?? 0" />
             </main>
         </div>
     </div>

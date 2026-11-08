@@ -73,6 +73,33 @@ Regras adicionais aplicadas pelo servidor (não configuráveis):
 | `issues.resolve` | Resolver as que lhe estão atribuídas | ● | ● | ○ | ○ | | | | | | | | ○ | | |
 | `issues.validate` | Validar, reabrir, anular, mudar responsável e prazo | ● | ● | ○ | | | | ○ | ○ | ○ | | | | | |
 
+
+Gestão económica (0.14.0) — todas valem por obra (● = em todas as obras, por ter `projects.all`; ○ = nas obras da equipa):
+
+| Permissão | Descrição | ADM | DT | DO | ENC | PRE | MED | FIS | CSO | TQ | ADV | TRB | SUB | FOR | DON |
+| --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| `budgets.view` | Consultar orçamentos e a biblioteca de preços | ● | ● | ○ |  | ○ | ● |  |  |  | ● |  |  |  |  |
+| `budgets.manage` | Fazer, aprovar e rever orçamentos; gerir a biblioteca de preços | ● | ● |  |  |  | ● |  |  |  |  |  |  |  |  |
+| `measurements.manage` | Registar medições e preparar autos de medição | ● | ● | ○ |  |  | ● |  |  |  |  |  |  |  |  |
+| `certificates.approve` | Aprovar autos de medição | ● | ● | ○ |  |  |  | ○ |  |  |  |  |  |  | ○ |
+| `purchases.manage` | Gerir fornecedores e compras | ● | ● | ○ |  | ○ |  |  |  |  | ● |  |  |  |  |
+| `subcontractors.manage` | Gerir subempreiteiros e contratos de subempreitada | ● | ● | ○ |  | ○ |  |  |  |  | ● |  |  |  |  |
+| `workforce.view` | Consultar trabalhadores e horas | ● | ● | ○ | ○ |  |  |  |  |  | ● |  |  |  |  |
+| `workforce.manage` | Gerir a lista de trabalhadores e o custo/hora | ● | ● |  |  |  |  |  |  |  | ● |  |  |  |  |
+| `time.register_own` | Registar as próprias horas | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ | ● | ○ | ○ |  |  |
+| `time.register_team` | Registar horas da equipa | ● |  | ○ | ○ |  |  |  |  |  |  |  | ○ |  |  |
+| `time.approve` | Aprovar e rejeitar horas | ● | ● | ○ |  |  |  |  |  |  | ● |  |  |  |  |
+| `time.export_payroll` | Exportar horas para processamento salarial | ● |  |  |  |  |  |  |  |  | ● |  |  |  |  |
+| `equipment.manage` | Gerir equipamentos, utilização em obra e manutenções | ● | ● | ○ | ○ | ○ |  |  |  |  | ● |  |  |  |  |
+| `costs.view` | Consultar o mapa de custos da obra | ● | ● | ○ |  | ○ | ● |  |  |  | ● |  |  |  |  |
+| `costs.manage` | Lançar custos e definir o teto de custo | ● | ● |  |  |  |  |  |  |  | ● |  |  |  |  |
+| `finance.view` | Ver o painel financeiro (faturado, custo e margem) | ● | ● | ○ |  |  |  |  |  |  | ● |  |  |  |  |
+| `planning.view` | Consultar o planeamento (Gantt, caminho crítico) | ● | ● | ○ | ○ | ○ | ● | ○ | ○ | ○ |  |  | ○ |  | ○ |
+| `planning.manage` | Gerir atividades, precedências e avanço | ● | ● | ○ |  | ○ |  |  |  |  |  |  |  |  |  |
+| `reports.export` | Exportar relatórios (orçamento, custos, horas) em CSV | ● | ● | ○ |  | ○ | ● | ○ | ○ | ○ | ● |  |  |  | ○ |
+
+Regras da gestão económica (0.14.0): as páginas da empresa (biblioteca de preços, fornecedores, trabalhadores, equipamentos, painel financeiro) aparecem a quem tem a permissão no perfil da empresa; numa obra decide sempre o perfil nessa obra. Sem `workforce.view` nem `costs.view`, as horas aparecem sem custo. Quem só tem `time.register_own` regista e vê apenas as horas dos trabalhadores ligados à sua conta. A biblioteca de preços consulta-se com `budgets.view` e gere-se com `budgets.manage`. `workforce.manage` (nova) gere a lista de trabalhadores e o custo/hora.
+
 Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); departamentos e centros de custo (0.9.0) consultam-se com `company.view`; as especialidades (0.10.0) também com `projects.view`, porque subempreiteiros e fornecedores classificam os documentos que enviam (os centros também com `projects.create`/`projects.update`, para os escolher nas obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
 
 Inspeções (0.11.0): vê as inspeções de uma obra quem tem lá qualquer uma das três permissões de inspeção (não há `inspections.view`); as fotografias de evidência seguem a mesma regra, e não `diary.view`. As listas de verificação consultam-se com `checklists.manage` ou com uma permissão de inspeção (para as escolher ao criar). `inspections.release_hold_point` (0.12.0) liberta pontos de paragem só depois de a inspeção ser aprovada.

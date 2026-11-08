@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.7.0
+  version: 0.14.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -55,6 +55,12 @@ tags:
   - name: Ocorrências
   - name: Clientes
   - name: Calendários
+  - name: Orçamentos
+  - name: Medições e autos
+  - name: Compras e subempreitadas
+  - name: Horas e equipamentos
+  - name: Custos
+  - name: Planeamento
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -618,6 +624,149 @@ paths:
   /api/v1/platform/security-logs:
     get: { tags: [Plataforma], summary: "Eventos auth.*, platform.* e support.*", responses: { "200": { description: Lista paginada } } }
 
+  /api/v1/price-library:
+    get: { tags: [Orçamentos], summary: "Biblioteca de preços: recursos e artigos (budgets.view)" }
+  /api/v1/price-library/resources:
+    post: { tags: [Orçamentos], summary: "Criar recurso (budgets.manage)" }
+  /api/v1/price-library/resources/{priceResource}:
+    put: { tags: [Orçamentos], summary: "Alterar ou arquivar recurso" }
+    delete: { tags: [Orçamentos], summary: "Apagar recurso sem uso (RESOURCE_IN_USE)" }
+  /api/v1/price-library/articles:
+    post: { tags: [Orçamentos], summary: "Criar artigo (simples ou composto)" }
+  /api/v1/price-library/articles/{article}:
+    put: { tags: [Orçamentos], summary: "Alterar ou arquivar artigo" }
+    delete: { tags: [Orçamentos], summary: "Apagar artigo sem uso (ARTICLE_IN_USE)" }
+  /api/v1/projects/{project}/budgets:
+    get: { tags: [Orçamentos], summary: "Orçamentos da obra" }
+    post: { tags: [Orçamentos], summary: "Novo orçamento em rascunho (budgets.manage)" }
+  /api/v1/projects/{project}/budgets/{budget}:
+    get: { tags: [Orçamentos], summary: "Orçamento com capítulos, artigos, totais e custo por natureza" }
+    put: { tags: [Orçamentos], summary: "Condições (nome, encargos, margem, IVA) — só em rascunho (BUDGET_STATUS)" }
+    delete: { tags: [Orçamentos], summary: "Apagar rascunho" }
+  /api/v1/projects/{project}/budgets/{budget}/approve:
+    post: { tags: [Orçamentos], summary: "Aprovar (BUDGET_EMPTY); o anterior aprovado fica substituído" }
+  /api/v1/projects/{project}/budgets/{budget}/revise:
+    post: { tags: [Orçamentos], summary: "Nova versão em rascunho, cópia do aprovado (REVISION_EXISTS)" }
+  /api/v1/projects/{project}/budgets/{budget}/chapters:
+    post: { tags: [Orçamentos], summary: "Novo capítulo ou subcapítulo (parent_id)" }
+  /api/v1/projects/{project}/budgets/{budget}/chapters/{chapter}:
+    put: { tags: [Orçamentos], summary: "Renomear capítulo" }
+    delete: { tags: [Orçamentos], summary: "Apagar capítulo e artigos" }
+  /api/v1/projects/{project}/budgets/{budget}/items:
+    post: { tags: [Orçamentos], summary: "Novo artigo (article_id da biblioteca, ou descrição, unidade e components)" }
+  /api/v1/projects/{project}/budgets/{budget}/items/{item}:
+    put: { tags: [Orçamentos], summary: "Alterar artigo" }
+    delete: { tags: [Orçamentos], summary: "Apagar artigo" }
+  /api/v1/projects/{project}/budgets/{budget}/import:
+    post: { tags: [Orçamentos], summary: "Importar XLSX/CSV (multipart, campo file)" }
+  /api/v1/projects/{project}/budgets/{budget}/export:
+    get: { tags: [Orçamentos], summary: "Exportar CSV" }
+  /api/v1/projects/{project}/measurements:
+    get: { tags: [Medições e autos], summary: "Medições e avanço por artigo do orçamento aprovado" }
+    post: { tags: [Medições e autos], summary: "Registar medição (dimensões ou quantidade; NO_APPROVED_BUDGET)" }
+  /api/v1/projects/{project}/measurements/{measurement}:
+    put: { tags: [Medições e autos], summary: "Alterar medição ainda não autada (MEASUREMENT_CERTIFIED)" }
+    delete: { tags: [Medições e autos], summary: "Apagar medição ainda não autada" }
+  /api/v1/projects/{project}/certificates:
+    get: { tags: [Medições e autos], summary: "Autos (filtro contract_id)" }
+    post: { tags: [Medições e autos], summary: "Novo auto ao dono de obra ou de subempreitada (contract_id)" }
+  /api/v1/projects/{project}/certificates/{certificate}:
+    get: { tags: [Medições e autos], summary: "Auto com linhas" }
+    delete: { tags: [Medições e autos], summary: "Apagar rascunho (as medições ficam livres)" }
+  /api/v1/projects/{project}/certificates/{certificate}/lines/{line}:
+    put: { tags: [Medições e autos], summary: "Quantidade do período (qty_period), em rascunho" }
+  /api/v1/projects/{project}/certificates/{certificate}/submit:
+    post: { tags: [Medições e autos], summary: "Submeter (CERTIFICATE_STATUS)" }
+  /api/v1/projects/{project}/certificates/{certificate}/approve:
+    post: { tags: [Medições e autos], summary: "Aprovar (certificates.approve)" }
+  /api/v1/projects/{project}/certificates/{certificate}/reopen:
+    post: { tags: [Medições e autos], summary: "Devolver a rascunho (certificates.approve)" }
+  /api/v1/partners:
+    get: { tags: [Compras e subempreitadas], summary: "Fornecedores e subempreiteiros (filtro kind)" }
+    post: { tags: [Compras e subempreitadas], summary: "Criar" }
+  /api/v1/partners/{partner}:
+    put: { tags: [Compras e subempreitadas], summary: "Alterar, especialidades, arquivar" }
+    delete: { tags: [Compras e subempreitadas], summary: "Apagar sem uso (PARTNER_IN_USE)" }
+  /api/v1/partners/{partner}/documents:
+    post: { tags: [Compras e subempreitadas], summary: "Juntar documento com validade" }
+  /api/v1/partners/{partner}/documents/{document}:
+    delete: { tags: [Compras e subempreitadas], summary: "Retirar documento" }
+  /api/v1/projects/{project}/purchase-orders:
+    get: { tags: [Compras e subempreitadas], summary: "Compras da obra" }
+    post: { tags: [Compras e subempreitadas], summary: "Nova compra com linhas (purchases.manage)" }
+  /api/v1/projects/{project}/purchase-orders/{purchaseOrder}:
+    put: { tags: [Compras e subempreitadas], summary: "Alterar rascunho (PURCHASE_STATUS)" }
+    delete: { tags: [Compras e subempreitadas], summary: "Apagar rascunho" }
+  /api/v1/projects/{project}/purchase-orders/{purchaseOrder}/actions/{action}:
+    post: { tags: [Compras e subempreitadas], summary: "approve | receive | invoice (invoice_number, invoiced_on, invoiced_cents) | cancel" }
+  /api/v1/projects/{project}/contracts:
+    get: { tags: [Compras e subempreitadas], summary: "Subempreitadas da obra" }
+    post: { tags: [Compras e subempreitadas], summary: "Novo contrato com trabalhos (subcontractors.manage)" }
+  /api/v1/projects/{project}/contracts/{contract}:
+    put: { tags: [Compras e subempreitadas], summary: "Alterar (trabalhos e subempreiteiro só em rascunho: CONTRACT_STATUS)" }
+    delete: { tags: [Compras e subempreitadas], summary: "Apagar rascunho" }
+  /api/v1/projects/{project}/contracts/{contract}/actions/{action}:
+    post: { tags: [Compras e subempreitadas], summary: "activate | close" }
+  /api/v1/workers:
+    get: { tags: [Horas e equipamentos], summary: "Trabalhadores" }
+    post: { tags: [Horas e equipamentos], summary: "Criar (workforce.manage)" }
+  /api/v1/workers/{worker}:
+    put: { tags: [Horas e equipamentos], summary: "Alterar, desativar" }
+    delete: { tags: [Horas e equipamentos], summary: "Apagar sem horas (WORKER_IN_USE)" }
+  /api/v1/time-entries/payroll:
+    get: { tags: [Horas e equipamentos], summary: "CSV mensal das horas aprovadas (month=AAAA-MM; time.export_payroll)" }
+  /api/v1/projects/{project}/time-entries:
+    get: { tags: [Horas e equipamentos], summary: "Horas da semana (week=AAAA-MM-DD)" }
+    post: { tags: [Horas e equipamentos], summary: "Folha de um dia: work_date + entries[] (cria ou substitui)" }
+  /api/v1/projects/{project}/time-entries/{decision}:
+    post: { tags: [Horas e equipamentos], summary: "approve | reject para ids[] (time.approve)" }
+  /api/v1/projects/{project}/time-entries/{timeEntry}:
+    delete: { tags: [Horas e equipamentos], summary: "Apagar registo não aprovado (TIME_APPROVED)" }
+  /api/v1/equipment:
+    get: { tags: [Horas e equipamentos], summary: "Equipamentos" }
+    post: { tags: [Horas e equipamentos], summary: "Criar (equipment.manage)" }
+  /api/v1/equipment/{equipment}:
+    get: { tags: [Horas e equipamentos], summary: "Ficha com utilizações e manutenções" }
+    put: { tags: [Horas e equipamentos], summary: "Alterar" }
+    delete: { tags: [Horas e equipamentos], summary: "Apagar sem uso (EQUIPMENT_IN_USE)" }
+  /api/v1/equipment/qr/{token}:
+    get: { tags: [Horas e equipamentos], summary: "Ficha pela etiqueta QR" }
+  /api/v1/equipment/{equipment}/qr:
+    get: { tags: [Horas e equipamentos], summary: "Imagem SVG da etiqueta QR" }
+  /api/v1/equipment/{equipment}/maintenance:
+    post: { tags: [Horas e equipamentos], summary: "Registar manutenção" }
+  /api/v1/equipment/{equipment}/maintenance/{maintenanceRecord}:
+    delete: { tags: [Horas e equipamentos], summary: "Retirar manutenção" }
+  /api/v1/projects/{project}/equipment-usages:
+    get: { tags: [Horas e equipamentos], summary: "Horas de equipamento na obra" }
+    post: { tags: [Horas e equipamentos], summary: "Registar horas de equipamento" }
+  /api/v1/projects/{project}/equipment-usages/{equipmentUsage}:
+    delete: { tags: [Horas e equipamentos], summary: "Apagar registo" }
+  /api/v1/projects/{project}/costs:
+    get: { tags: [Custos], summary: "Mapa de custos: previsto, comprometido, realizado, previsão, teto e alerta" }
+  /api/v1/projects/{project}/costs/export:
+    get: { tags: [Custos], summary: "Mapa de custos em CSV" }
+  /api/v1/projects/{project}/costs/ceiling:
+    put: { tags: [Custos], summary: "Teto de custo (cost_ceiling_cents; null = custo do orçamento)" }
+  /api/v1/projects/{project}/cost-entries:
+    post: { tags: [Custos], summary: "Lançamento manual (costs.manage)" }
+  /api/v1/projects/{project}/cost-entries/{costEntry}:
+    delete: { tags: [Custos], summary: "Apagar lançamento" }
+  /api/v1/finance:
+    get: { tags: [Custos], summary: "Painel financeiro de todas as obras (finance.view)" }
+  /api/v1/projects/{project}/planning:
+    get: { tags: [Planeamento], summary: "Atividades com datas, folgas, caminho crítico e PERT" }
+  /api/v1/projects/{project}/activities:
+    post: { tags: [Planeamento], summary: "Nova atividade (planning.manage)" }
+  /api/v1/projects/{project}/activities/{activity}:
+    put: { tags: [Planeamento], summary: "Alterar atividade" }
+    delete: { tags: [Planeamento], summary: "Apagar atividade sem inspeções nem horas (ACTIVITY_IN_USE)" }
+  /api/v1/projects/{project}/activities/{activity}/progress:
+    post: { tags: [Planeamento], summary: "Avanço (progress_pct); 100% recusado com ponto de paragem por libertar (HOLD_POINT_PENDING)" }
+  /api/v1/projects/{project}/dependencies:
+    post: { tags: [Planeamento], summary: "Nova precedência (FS/SS/FF/SF, lag_days); ciclos recusados" }
+  /api/v1/projects/{project}/dependencies/{dependency}:
+    delete: { tags: [Planeamento], summary: "Retirar precedência" }
 components:
   securitySchemes:
     sessionCookie:

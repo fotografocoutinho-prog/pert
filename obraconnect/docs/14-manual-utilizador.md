@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.13.0)
+# Manual do utilizador (versão 0.14.0)
 
 ## Entrar
 
@@ -165,6 +165,69 @@ No separador **Ocorrências e NC** da obra registam-se problemas que alguém tem
 **Prazo ultrapassado.** Todas as manhãs (7h30), as ocorrências por resolver com o prazo ultrapassado recebem a marca **Atrasada** e o responsável e o diretor de obra da equipa recebem um email (sem diretor de obra na equipa, vai para os administradores da empresa). Cada ocorrência só é escalonada uma vez; se combinar um novo prazo, mude-o em **Editar**.
 
 Filtros: **Por resolver**, **Por validar**, **Atrasadas**, **Fechadas**, **Todas** e **Só as minhas**.
+
+## Biblioteca de preços
+
+Em **Biblioteca de preços** ficam os **recursos** (mão de obra, materiais, equipamentos, subempreitadas) com o custo unitário e os **artigos**. Um artigo composto soma os recursos × rendimento (ex.: 1,05 m3 de betão + 0,5 h de pedreiro + 0,8 h de servente). Os orçamentos guardam uma cópia: mudar um preço na biblioteca não altera orçamentos feitos. Recursos e artigos usados arquivam-se em vez de se apagarem.
+
+## Orçamento da obra
+
+No separador **Orçamento** da obra:
+
+1. **Novo orçamento** cria um rascunho. Em **Condições** escolha os encargos e a margem (%) e o IVA (à taxa, autoliquidação ou isento).
+2. Junte **capítulos** (e subcapítulos) e, em cada um, **artigos**: da biblioteca ou escritos à mão, com a composição do preço. O preço de venda é calculado (custo × encargos × margem); pode escrevê-lo à mão num artigo.
+3. Ou **Importar Excel / CSV** com as colunas Código, Descrição, Unidade, Quantidade e Custo unitário (as linhas sem unidade são capítulos).
+4. **Aprovar orçamento**: passa a ser a base dos autos e do custo previsto, e deixa de se poder alterar. Para mudar, **Fazer revisão** (cria a versão seguinte em rascunho; ao aprová-la, a anterior fica substituída).
+
+**Exportar CSV** tira o orçamento para folha de cálculo.
+
+## Medições e autos
+
+No separador **Medições e autos**:
+
+- **Registar medição**: escolha o artigo do orçamento aprovado e escreva as dimensões (n.º, comprimento, largura, altura: a quantidade é o produto) ou a quantidade. O quadro **Avanço por artigo** mostra orçado, medido e autado.
+- **Novo auto**: indique o período. O auto traz as medições ainda não autadas até ao fim do período, aos preços de venda do orçamento; em rascunho pode acertar a quantidade de cada linha. **Submeter** → quem aprova autos (por omissão, fiscal e diretor de obra) **Aprova** ou **Reabre**. Uma linha acima do contratado fica a vermelho.
+
+## Compras e subempreitadas
+
+- **Nova compra**: fornecedor, natureza (materiais, equipamentos…), centro de custo e linhas (pode ligar cada linha a um artigo do orçamento). **Aprovar** → o valor passa a custo **comprometido**; **Recebida**; **Registar fatura** (número, data, valor) → passa a custo **realizado**. Também se cancela.
+- **Nova subempreitada**: subempreiteiro, objeto, retenção de garantia (%) e os trabalhos com os preços acordados. **Adjudicar** → comprometido. Em curso, **Novo auto** cria o auto da subempreitada: escreva a quantidade do período em cada trabalho; a retenção calcula-se sozinha. Autos aprovados contam como realizado.
+
+Os fornecedores e subempreiteiros criam-se em **Fornecedores e subempreiteiros**, com especialidades e documentos com validade (alvará, seguros, certidões): aparece o aviso quando estão a expirar ou expirados.
+
+## Horas e equipamentos
+
+No separador **Horas e equipamentos**:
+
+- **Horas da semana**: grelha por trabalhador e dia (amarelo por aprovar, verde aprovadas), com o custo se o seu perfil o mostrar.
+- **Folha do dia**: escolha o dia, escreva as horas normais e extra de cada pessoa e **Guardar folha**. Voltar a gravar o mesmo dia substitui o registo (se ainda não estiver aprovado). Quem só regista as próprias horas vê apenas a sua linha (o trabalhador tem de estar ligado à sua conta em **Trabalhadores**).
+- **Aprovar**: escolha os registos (ou todos) e **Aprovar** ou **Rejeitar**.
+- **Equipamentos na obra**: registe as horas de cada equipamento por dia; entram no custo com o custo/hora do equipamento.
+
+Em **Trabalhadores** gerem-se as pessoas e o custo/hora (de subempreiteiros também) e **Exportar horas (CSV)** tira as horas aprovadas de um mês para os salários. Em **Equipamentos** fica a ficha de cada um (onde está, situação, manutenções com a próxima data) e a **etiqueta QR**: imprima-a e cole-a no equipamento; lida no telemóvel, abre a ficha (com sessão iniciada).
+
+## Custos
+
+O separador **Custos** compara o **previsto** (orçamento aprovado) com o **comprometido** (encomendas aprovadas e subempreitadas por faturar), o **realizado** (faturas, autos de subempreitada aprovados, horas, equipamentos e lançamentos) e a **previsão final** (realizado + comprometido), por natureza, por centro de custo e por mês.
+
+- **Teto**: por omissão é o custo do orçamento; **Alterar teto** escreve outro. Aparece o aviso **Perto do teto** a partir de 90% e **Acima do teto** quando a previsão o passa.
+- **Lançamentos**: custos que não vêm de compras, autos, horas ou equipamentos (taxas, licenças, seguros, ajustes).
+- **Exportar mapa de custos (CSV)**.
+
+O **Painel financeiro** (menu) junta todas as obras: contrato, autado, realizado, comprometido, previsão, margem e situação face ao teto.
+
+## Planeamento
+
+No separador **Planeamento**:
+
+1. **Nova atividade**: nome, duração em **dias úteis** (o calendário da obra conta os fins de semana e feriados), "dentro de" (para agrupar em resumos) e, se quiser, a data "não antes de" e a estimativa PERT (otimista, mais provável, pessimista).
+2. Abra a atividade e junte as **precedências** (fim → início, início → início, fim → fim, início → fim, com desfasamento em dias).
+3. O **Gantt** mostra as datas calculadas, o **caminho crítico** a vermelho, o avanço (parte cheia da barra), hoje (azul) e o fim previsto da obra (roxo). Se o plano acabar depois do fim previsto, aparece o aviso.
+4. **Avanço (%)**: a 100% a atividade fica concluída — exceto se tiver um **ponto de paragem** por libertar (marca **PP**). Ao criar uma inspeção pode escolher a atividade a que pertence.
+
+## Empresa de demonstração
+
+Se tiver acesso à **Atlântico Construções (demonstração)**, mude de empresa no menu (no topo). É uma empresa com dados fictícios em todas as áreas, para mostrar o produto; as pessoas da equipa têm emails `@atlantico-demo.test`, que nunca recebem emails. Pode experimentar à vontade: a demonstração recria-se com as datas do dia.
 
 ## No telemóvel
 

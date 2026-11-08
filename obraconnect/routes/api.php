@@ -1,15 +1,20 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\BudgetController;
+use App\Http\Controllers\Api\V1\CertificateController;
 use App\Http\Controllers\Api\V1\ChecklistTemplateController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\ContractController;
 use App\Http\Controllers\Api\V1\CostCenterController;
+use App\Http\Controllers\Api\V1\CostController;
 use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\DiaryEntryController;
 use App\Http\Controllers\Api\V1\DiaryPhotoController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DocumentFolderController;
+use App\Http\Controllers\Api\V1\EquipmentController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InspectionController;
@@ -17,21 +22,28 @@ use App\Http\Controllers\Api\V1\InspectionItemController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\IssueController;
+use App\Http\Controllers\Api\V1\MeasurementController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MemberController;
+use App\Http\Controllers\Api\V1\PartnerController;
 use App\Http\Controllers\Api\V1\PermissionController;
+use App\Http\Controllers\Api\V1\PlanningController;
 use App\Http\Controllers\Api\V1\Platform;
+use App\Http\Controllers\Api\V1\PriceLibraryController;
 use App\Http\Controllers\Api\V1\ProjectCalendarController;
 use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectMemberController;
 use App\Http\Controllers\Api\V1\PublicPlanController;
+use App\Http\Controllers\Api\V1\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SpecialtyController;
 use App\Http\Controllers\Api\V1\StructureController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
+use App\Http\Controllers\Api\V1\TimeEntryController;
 use App\Http\Controllers\Api\V1\WorkCalendarController;
+use App\Http\Controllers\Api\V1\WorkerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -132,6 +144,40 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::delete('work-calendars/{workCalendar}/holidays', [WorkCalendarController::class, 'destroyHolidays'])->name('calendars.holidays.destroy');
             Route::post('work-calendars/{workCalendar}/national-holidays', [WorkCalendarController::class, 'addNationalHolidays'])->name('calendars.national');
 
+            // Fase 4: biblioteca de preços, fornecedores e subempreiteiros, trabalhadores, equipamentos, finanças.
+            Route::get('price-library', [PriceLibraryController::class, 'index'])->name('prices.index');
+            Route::post('price-library/resources', [PriceLibraryController::class, 'storeResource'])->name('prices.resources.store');
+            Route::put('price-library/resources/{priceResource}', [PriceLibraryController::class, 'updateResource'])->name('prices.resources.update');
+            Route::delete('price-library/resources/{priceResource}', [PriceLibraryController::class, 'destroyResource'])->name('prices.resources.destroy');
+            Route::post('price-library/articles', [PriceLibraryController::class, 'storeArticle'])->name('prices.articles.store');
+            Route::put('price-library/articles/{article}', [PriceLibraryController::class, 'updateArticle'])->name('prices.articles.update');
+            Route::delete('price-library/articles/{article}', [PriceLibraryController::class, 'destroyArticle'])->name('prices.articles.destroy');
+
+            Route::get('partners', [PartnerController::class, 'index'])->name('partners.index');
+            Route::post('partners', [PartnerController::class, 'store'])->name('partners.store');
+            Route::put('partners/{partner}', [PartnerController::class, 'update'])->name('partners.update');
+            Route::delete('partners/{partner}', [PartnerController::class, 'destroy'])->name('partners.destroy');
+            Route::post('partners/{partner}/documents', [PartnerController::class, 'storeDocument'])->name('partners.documents.store');
+            Route::delete('partners/{partner}/documents/{document}', [PartnerController::class, 'destroyDocument'])->scopeBindings()->name('partners.documents.destroy');
+
+            Route::get('workers', [WorkerController::class, 'index'])->name('workers.index');
+            Route::post('workers', [WorkerController::class, 'store'])->name('workers.store');
+            Route::put('workers/{worker}', [WorkerController::class, 'update'])->name('workers.update');
+            Route::delete('workers/{worker}', [WorkerController::class, 'destroy'])->name('workers.destroy');
+            Route::get('time-entries/payroll', [TimeEntryController::class, 'payroll'])->name('time.payroll');
+
+            Route::get('equipment', [EquipmentController::class, 'index'])->name('equipment.index');
+            Route::post('equipment', [EquipmentController::class, 'store'])->name('equipment.store');
+            Route::get('equipment/qr/{token}', [EquipmentController::class, 'byToken'])->where('token', '[A-Za-z0-9]+')->name('equipment.token');
+            Route::get('equipment/{equipment}', [EquipmentController::class, 'show'])->name('equipment.show');
+            Route::put('equipment/{equipment}', [EquipmentController::class, 'update'])->name('equipment.update');
+            Route::delete('equipment/{equipment}', [EquipmentController::class, 'destroy'])->name('equipment.destroy');
+            Route::get('equipment/{equipment}/qr', [EquipmentController::class, 'qr'])->name('equipment.qr');
+            Route::post('equipment/{equipment}/maintenance', [EquipmentController::class, 'storeMaintenance'])->name('equipment.maintenance.store');
+            Route::delete('equipment/{equipment}/maintenance/{maintenanceRecord}', [EquipmentController::class, 'destroyMaintenance'])->scopeBindings()->name('equipment.maintenance.destroy');
+
+            Route::get('finance', [CostController::class, 'finance'])->name('finance');
+
             // Obras. O acesso a cada obra é decidido no controlador (perfil na empresa ou na equipa).
             Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
             Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -205,6 +251,71 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::post('issues/{issue}/photos', [IssueController::class, 'storePhoto'])
                     ->middleware('throttle:uploads')->name('issues.photos.store');
                 Route::delete('issues/{issue}/photos/{photo}', [IssueController::class, 'destroyPhoto'])->name('issues.photos.destroy');
+
+                Route::get('budgets', [BudgetController::class, 'index'])->name('budgets.index');
+                Route::post('budgets', [BudgetController::class, 'store'])->name('budgets.store');
+                Route::get('budgets/{budget}', [BudgetController::class, 'show'])->name('budgets.show');
+                Route::put('budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
+                Route::delete('budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
+                Route::post('budgets/{budget}/approve', [BudgetController::class, 'approve'])->name('budgets.approve');
+                Route::post('budgets/{budget}/revise', [BudgetController::class, 'revise'])->name('budgets.revise');
+                Route::post('budgets/{budget}/chapters', [BudgetController::class, 'storeChapter'])->name('budgets.chapters.store');
+                Route::put('budgets/{budget}/chapters/{chapter}', [BudgetController::class, 'updateChapter'])->name('budgets.chapters.update');
+                Route::delete('budgets/{budget}/chapters/{chapter}', [BudgetController::class, 'destroyChapter'])->name('budgets.chapters.destroy');
+                Route::post('budgets/{budget}/items', [BudgetController::class, 'storeItem'])->name('budgets.items.store');
+                Route::put('budgets/{budget}/items/{item}', [BudgetController::class, 'updateItem'])->name('budgets.items.update');
+                Route::delete('budgets/{budget}/items/{item}', [BudgetController::class, 'destroyItem'])->name('budgets.items.destroy');
+                Route::post('budgets/{budget}/import', [BudgetController::class, 'import'])->middleware('throttle:uploads')->name('budgets.import');
+                Route::get('budgets/{budget}/export', [BudgetController::class, 'export'])->name('budgets.export');
+
+                Route::get('measurements', [MeasurementController::class, 'index'])->name('measurements.index');
+                Route::post('measurements', [MeasurementController::class, 'store'])->name('measurements.store');
+                Route::put('measurements/{measurement}', [MeasurementController::class, 'update'])->name('measurements.update');
+                Route::delete('measurements/{measurement}', [MeasurementController::class, 'destroy'])->name('measurements.destroy');
+
+                Route::get('certificates', [CertificateController::class, 'index'])->name('certificates.index');
+                Route::post('certificates', [CertificateController::class, 'store'])->name('certificates.store');
+                Route::get('certificates/{certificate}', [CertificateController::class, 'show'])->name('certificates.show');
+                Route::delete('certificates/{certificate}', [CertificateController::class, 'destroy'])->name('certificates.destroy');
+                Route::put('certificates/{certificate}/lines/{line}', [CertificateController::class, 'updateLine'])->name('certificates.lines.update');
+                Route::post('certificates/{certificate}/submit', [CertificateController::class, 'submit'])->name('certificates.submit');
+                Route::post('certificates/{certificate}/approve', [CertificateController::class, 'approve'])->name('certificates.approve');
+                Route::post('certificates/{certificate}/reopen', [CertificateController::class, 'reopen'])->name('certificates.reopen');
+
+                Route::get('contracts', [ContractController::class, 'index'])->name('contracts.index');
+                Route::post('contracts', [ContractController::class, 'store'])->name('contracts.store');
+                Route::put('contracts/{contract}', [ContractController::class, 'update'])->name('contracts.update');
+                Route::delete('contracts/{contract}', [ContractController::class, 'destroy'])->name('contracts.destroy');
+                Route::post('contracts/{contract}/actions/{action}', [ContractController::class, 'transition'])->whereIn('action', ['activate', 'close'])->name('contracts.transition');
+
+                Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])->name('purchases.index');
+                Route::post('purchase-orders', [PurchaseOrderController::class, 'store'])->name('purchases.store');
+                Route::put('purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->name('purchases.update');
+                Route::delete('purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'destroy'])->name('purchases.destroy');
+                Route::post('purchase-orders/{purchaseOrder}/actions/{action}', [PurchaseOrderController::class, 'transition'])->whereIn('action', ['approve', 'receive', 'invoice', 'cancel'])->name('purchases.transition');
+
+                Route::get('costs', [CostController::class, 'show'])->name('costs.show');
+                Route::get('costs/export', [CostController::class, 'export'])->name('costs.export');
+                Route::put('costs/ceiling', [CostController::class, 'updateCeiling'])->name('costs.ceiling');
+                Route::post('cost-entries', [CostController::class, 'storeEntry'])->name('costs.entries.store');
+                Route::delete('cost-entries/{costEntry}', [CostController::class, 'destroyEntry'])->name('costs.entries.destroy');
+
+                Route::get('time-entries', [TimeEntryController::class, 'index'])->name('time.index');
+                Route::post('time-entries', [TimeEntryController::class, 'store'])->name('time.store');
+                Route::post('time-entries/{decision}', [TimeEntryController::class, 'decide'])->whereIn('decision', ['approve', 'reject'])->name('time.decide');
+                Route::delete('time-entries/{timeEntry}', [TimeEntryController::class, 'destroy'])->name('time.destroy');
+
+                Route::get('equipment-usages', [EquipmentController::class, 'projectUsages'])->name('equipment.usages.index');
+                Route::post('equipment-usages', [EquipmentController::class, 'storeUsage'])->name('equipment.usages.store');
+                Route::delete('equipment-usages/{equipmentUsage}', [EquipmentController::class, 'destroyUsage'])->name('equipment.usages.destroy');
+
+                Route::get('planning', [PlanningController::class, 'show'])->name('planning.show');
+                Route::post('activities', [PlanningController::class, 'storeActivity'])->name('activities.store');
+                Route::put('activities/{activity}', [PlanningController::class, 'updateActivity'])->name('activities.update');
+                Route::delete('activities/{activity}', [PlanningController::class, 'destroyActivity'])->name('activities.destroy');
+                Route::post('activities/{activity}/progress', [PlanningController::class, 'progress'])->name('activities.progress');
+                Route::post('dependencies', [PlanningController::class, 'storeDependency'])->name('dependencies.store');
+                Route::delete('dependencies/{dependency}', [PlanningController::class, 'destroyDependency'])->withoutScopedBindings()->name('dependencies.destroy');
 
                 Route::get('structure', [StructureController::class, 'index'])->name('structure.index');
                 Route::post('locations', [StructureController::class, 'storeLocation'])->name('locations.store');

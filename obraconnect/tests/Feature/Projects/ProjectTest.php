@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Projects;
 
+use App\Access\PermissionRegistry;
+use App\Access\RoleTemplates;
 use App\Models\AuditLog;
 use App\Models\Membership;
 use App\Models\Project;
@@ -20,6 +22,18 @@ class ProjectTest extends TestCase
         return $this->actingAs($user)->postJson('/api/v1/projects', $data + ['name' => 'Moradia T3'])
             ->assertCreated()
             ->json('data.id');
+    }
+
+    /**
+     * Permissões de obra de um perfil-modelo, comparadas sem ordem (a ordem vem da base de dados).
+     *
+     * @return \Closure(array): bool
+     */
+    private function projectPermissionsOf(string $template): \Closure
+    {
+        $expected = collect(RoleTemplates::permissionsFor($template))->filter(fn ($k) => PermissionRegistry::isProjectScoped($k))->sort()->values()->all();
+
+        return fn (array $p) => collect($p)->sort()->values()->all() === $expected;
     }
 
     private function membershipId(Tenant $tenant, User $user): int
@@ -80,7 +94,7 @@ class ProjectTest extends TestCase
 
         $this->actingAs($director)->getJson('/api/v1/projects')->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.id', $mine);
         $this->actingAs($director)->getJson("/api/v1/projects/{$mine}")->assertOk()
-            ->assertJsonPath('data.permissions', ['projects.view', 'projects.update', 'projects.team', 'structure.manage', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload', 'documents.manage', 'inspections.request', 'issues.view', 'issues.create', 'issues.resolve', 'issues.validate']);
+            ->assertJsonPath('data.permissions', $this->projectPermissionsOf('diretor_obra'));
         $this->actingAs($director)->getJson("/api/v1/projects/{$other}")->assertForbidden();
         $this->actingAs($director)->putJson("/api/v1/projects/{$other}", ['name' => 'Tentativa'])->assertForbidden();
         $this->actingAs($director)->putJson("/api/v1/projects/{$mine}", ['name' => 'Novo nome'])->assertOk();
@@ -95,7 +109,7 @@ class ProjectTest extends TestCase
 
         $this->actingAs($measurer)->getJson('/api/v1/projects')->assertJsonPath('meta.total', 2);
         // Vê, mas o perfil não tem projects.update nem diário.
-        $this->actingAs($measurer)->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view', 'structure.manage', 'documents.view', 'documents.upload']);
+        $this->actingAs($measurer)->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', $this->projectPermissionsOf('medidor_orcamentista'));
         $this->actingAs($measurer)->putJson("/api/v1/projects/{$id}", ['name' => 'X'])->assertForbidden();
         $this->actingAs($measurer)->postJson('/api/v1/projects', ['name' => 'X'])->assertForbidden();
     }
@@ -113,7 +127,7 @@ class ProjectTest extends TestCase
         ])->assertCreated();
 
         $this->actingAs($worker)->getJson("/api/v1/projects/{$id}")
-            ->assertJsonPath('data.permissions', ['projects.view', 'diary.view', 'diary.write', 'diary.submit', 'documents.view', 'documents.upload', 'inspections.request', 'issues.view', 'issues.create', 'issues.resolve']);
+            ->assertJsonPath('data.permissions', $this->projectPermissionsOf('encarregado'));
         $this->actingAs($worker)->postJson("/api/v1/projects/{$id}/diary", ['entry_date' => now()->toDateString()])->assertCreated();
     }
 
@@ -287,7 +301,8 @@ class ProjectTest extends TestCase
         $asSupport()->postJson("/api/v1/platform/support-grants/{$grant}/enter")->assertOk();
 
         $asSupport()->getJson('/api/v1/projects')->assertJsonPath('meta.total', 1);
-        $asSupport()->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', ['projects.view', 'diary.view', 'documents.view', 'issues.view']);
+        $asSupport()->getJson("/api/v1/projects/{$id}")->assertJsonPath('data.permissions', fn (array $p) => collect($p)->sort()->values()->all() === collect(PermissionRegistry::keys())
+            ->filter(fn ($k) => PermissionRegistry::isProjectScoped($k) && str_ends_with($k, '.view'))->sort()->values()->all());
         $asSupport()->getJson("/api/v1/projects/{$id}/diary")->assertOk();
         $asSupport()->putJson("/api/v1/projects/{$id}", ['name' => 'X'])->assertForbidden();
     }

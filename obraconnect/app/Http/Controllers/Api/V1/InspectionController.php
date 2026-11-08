@@ -352,7 +352,7 @@ class InspectionController extends Controller
         $copy = DB::transaction(function () use ($project, $inspection, $request): Inspection {
             Inspection::query()->lockForUpdate()->findOrFail($inspection->id);
 
-            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote', 'hold_point', 'approvals_required']));
+            $copy = $project->inspections()->make($inspection->only(['description', 'location_id', 'element_id', 'specialty_id', 'remote', 'hold_point', 'approvals_required', 'activity_id']));
             $copy->title = Str::limit("Reinspeção da n.º {$inspection->number}: {$inspection->title}", 200, '');
             $copy->number = $this->nextNumber($project);
             $copy->checklist_template_id = $inspection->checklist_template_id;
@@ -403,6 +403,7 @@ class InspectionController extends Controller
             'remote' => ['sometimes', 'boolean'],
             'hold_point' => ['sometimes', 'boolean'],
             'approvals_required' => ['sometimes', 'integer', 'between:1,'.Approvals::MAX],
+            'activity_id' => ['sometimes', 'nullable', 'integer', Rule::exists('activities', 'id')->where('project_id', $project->id)],
         ] + Place::rules($project) + ChecklistItems::rules('items', required: false), [
             'checklist_template_id.exists' => 'Essa lista de verificação não existe ou está arquivada.',
         ], [
@@ -421,7 +422,7 @@ class InspectionController extends Controller
      */
     private function headerFields(Project $project, array $data): array
     {
-        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote', 'hold_point', 'approvals_required']));
+        $fields = array_intersect_key($data, array_flip(['description', 'scheduled_for', 'remote', 'hold_point', 'approvals_required', 'activity_id']));
         if (array_key_exists('location_id', $data) || array_key_exists('element_id', $data)) {
             $place = Place::normalize($project, array_intersect_key($data, array_flip(['location_id', 'element_id'])) + ['location_id' => null, 'element_id' => null]);
             $fields['location_id'] = $place['location_id'];

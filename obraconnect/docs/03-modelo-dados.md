@@ -215,24 +215,29 @@ O original de cada fotografia é guardado sem alterações (hash SHA-256 regista
 
 ### Gestão económica (fase 4)
 
+**Implementado na 0.14.0** (todas as ligações com FK composta `(tenant_id, x_id)`; nada usa "set null"; com referências, apaga-se com erro `*_IN_USE` ou arquiva-se):
+
 | Tabela | Campos principais |
 | --- | --- |
-| `budgets` | project_id (opcional), code, name, version, status, vat_mode, overhead_pct, profit_pct |
-| `budget_chapters` | budget_id, parent_id, code, name, sort_order |
-| `budget_items` | chapter_id, article_id, code, description, unit, quantity, unit_price_cents, total_cents |
-| `articles` (biblioteca) | code, description, unit, composed (bool), source, license_note |
-| `article_components` | article_id, resource_type (material/mão de obra/equipamento/subempreitada), resource_id, yield, unit_cost_cents |
-| `materials`, `labor_categories`, `equipment` | code, name, unit, cost_cents, price_history via `price_records` |
-| `measurements` | project_id, budget_item_id, element_id, formula JSON (dimensões, desperdício, fator), quantity |
-| `measurement_certificates` (autos) | project_id, contract_id, number, period, status, total_cents, approved_at |
-| `measurement_certificate_lines` | certificate_id, budget_item_id, qty_period, qty_accumulated, amount_cents |
-| `suppliers`, `subcontractors` | name, nif, specialties, documents com validade |
-| `contracts` | project_id, party_type, party_id, value_cents, retention_pct, starts_on, ends_on |
-| `purchase_orders`, `purchase_order_lines` | supplier_id, project_id, status, expected_on |
-| `cost_entries` | project_id, cost_center_id, specialty_id, source_type/source_id, kind (previsto/comprometido/realizado), amount_cents, date |
-| `workers` | membership_id (opcional), name, nif (encriptado), hourly_cost_cents, subcontractor_id |
-| `time_entries` | worker_id, project_id, activity_id, date, start, end, break_min, type (normal/extra), approved_by, geo (opcional e configurável) |
-| `equipment_usage`, `maintenance_records` | equipment_id, project_id, hours, cost |
+| `resources` (biblioteca) | kind (labor/material/equipment/subcontract), code único, name, unit, unit_cost_cents, archived_at |
+| `articles`, `article_components` | code único, description, unit, unit_cost_cents (cache), notes, archived_at; componentes: resource_id + quantity (rendimento) |
+| `budgets` | project_id, code, name, version, status (draft/approved/superseded), vat_mode (normal/reverse_charge/exempt), vat_rate, overhead_pct, profit_pct, revision_of_id, approved_by/at |
+| `budget_chapters` | budget_id, parent_id (subcapítulos, cascata), code, name, sort_order |
+| `budget_items`, `budget_item_components` | chapter_id, article_id, specialty_id, code, description, unit, quantity, unit_cost_cents, unit_price_cents (vazio = calculado); componentes copiados (kind, name, unit, quantity, unit_cost_cents) |
+| `measurements` | project_id, budget_item_id, measured_on, description, count/length/width/height, quantity, location_id/element_id, certificate_id |
+| `certificates`, `certificate_lines` | scope ('owner' ou 'contract:{id}'), number único por obra e âmbito, period_start/end, status (draft/submitted/approved), amount_cents, retention_cents; linhas: qty_contract, qty_previous, qty_period, unit_price_cents, amount_cents |
+| `partners`, `partner_specialty`, `partner_documents` | kind (supplier/subcontractor), name, nif único, contactos, archived_at; documentos com expires_on |
+| `contracts`, `contract_items` | project_id, partner_id, code, title, retention_pct, starts_on/ends_on, status (draft/active/closed); trabalhos com quantity e unit_price_cents |
+| `purchase_orders`, `purchase_order_lines` | number por obra, partner_id, status (draft/approved/received/invoiced/cancelled), category (natureza), cost_center_id, datas, fatura (número, data, valor); linhas com resource_id e budget_item_id |
+| `cost_entries` | project_id, cost_center_id, category, kind (committed/actual), description, amount_cents, incurred_on (só os lançamentos manuais: compras, autos, horas e equipamentos contam a partir das suas tabelas) |
+| `projects.cost_ceiling_cents` | teto de custo (vazio = custo do orçamento aprovado) |
+| `workers` | name, nif (encriptado), category, hourly_cost_cents, partner_id, user_id, active |
+| `time_entries` | worker_id + project_id + work_date únicos, activity_id, hours, overtime_hours, hourly_cost_cents (cópia do dia), status (pending/approved/rejected), approved_by/at |
+| `equipment`, `equipment_usages`, `maintenance_records` | code único, qr_token único, status, project_id (onde está), hourly_cost_cents; utilizações com horas e custo/hora do dia; manutenções com next_due_on |
+| `activities`, `activity_dependencies` | parent_id (resumos), code único por obra, duration_days (úteis), PERT (otimista, provável, pessimista), start_no_earlier_than, progress_pct, completed_at, local/elemento; dependências FS/SS/FF/SF com lag_days |
+| `inspections.activity_id` | liga a inspeção (e o ponto de paragem) a uma atividade |
+
+Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_categories` separados (ficaram em `resources.kind`), e as horas de entrada/saída e a localização em `time_entries`.
 
 ### Inteligência e automação (fase 5)
 

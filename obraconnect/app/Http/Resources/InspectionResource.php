@@ -51,6 +51,7 @@ class InspectionResource extends JsonResource
             'evidence_score' => $this->evidence_score,
             'hold_point' => $this->hold_point,
             'approvals_required' => $this->approvals_required,
+            'activity_id' => $this->activity_id,
             'hold_released_at' => $this->hold_released_at?->toIso8601String(),
             'hold_released_by' => $this->whenLoaded('holdReleasedBy', fn () => $this->holdReleasedBy?->name),
             'holding_work' => $this->hold_point && $this->hold_released_at === null && $this->status !== InspectionStatus::Cancelled

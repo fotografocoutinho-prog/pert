@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Inspeção de uma obra. Em rascunho prepara-se (pontos, local, data pretendida); depois só
  * muda por App\Inspections\InspectionWorkflow e cada passagem fica no histórico encadeado.
  */
-#[Fillable(['title', 'description', 'location_id', 'element_id', 'specialty_id', 'scheduled_for', 'remote', 'hold_point', 'approvals_required'])]
+#[Fillable(['title', 'description', 'location_id', 'element_id', 'specialty_id', 'scheduled_for', 'remote', 'hold_point', 'approvals_required', 'activity_id'])]
 class Inspection extends Model
 {
     use BelongsToTenant;
@@ -108,6 +108,11 @@ class Inspection extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    public function activity(): BelongsTo
+    {
+        return $this->belongsTo(Activity::class);
     }
 
     public function holdReleasedBy(): BelongsTo
