@@ -239,6 +239,13 @@ O original de cada fotografia é guardado sem alterações (hash SHA-256 regista
 
 Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_categories` separados (ficaram em `resources.kind`), e as horas de entrada/saída e a localização em `time_entries`.
 
+**Implementado na 0.15.0 (pré-faturação):**
+
+| Tabela | Campos principais |
+| --- | --- |
+| `invoice_drafts` | project_id, client_id e certificate_id (opcionais, FK composta), series_year + number (internos, únicos por empresa, dados quando fica pronta), status (draft/ready/invoiced/cancelled), issue_date, due_date, cópia dos dados do cliente (nome, NIF, morada, código postal, localidade, país, email), reference, vat_exemption_code/reason, notes, ready_at, official_number + official_date (fatura do programa certificado), invoiced_at/by |
+| `invoice_draft_lines` | invoice_draft_id (cascata), code, description, unit, quantity, unit_price_cents, discount_pct, vat_rate, sort_order |
+
 ### Inteligência e automação (fase 5)
 
 | Tabela | Campos principais |

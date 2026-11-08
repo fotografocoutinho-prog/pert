@@ -12,6 +12,7 @@ use App\Enums\InspectionStatus as S;
 use App\Enums\SubscriptionStatus;
 use App\Inspections\EvidenceIndex;
 use App\Inspections\InspectionHistory;
+use App\Invoicing\InvoiceDrafts;
 use App\Media\MediaStorage;
 use App\Models\Activity;
 use App\Models\ActivityDependency;
@@ -35,6 +36,7 @@ use App\Models\DocumentFolder;
 use App\Models\Equipment;
 use App\Models\EquipmentUsage;
 use App\Models\Inspection;
+use App\Models\InvoiceDraft;
 use App\Models\Issue;
 use App\Models\IssueEvent;
 use App\Models\MaintenanceRecord;
@@ -141,6 +143,9 @@ final class DemoCompany
 
     private int $photoSeed = 1;
 
+    /** @var list<array{0: Certificate, 1: CarbonImmutable, 2: string|null, 3: CarbonImmutable|null}> */
+    private array $pendingInvoices = [];
+
     /** @var callable(string): void */
     private $log;
 
@@ -205,6 +210,7 @@ final class DemoCompany
                     $this->rehabProject();
                     $this->plannedProject();
                     $this->finishedProject();
+                    $this->flushInvoices();
                 });
 
                 return $tenant;
@@ -731,8 +737,9 @@ final class DemoCompany
                 'created_by_user_id' => $this->users['pedro.almeida']->id,
             ]);
         }
-        $this->ownerCertificate($p, $budget, $start, $d(22), 'approved');
+        $auto1 = $this->ownerCertificate($p, $budget, $start, $d(22), 'approved');
         $this->ownerCertificate($p, $budget, $d(23), $d(44), 'submitted');
+        $this->invoice($auto1, $d(28), 'FT A/2026/0412', $d(29));
 
         // Subempreitadas
         $eletro = $this->contract($p, 'SUB-01', 'eletro', 'Instalações elétricas e ITED', 5, $d(20), $d(140), 'active', [
@@ -868,7 +875,8 @@ final class DemoCompany
             $this->at($date->setTime(17, 0));
             Measurement::query()->create(['project_id' => $p->id, 'budget_item_id' => $items[$code]->id, 'measured_on' => $date->toDateString(), 'description' => $description, 'quantity' => $qty, 'created_by_user_id' => $this->users['pedro.almeida']->id]);
         }
-        $this->ownerCertificate($p, $budget, $start, $d(15), 'approved');
+        $auto = $this->ownerCertificate($p, $budget, $start, $d(15), 'approved');
+        $this->invoice($auto, $d(21), null, null);
 
         $this->timesheets($p, ['antonio', 'daniel', 'luis'], 10, $acts['2']->id, 'antonio.ramos', 'marta.lopes');
         $this->equipment['betoneira']->forceFill(['project_id' => $p->id])->save();
@@ -905,6 +913,14 @@ final class DemoCompany
             'created_by_user_id' => $this->users['helena.marques']->id,
         ]);
         $this->projectTeam($p, ['marta.lopes' => 'diretor_obra', 'sofia.carvalho' => 'preparador', 'rui.barbosa' => 'diretor_tecnico']);
+        $this->at($this->today->subDays(1)->setTime(15, 0));
+        $advance = new InvoiceDraft(InvoiceDrafts::clientFields(Client::query()->find($this->clients['vale']), $p) + [
+            'project_id' => $p->id, 'reference' => 'Adiantamento de 10% na adjudicação', 'due_date' => $this->today->addDays(15)->toDateString(),
+            'notes' => 'A deduzir nos autos de medição.',
+        ]);
+        $advance->created_by_user_id = $this->users['teresa.monteiro']->id;
+        $advance->save();
+        $advance->lines()->create(['description' => 'Adiantamento por conta da empreitada', 'unit' => 'vg', 'quantity' => 1, 'unit_price_cents' => 6500000, 'discount_pct' => 0, 'vat_rate' => 23, 'sort_order' => 0]);
         $this->budget($p, 'ORC-01', 'Proposta (em preparação)', 9, 14, 'normal', 23, [
             ['1', 'Movimento de terras', null, [['1.1', 'ESC', null, null, 420, null, null]]],
             ['2', 'Fundações', null, [['2.1', 'BSAP', null, null, 96, null, null], ['2.2', 'ACO', 'Aço A500 NR em fundações', null, 7600, null, null]]],
@@ -959,8 +975,10 @@ final class DemoCompany
             $this->at($date->setTime(17, 0));
             Measurement::query()->create(['project_id' => $p->id, 'budget_item_id' => $items[$code]->id, 'measured_on' => $date->toDateString(), 'description' => 'Medição final', 'quantity' => $qty, 'created_by_user_id' => $this->users['pedro.almeida']->id]);
         }
-        $this->ownerCertificate($p, $budget, $start, $d(21), 'approved');
-        $this->ownerCertificate($p, $budget, $d(22), $d(42), 'approved');
+        $first = $this->ownerCertificate($p, $budget, $start, $d(21), 'approved');
+        $last = $this->ownerCertificate($p, $budget, $d(22), $d(42), 'approved');
+        $this->invoice($first, $d(26), 'FT A/2026/0198', $d(27));
+        $this->invoice($last, $d(46), 'FT A/2026/0287', $d(47));
         $this->timesheets($p, ['daniel', 'luis', 'carlos'], 20, null, 'antonio.ramos', 'ricardo.sousa', from: $start->addWeeks(1), approveAll: true);
         $this->plan($p, $start, [
             ['1', 'Demolições', null, 5, null], ['2', 'Divisórias e tetos', null, 12, [['1', 'FS', 0]]], ['3', 'Instalação elétrica', null, 20, [['1', 'FS', 0]]],
@@ -1163,6 +1181,35 @@ final class DemoCompany
         ]);
         foreach ($article->components as $i => $c) {
             $item->components()->create(['resource_id' => $c->resource_id, 'kind' => $c->resource->kind->value, 'name' => $c->resource->name, 'unit' => $c->resource->unit, 'quantity' => (float) $c->quantity, 'unit_cost_cents' => (int) $c->resource->unit_cost_cents, 'sort_order' => $i]);
+        }
+    }
+
+    /** Pré-fatura do auto, pronta a faturar e (com número oficial) já faturada no programa certificado. */
+    private function invoice(Certificate $certificate, CarbonImmutable $readyOn, ?string $official, ?CarbonImmutable $officialOn): void
+    {
+        // Fica para o fim, para os números internos saírem pela ordem das datas.
+        $this->pendingInvoices[] = [$certificate, $readyOn, $official, $officialOn];
+    }
+
+    private function flushInvoices(): void
+    {
+        usort($this->pendingInvoices, fn ($a, $b) => $a[1] <=> $b[1]);
+        foreach ($this->pendingInvoices as [$certificate, $readyOn, $official, $officialOn]) {
+            $this->issueInvoice($certificate, $readyOn, $official, $officialOn);
+        }
+        $this->pendingInvoices = [];
+    }
+
+    private function issueInvoice(Certificate $certificate, CarbonImmutable $readyOn, ?string $official, ?CarbonImmutable $officialOn): void
+    {
+        $by = $this->users['teresa.monteiro'];
+        $this->at($readyOn->setTime(10, 30));
+        $draft = InvoiceDrafts::fromCertificate($certificate->refresh(), $by->id);
+        $draft->forceFill(['due_date' => $readyOn->addDays(30)->toDateString()])->save();
+        InvoiceDrafts::markReady($draft, $readyOn->toDateString());
+        if ($official !== null && $officialOn !== null) {
+            $this->at($officialOn->setTime(16, 0));
+            InvoiceDrafts::markInvoiced($draft, $official, $officialOn->min($this->today)->toDateString(), $by->id);
         }
     }
 

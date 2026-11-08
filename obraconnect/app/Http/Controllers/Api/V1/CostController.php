@@ -6,11 +6,13 @@ use App\Access\AccessResolver;
 use App\Audit\Auditor;
 use App\Economics\CostReport;
 use App\Enums\CostCategory;
+use App\Enums\InvoiceDraftStatus;
 use App\Enums\ProjectStatus;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\CostCenter;
 use App\Models\CostEntry;
+use App\Models\InvoiceDraft;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -107,7 +109,12 @@ class CostController extends Controller
             ->orderBy('code')->get()
             ->filter(fn (Project $p) => Gate::allows('finance.view', $p));
 
-        $rows = $projects->map(function (Project $p) {
+        // Faturado = valor sem IVA das pré-faturas com a fatura oficial registada.
+        $invoiced = InvoiceDraft::query()->with('lines')->where('status', InvoiceDraftStatus::Invoiced->value)
+            ->whereIn('project_id', $projects->pluck('id'))->get()
+            ->groupBy('project_id')->map(fn ($drafts) => (int) $drafts->sum(fn (InvoiceDraft $d) => $d->totals()['net_cents']));
+
+        $rows = $projects->map(function (Project $p) use ($invoiced) {
             $r = CostReport::for($p);
 
             return [
@@ -119,6 +126,7 @@ class CostController extends Controller
                 'contract_cents' => $r['revenue']['contract_cents'],
                 'certified_cents' => $r['revenue']['certified_cents'],
                 'certified_pct' => $r['revenue']['certified_pct'],
+                'invoiced_cents' => (int) ($invoiced[$p->id] ?? 0),
                 'actual_cents' => $r['actual_cents'],
                 'committed_cents' => $r['committed_cents'],
                 'forecast_cents' => $r['forecast_cents'],
@@ -136,6 +144,7 @@ class CostController extends Controller
             'totals' => [
                 'contract_cents' => $sum('contract_cents'),
                 'certified_cents' => $sum('certified_cents'),
+                'invoiced_cents' => $sum('invoiced_cents'),
                 'actual_cents' => $sum('actual_cents'),
                 'committed_cents' => $sum('committed_cents'),
                 'forecast_cents' => $sum('forecast_cents'),

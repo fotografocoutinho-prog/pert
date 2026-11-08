@@ -173,7 +173,8 @@ export interface Certificate extends CertificateSummary {
     created_by: string | null;
     previous_cents: number;
     lines: CertificateLine[];
-    can: { edit: boolean; submit: boolean; approve: boolean; reopen: boolean; delete: boolean };
+    can: { edit: boolean; submit: boolean; approve: boolean; reopen: boolean; delete: boolean; invoice: boolean };
+    invoice_draft: { id: number; code: string | null; status: string; status_label: string; official_number: string | null } | null;
 }
 
 export interface PartnerDocument {
@@ -306,6 +307,7 @@ export interface FinanceRow {
     contract_cents: number | null;
     certified_cents: number;
     certified_pct: number | null;
+    invoiced_cents: number;
     actual_cents: number;
     committed_cents: number;
     forecast_cents: number;
@@ -556,6 +558,76 @@ export const planningApi = {
     progress: (projectId: number, id: number, pct: number) => data<Plan>(http.post(`${p(projectId)}/activities/${id}/progress`, { progress_pct: pct })),
     addDependency: (projectId: number, payload: Record<string, unknown>) => data<Plan>(http.post(`${p(projectId)}/dependencies`, payload)),
     removeDependency: (projectId: number, id: number) => data<Plan>(http.delete(`${p(projectId)}/dependencies/${id}`)),
+};
+
+export type InvoiceDraftStatus = 'draft' | 'ready' | 'invoiced' | 'cancelled';
+
+export interface InvoiceDraftSummary {
+    id: number;
+    code: string | null;
+    status: InvoiceDraftStatus;
+    status_label: string;
+    issue_date: string | null;
+    due_date: string | null;
+    client_name: string;
+    client_nif: string | null;
+    project: { id: number; code: string; name: string } | null;
+    reference: string | null;
+    certificate_id: number | null;
+    net_cents: number;
+    vat_cents: number;
+    total_cents: number;
+    official_number: string | null;
+    official_date: string | null;
+}
+
+export interface InvoiceDraftLine {
+    id?: number;
+    code: string | null;
+    description: string;
+    unit: string;
+    quantity: number;
+    unit_price_cents: number;
+    discount_pct: number;
+    vat_rate: number;
+    net_cents?: number;
+    vat_cents?: number;
+}
+
+export interface InvoiceDraft extends InvoiceDraftSummary {
+    client_id: number | null;
+    project_id: number | null;
+    client_address: string | null;
+    client_postal_code: string | null;
+    client_city: string | null;
+    client_country: string;
+    client_email: string | null;
+    vat_exemption_code: string | null;
+    vat_exemption_reason: string | null;
+    notes: string | null;
+    certificate: { id: number; project_id: number; number: number } | null;
+    by_rate: { rate: number; net_cents: number; vat_cents: number }[];
+    lines: InvoiceDraftLine[];
+    created_by: string | null;
+    invoiced_by: string | null;
+    can: { edit: boolean; ready: boolean; reopen: boolean; invoice: boolean; cancel: boolean; delete: boolean };
+}
+
+const query = (params: Record<string, unknown>) =>
+    Object.entries(params)
+        .flatMap(([k, v]) => (Array.isArray(v) ? v.map((x) => `${k}[]=${encodeURIComponent(String(x))}`) : v === undefined || v === null || v === '' ? [] : [`${k}=${encodeURIComponent(String(v))}`]))
+        .join('&');
+
+export const invoicingApi = {
+    list: (params: Record<string, unknown> = {}) => getData<InvoiceDraftSummary[]>('/api/v1/invoice-drafts', params),
+    get: (id: number) => getData<InvoiceDraft>(`/api/v1/invoice-drafts/${id}`),
+    create: (payload: Record<string, unknown>) => data<InvoiceDraft>(http.post('/api/v1/invoice-drafts', payload)),
+    update: (id: number, payload: Record<string, unknown>) => data<InvoiceDraft>(http.put(`/api/v1/invoice-drafts/${id}`, payload)),
+    remove: (id: number) => http.delete(`/api/v1/invoice-drafts/${id}`),
+    act: (id: number, action: 'ready' | 'reopen' | 'invoice' | 'cancel', payload: Record<string, unknown> = {}) =>
+        data<InvoiceDraft>(http.post(`/api/v1/invoice-drafts/${id}/actions/${action}`, payload)),
+    exportUrl: (format: 'xlsx' | 'csv' | 'json', params: Record<string, unknown> = {}) => `/api/v1/invoice-drafts/export?${query({ format, ...params })}`,
+    pdfUrl: (id: number) => `/api/v1/invoice-drafts/${id}/pdf`,
 };
 
 /** "1.234,5" → 123450 (euros escritos → cêntimos); vazio → null. */

@@ -8,6 +8,7 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use App\Models\InvoiceDraft;
 use App\Rules\ValidPortugueseNif;
 use App\Support\PortugueseNif;
 use Illuminate\Http\JsonResponse;
@@ -114,8 +115,8 @@ class ClientController extends Controller
     {
         $this->authorize('clients.manage');
 
-        if ($client->projects()->exists()) {
-            throw ApiException::conflict('Este cliente tem obras. Arquive-o em vez de o apagar.', 'CLIENT_IN_USE');
+        if ($client->projects()->exists() || InvoiceDraft::query()->where('client_id', $client->id)->exists()) {
+            throw ApiException::conflict('Este cliente tem obras ou pré-faturas. Arquive-o em vez de o apagar.', 'CLIENT_IN_USE');
         }
 
         $client->delete();

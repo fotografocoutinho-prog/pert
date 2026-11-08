@@ -2,7 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ApiError } from '@/api/http';
-import { certificatesApi, formatQty, parseNumber, type Certificate, type CertificateLine } from '@/api/economics';
+import { certificatesApi, formatQty, invoicingApi, parseNumber, type Certificate, type CertificateLine } from '@/api/economics';
 import { useToastStore } from '@/stores/toast';
 import { formatDate, formatMoney } from '@/utils/format';
 import AppAlert from '@/components/ui/AppAlert.vue';
@@ -67,6 +67,19 @@ async function remove(): Promise<void> {
     }
 }
 const printPage = () => window.print();
+const invoicing = ref(false);
+async function createInvoice(): Promise<void> {
+    if (!cert.value) return;
+    invoicing.value = true;
+    try {
+        const d = await invoicingApi.create({ certificate_id: cert.value.id });
+        router.push(`/app/faturacao/${d.id}`);
+    } catch (e) {
+        fail(e);
+    } finally {
+        invoicing.value = false;
+    }
+}
 const statusColor = (s: string) => (s === 'approved' ? 'green' : s === 'submitted' ? 'blue' : 'amber');
 </script>
 
@@ -99,6 +112,14 @@ const statusColor = (s: string) => (s === 'approved' ? 'green' : s === 'submitte
                 <AppButton v-if="cert.can.submit" @click="act('submit')">Submeter</AppButton>
                 <AppButton v-if="cert.can.approve" @click="act('approve')">Aprovar</AppButton>
                 <AppButton v-if="cert.can.reopen" variant="secondary" @click="act('reopen')">Reabrir</AppButton>
+                <AppButton v-if="cert.can.invoice" variant="secondary" :loading="invoicing" @click="createInvoice">Criar pré-fatura</AppButton>
+                <RouterLink
+                    v-if="cert.invoice_draft"
+                    :to="`/app/faturacao/${cert.invoice_draft.id}`"
+                    class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-slate-50"
+                >
+                    Pré-fatura {{ cert.invoice_draft.code ?? '(rascunho)' }} · {{ cert.invoice_draft.official_number ? `fatura ${cert.invoice_draft.official_number}` : cert.invoice_draft.status_label }}
+                </RouterLink>
                 <AppButton variant="secondary" @click="printPage">Imprimir</AppButton>
                 <AppButton v-if="cert.can.delete" variant="ghost" class="text-red-700" @click="remove">Apagar</AppButton>
             </div>

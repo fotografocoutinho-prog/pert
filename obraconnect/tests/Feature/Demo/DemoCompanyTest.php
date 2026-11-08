@@ -44,9 +44,13 @@ class DemoCompanyTest extends TestCase
             }
             $this->assertSame(0, Media::query()->where('status', '!=', 'ready')->count());
             $this->assertGreaterThan(20, Media::query()->count());
-            foreach (['site_diary_entries', 'documents', 'issues', 'budgets', 'measurements', 'certificates', 'contracts', 'purchase_orders', 'time_entries', 'equipment_usages', 'activities', 'activity_dependencies'] as $table) {
+            foreach (['site_diary_entries', 'documents', 'issues', 'budgets', 'measurements', 'certificates', 'contracts', 'purchase_orders', 'time_entries', 'equipment_usages', 'activities', 'activity_dependencies', 'invoice_drafts'] as $table) {
                 $this->assertGreaterThan(0, DB::table($table)->count(), $table);
             }
+            // Pré-faturas numeradas pela ordem das datas: faturadas, uma pronta e um rascunho.
+            $numbered = DB::table('invoice_drafts')->whereNotNull('number')->orderBy('number')->pluck('issue_date')->all();
+            $this->assertSame($numbered, collect($numbered)->sort()->values()->all());
+            $this->assertSame(['draft' => 1, 'invoiced' => 3, 'ready' => 1], DB::table('invoice_drafts')->groupBy('status')->selectRaw('status, count(*) c')->pluck('c', 'status')->map(fn ($c) => (int) $c)->sortKeys()->all());
         });
         $team = User::query()->where('email', 'like', '%@'.DemoCompany::DOMAIN)->count();
         $this->assertSame(15, $team);

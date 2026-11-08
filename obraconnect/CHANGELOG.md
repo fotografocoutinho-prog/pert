@@ -1,5 +1,18 @@
 # Histórico de versões
 
+## 0.15.0 — 2026-11-08
+
+Pré-faturação: documentos internos, sem valor fiscal, para exportar para o programa de faturação certificado. A ligação direta a um programa de faturação (Fase 6) fica em espera.
+
+- **Faturação** (menu): pré-faturas com cliente (copiado do cliente da obra ou escrito), data, vencimento, referência, linhas com quantidade, preço, desconto e taxa de IVA, motivo de isenção (com a menção "IVA - autoliquidação" por omissão quando o orçamento é em autoliquidação) e notas. Totais com o quadro de IVA por taxa.
+- **A partir de um auto**: nos autos ao dono de obra aprovados, **Criar pré-fatura** traz o cliente, a obra, a referência do auto e as linhas deste período aos preços de venda e com o IVA do orçamento. Um auto só tem uma pré-fatura ativa; o auto mostra a ligação.
+- Estados: rascunho → **pronta a faturar** (recebe o número interno PF AAAA/NNNN, por ano, sem buracos) → **faturada** (com o número e a data da fatura emitida no programa certificado) ou anulada. Pronta pode voltar a rascunho; faturada já não se altera.
+- **Exportação** para importar no programa de faturação: **Excel** (números e datas a sério), **CSV** (";" e vírgula decimal, para o Excel em português) e **JSON** (documentos com linhas, para importações por API). Uma linha por linha de pré-fatura, com os dados do cliente repetidos. Por omissão exportam-se as prontas a faturar; também uma só pré-fatura.
+- **PDF** da pré-fatura, sempre com o aviso "documento interno sem valor fiscal — não serve de fatura".
+- **Painel financeiro**: coluna e total **Faturado** (pré-faturas com a fatura oficial registada, sem IVA).
+- Permissões novas: `invoicing.view` (diretor técnico, administrativo) e `invoicing.manage` (administrativo); valem para a empresa toda. Clientes com pré-faturas não se apagam.
+- Empresa de demonstração com pré-faturas: três faturadas, uma pronta a exportar e um adiantamento em rascunho.
+
 ## 0.14.0 — 2026-11-08
 
 Fase 4 completa: gestão económica da obra. E uma empresa de demonstração com dados fictícios em todas as áreas.

@@ -11,14 +11,14 @@ Cada fase termina com: código, migrações, testes automatizados a passar em CI
 | **3 · Fiscalização** | Checklists configuráveis, inspeções com 9 estados, evidências obrigatórias, índice de suficiência explicável, pontos de paragem, ocorrências/NC com escalonamento, aprovações com cadeia imutável, relatório PDF, notificações por email | Fase 2 | **Concluída (v0.13.0)** |
 | **4 · Económica** | Orçamentos (capítulos, artigos, preços compostos, importação Excel), medições, autos, custos previsto/comprometido/realizado, compras, subempreiteiros e portal, trabalhadores e tempos, equipamentos com QR, planeamento Gantt/CPM/PERT | Fases 2–3 | **Concluída (v0.14.0)** (sem portal próprio de subempreiteiros) |
 | **5 · Inteligência** | Assistente documental com referências, apoio à fiscalização (sem aprovar), resumos e atas, previsões explicadas, voz em pt-PT, automações | Fases 2–4, fornecedor IA | Próxima — falta escolher o fornecedor de IA (contrato de tratamento de dados, alojamento na UE) |
-| **6 · Comercial e escala** | Pagamentos e faturação via software certificado, cupões, upgrades/downgrades self-service, integrações ERP/BIM/assinatura, API pública e webhooks, monitorização, bases dedicadas, internacionalização | Fases 1–4 | Planeada — a faturação exige software certificado pela AT, a escolher |
+| **6 · Comercial e escala** | Pagamentos e faturação via software certificado, cupões, upgrades/downgrades self-service, integrações ERP/BIM/assinatura, API pública e webhooks, monitorização, bases dedicadas, internacionalização | Fases 1–4 | Planeada. Faturação certificada **em espera** (decisão do cliente); feita a pré-faturação interna com exportação para o programa existente (v0.15.0) |
 
 ## Próximos passos (fases 5 e 6)
 
 Antes de começar, são precisas duas decisões do cliente:
 
 1. **Fase 5 — fornecedor de IA**: com contrato de tratamento de dados (RGPD) e alojamento/processamento na UE; definir o limite de custo mensal por empresa.
-2. **Fase 6 — faturação**: as faturas aos clientes têm de sair de um programa certificado pela AT; escolher qual (e se tem API) antes de ligar pagamentos e subscrições.
+2. **Fase 6 — faturação**: em espera. Entretanto (0.15.0) o ObraConnect prepara pré-faturas sem valor fiscal e exporta-as (Excel, CSV, JSON) para o programa de faturação certificado que a empresa já usa; com o nome desse programa pode juntar-se um formato próprio de exportação.
 
 ## Riscos
 

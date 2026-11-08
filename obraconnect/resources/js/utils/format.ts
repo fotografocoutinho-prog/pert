@@ -174,6 +174,12 @@ const EVENT_LABELS: Record<string, string> = {
     'costs.entry_created': 'Lançamento de custo registado',
     'costs.entry_deleted': 'Lançamento de custo apagado',
     'planning.progress': 'Avanço de atividade registado',
+    'invoice_draft.created': 'Pré-fatura criada',
+    'invoice_draft.ready': 'Pré-fatura pronta a faturar',
+    'invoice_draft.reopen': 'Pré-fatura de volta a rascunho',
+    'invoice_draft.invoice': 'Fatura oficial registada na pré-fatura',
+    'invoice_draft.cancel': 'Pré-fatura anulada',
+    'invoice_draft.exported': 'Pré-faturas exportadas',
 };
 
 export function eventLabel(event: string): string {

@@ -7,12 +7,14 @@ use App\Economics\CertificateBuilder;
 use App\Enums\BudgetStatus;
 use App\Enums\CertificateStatus;
 use App\Enums\ContractStatus;
+use App\Enums\InvoiceDraftStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\Certificate;
 use App\Models\CertificateLine;
 use App\Models\Contract;
+use App\Models\InvoiceDraft;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -179,6 +181,7 @@ class CertificateController extends Controller
         $open = ! $project->isArchived();
         $write = $open && Gate::any($certificate->contract_id ? ['subcontractors.manage', 'measurements.manage'] : ['measurements.manage'], $project);
         $approve = $open && Gate::allows('certificates.approve', $project);
+        $invoice = InvoiceDraft::query()->where('certificate_id', $certificate->id)->where('status', '!=', InvoiceDraftStatus::Cancelled->value)->latest('id')->first();
 
         return $this->summary($certificate) + [
             'notes' => $certificate->notes,
@@ -204,7 +207,11 @@ class CertificateController extends Controller
                 'approve' => $approve && $certificate->status === CertificateStatus::Submitted,
                 'reopen' => $approve && $certificate->status === CertificateStatus::Submitted,
                 'delete' => $write && $certificate->status === CertificateStatus::Draft,
+                'invoice' => $certificate->contract_id === null && $certificate->status === CertificateStatus::Approved && $invoice === null && Gate::allows('invoicing.manage'),
             ],
+            'invoice_draft' => $invoice && Gate::any(['invoicing.view', 'invoicing.manage'])
+                ? ['id' => $invoice->id, 'code' => $invoice->code(), 'status' => $invoice->status->value, 'status_label' => $invoice->status->label(), 'official_number' => $invoice->official_number]
+                : null,
         ];
     }
 }

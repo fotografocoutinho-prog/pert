@@ -100,6 +100,14 @@ Gestão económica (0.14.0) — todas valem por obra (● = em todas as obras, p
 
 Regras da gestão económica (0.14.0): as páginas da empresa (biblioteca de preços, fornecedores, trabalhadores, equipamentos, painel financeiro) aparecem a quem tem a permissão no perfil da empresa; numa obra decide sempre o perfil nessa obra. Sem `workforce.view` nem `costs.view`, as horas aparecem sem custo. Quem só tem `time.register_own` regista e vê apenas as horas dos trabalhadores ligados à sua conta. A biblioteca de preços consulta-se com `budgets.view` e gere-se com `budgets.manage`. `workforce.manage` (nova) gere a lista de trabalhadores e o custo/hora.
 
+
+Pré-faturação (0.15.0) — vale para a empresa toda (não por obra):
+
+| Permissão | Descrição | ADM | DT | DO | ENC | PRE | MED | FIS | CSO | TQ | ADV | TRB | SUB | FOR | DON |
+| --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| `invoicing.view` | Consultar pré-faturas (documentos internos, sem valor fiscal) | ● | ● | | | | | | | | ● | | | | |
+| `invoicing.manage` | Preparar e exportar pré-faturas e registar a fatura oficial | ● | | | | | | | | | ● | | | | |
+
 Clientes e calendários (0.8.0) valem para a empresa toda (não por obra), por isso aqui ● é só "tem a permissão". Escolher o cliente e o calendário de uma obra exige `projects.create`/`projects.update`, não `clients.manage`; consultar os calendários exige `company.view` (ou poder editar obras); departamentos e centros de custo (0.9.0) consultam-se com `company.view`; as especialidades (0.10.0) também com `projects.view`, porque subempreiteiros e fornecedores classificam os documentos que enviam (os centros também com `projects.create`/`projects.update`, para os escolher nas obras); o calendário de uma obra concreta vê-se com `projects.view` nessa obra.
 
 Inspeções (0.11.0): vê as inspeções de uma obra quem tem lá qualquer uma das três permissões de inspeção (não há `inspections.view`); as fotografias de evidência seguem a mesma regra, e não `diary.view`. As listas de verificação consultam-se com `checklists.manage` ou com uma permissão de inspeção (para as escolher ao criar). `inspections.release_hold_point` (0.12.0) liberta pontos de paragem só depois de a inspeção ser aprovada.

@@ -24,12 +24,19 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
 
 <template>
     <div>
-        <PageHeader title="Painel financeiro" description="Por obra: valor do contrato (orçamento aprovado), autado ao dono de obra, custo realizado e comprometido, previsão final face ao teto e margem prevista." />
+        <PageHeader
+            title="Painel financeiro"
+            description="Por obra: valor do contrato (orçamento aprovado), autado ao dono de obra, faturado (pré-faturas com a fatura oficial registada, sem IVA), custo realizado e comprometido, previsão final face ao teto e margem prevista."
+        />
         <div v-if="loading" class="flex justify-center py-16"><AppSpinner class="h-6 w-6 text-brand-700" /></div>
         <template v-else>
-            <div class="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 <AppCard><p class="text-xs text-slate-500">Contratos</p><p class="text-xl font-bold">{{ money(totals.contract_cents) }}</p></AppCard>
                 <AppCard><p class="text-xs text-slate-500">Autado</p><p class="text-xl font-bold">{{ money(totals.certified_cents) }}</p></AppCard>
+                <AppCard>
+                    <p class="text-xs text-slate-500">Faturado (faturas oficiais)</p>
+                    <p class="text-xl font-bold">{{ money(totals.invoiced_cents) }}</p>
+                </AppCard>
                 <AppCard><p class="text-xs text-slate-500">Previsão de custo</p><p class="text-xl font-bold">{{ money(totals.forecast_cents) }}</p></AppCard>
                 <AppCard>
                     <p class="text-xs text-slate-500">Margem prevista</p>
@@ -45,6 +52,7 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
                                 <th class="py-2 pr-3">Obra</th>
                                 <th class="py-2 pr-3 text-right">Contrato</th>
                                 <th class="py-2 pr-3 text-right">Autado</th>
+                                <th class="py-2 pr-3 text-right">Faturado</th>
                                 <th class="py-2 pr-3 text-right">Realizado</th>
                                 <th class="py-2 pr-3 text-right">Comprometido</th>
                                 <th class="py-2 pr-3 text-right">Previsão</th>
@@ -62,6 +70,7 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">
                                     {{ money(r.certified_cents) }}<span v-if="r.certified_pct !== null" class="block text-xs text-slate-500">{{ formatPct(r.certified_pct) }}</span>
                                 </td>
+                                <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.invoiced_cents) }}</td>
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.actual_cents) }}</td>
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.committed_cents) }}</td>
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.forecast_cents) }}</td>

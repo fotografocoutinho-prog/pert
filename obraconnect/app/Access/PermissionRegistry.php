@@ -191,6 +191,13 @@ final class PermissionRegistry
                     'finance.view' => 'Ver o painel financeiro (faturado, custo e margem)',
                 ],
             ],
+            'invoicing' => [
+                'label' => 'Pré-faturação',
+                'permissions' => [
+                    'invoicing.view' => 'Consultar pré-faturas (documentos internos, sem valor fiscal)',
+                    'invoicing.manage' => 'Preparar e exportar pré-faturas e registar a fatura oficial',
+                ],
+            ],
             'planning' => [
                 'label' => 'Planeamento',
                 'permissions' => [

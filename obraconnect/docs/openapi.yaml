@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.14.0
+  version: 0.15.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -61,6 +61,7 @@ tags:
   - name: Horas e equipamentos
   - name: Custos
   - name: Planeamento
+  - name: Pré-faturação
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -767,6 +768,19 @@ paths:
     post: { tags: [Planeamento], summary: "Nova precedência (FS/SS/FF/SF, lag_days); ciclos recusados" }
   /api/v1/projects/{project}/dependencies/{dependency}:
     delete: { tags: [Planeamento], summary: "Retirar precedência" }
+  /api/v1/invoice-drafts:
+    get: { tags: [Pré-faturação], summary: "Pré-faturas (filtros status, project_id, from, to, search; invoicing.view)" }
+    post: { tags: [Pré-faturação], summary: "Nova pré-fatura: certificate_id (auto aprovado; INVOICE_EXISTS, CERTIFICATE_STATUS) ou à mão (cliente, linhas)" }
+  /api/v1/invoice-drafts/export:
+    get: { tags: [Pré-faturação], summary: "Exportação para o programa de faturação: format=xlsx|csv|json, ids[] ou filtros (por omissão as prontas)" }
+  /api/v1/invoice-drafts/{invoiceDraft}:
+    get: { tags: [Pré-faturação], summary: "Pré-fatura com linhas e totais" }
+    put: { tags: [Pré-faturação], summary: "Alterar rascunho (INVOICE_STATUS)" }
+    delete: { tags: [Pré-faturação], summary: "Apagar rascunho sem número (INVOICE_NUMBERED)" }
+  /api/v1/invoice-drafts/{invoiceDraft}/pdf:
+    get: { tags: [Pré-faturação], summary: "PDF (documento interno sem valor fiscal)" }
+  /api/v1/invoice-drafts/{invoiceDraft}/actions/{action}:
+    post: { tags: [Pré-faturação], summary: "ready (issue_date; INVOICE_EMPTY, VAT_REASON_REQUIRED) | reopen | invoice (official_number, official_date) | cancel" }
 components:
   securitySchemes:
     sessionCookie:

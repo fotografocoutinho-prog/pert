@@ -49,6 +49,8 @@ const routes: RouteRecordRaw[] = [
             { path: 'obras/:id/orcamentos/:budgetId', component: () => import('@/pages/app/projects/BudgetPage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Orçamento' } },
             { path: 'obras/:id/autos/:certId', component: () => import('@/pages/app/projects/CertificatePage.vue'), meta: { tenant: true, permission: 'projects.view', title: 'Auto de medição' } },
             { path: 'financas', component: () => import('@/pages/app/FinancePage.vue'), meta: { tenant: true, permission: 'finance.view', title: 'Painel financeiro' } },
+            { path: 'faturacao', component: () => import('@/pages/app/InvoicesPage.vue'), meta: { tenant: true, anyPermission: ['invoicing.view', 'invoicing.manage'], title: 'Faturação' } },
+            { path: 'faturacao/:id', component: () => import('@/pages/app/InvoicePage.vue'), meta: { tenant: true, anyPermission: ['invoicing.view', 'invoicing.manage'], title: 'Pré-fatura' } },
             { path: 'precos', component: () => import('@/pages/app/PriceLibraryPage.vue'), meta: { tenant: true, anyPermission: ['budgets.view', 'budgets.manage'], title: 'Biblioteca de preços' } },
             {
                 path: 'fornecedores',

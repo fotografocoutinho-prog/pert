@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.14.0)
+# Manual do utilizador (versão 0.15.0)
 
 ## Entrar
 
@@ -215,6 +215,18 @@ O separador **Custos** compara o **previsto** (orçamento aprovado) com o **comp
 - **Exportar mapa de custos (CSV)**.
 
 O **Painel financeiro** (menu) junta todas as obras: contrato, autado, realizado, comprometido, previsão, margem e situação face ao teto.
+
+## Faturação (pré-faturas)
+
+O ObraConnect **não emite faturas**: prepara **pré-faturas**, documentos internos sem valor fiscal, que se exportam para o programa de faturação certificado onde a fatura oficial é emitida.
+
+1. Num **auto de medição** ao dono de obra já aprovado, **Criar pré-fatura**: vem com o cliente, a obra, a referência do auto e as linhas deste período (preços de venda e IVA do orçamento). Também há **Nova pré-fatura** em **Faturação**, para adiantamentos e outros trabalhos.
+2. Em rascunho pode alterar o cliente (ou copiá-lo de um cliente da lista), as datas, as linhas, a taxa de IVA e o motivo de isenção. Com linhas a 0% é preciso o motivo (num orçamento em autoliquidação já vem "IVA - autoliquidação").
+3. **Pronta a faturar**: recebe o número interno (PF 2026/0001…).
+4. Em **Faturação**, no separador **Prontas a faturar**, exporte em **Excel**, **CSV** ou **JSON** e importe no seu programa de faturação (no importador, faça corresponder as colunas: documento, data, cliente, NIF, descrição, quantidade, preço, taxa de IVA…).
+5. Depois de emitir a fatura no programa certificado, abra a pré-fatura e use **Registar fatura oficial** (número e data). Passa a **Faturada** e conta no **Painel financeiro**.
+
+O **PDF** da pré-fatura serve para conferência interna e diz sempre que não serve de fatura. Antes de o enviar a um cliente, confirme com o contabilista.
 
 ## Planeamento
 

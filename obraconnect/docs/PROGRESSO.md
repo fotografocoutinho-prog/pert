@@ -1,5 +1,27 @@
 # Registo de progresso
 
+## v0.15.0 — Pré-faturação para o programa de faturação certificado (2026-11-08)
+
+Decisão do cliente: a ligação a um programa de faturação certificado (Fase 6) fica em espera; entretanto o ObraConnect prepara pré-faturas sem valor fiscal e exporta-as para importar no programa que a empresa já usa.
+
+| Área | Verificação |
+| --- | --- |
+| Pré-fatura a partir de um auto aprovado (cliente, obra, referência, linhas do período, IVA do orçamento; autoliquidação com a menção), só uma ativa por auto, auto por aprovar ou de subempreitada recusado | Testes (`InvoicingTest`) + browser |
+| Rascunho editável, pronta com número interno por ano, voltar a rascunho, fatura oficial registada (número e data), anular; faturada não se altera | Testes + browser (linha juntada com "1.250,50", total 81 488,12 €, PF 2026/0005, FT A/2026/0500) |
+| Exportação Excel, CSV (";" e vírgula decimal, BOM) e JSON; PDF com o aviso de documento interno | Testes + browser (os três ficheiros descarregados) + PDF aberto e conferido |
+| Permissões (diretor técnico consulta, administrativo gere, encarregado sem acesso), isolamento entre empresas, cliente com pré-faturas não se apaga | Testes |
+| Painel financeiro com o faturado; 360 px sem deslocamento horizontal | Browser |
+
+Total: **178 testes, 1818 asserções**.
+
+Decisões: a numeração PF é interna (não fiscal) e só é dada quando a pré-fatura fica pronta, para não haver buracos; o IVA é arredondado linha a linha (como sai na exportação; o programa certificado faz as contas finais); o motivo de isenção é obrigatório para ficar pronta quando há linhas a 0%; os códigos de isenção da AT escrevem-se à mão (confirmar com o contabilista).
+
+### Limitações
+
+- Não há formato próprio de nenhum programa de faturação: a folha tem colunas genéricas para mapear no importador. Com o nome do programa usado, junta-se um formato específico.
+- A pré-fatura não é para entregar ao cliente como fatura: confirmar com o contabilista se e como pode ser enviada como documento de conferência.
+- Não há notas de crédito nem recibos (fazem-se no programa certificado).
+
 ## v0.14.0 — Fase 4: gestão económica + empresa de demonstração (2026-11-08)
 
 | Área | Verificação |

@@ -30,6 +30,7 @@ const tenantNav = computed<NavItem[]>(() => [
     { to: '/app/obras', label: 'Obras', show: session.can('projects.view') },
     { to: '/app/clientes', label: 'Clientes', show: session.can('clients.view') },
     { to: '/app/financas', label: 'Painel financeiro', show: session.can('finance.view') },
+    { to: '/app/faturacao', label: 'Faturação', show: anyOf('invoicing.view', 'invoicing.manage') },
     { to: '/app/precos', label: 'Biblioteca de preços', show: anyOf('budgets.view', 'budgets.manage') },
     { to: '/app/fornecedores', label: 'Fornecedores e subempreiteiros', show: anyOf('purchases.manage', 'subcontractors.manage', 'costs.view', 'workforce.manage') },
     { to: '/app/trabalhadores', label: 'Trabalhadores', show: anyOf('workforce.view', 'workforce.manage', 'time.register_team', 'time.approve') },

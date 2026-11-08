@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\InspectionController;
 use App\Http\Controllers\Api\V1\InspectionItemController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
+use App\Http\Controllers\Api\V1\InvoiceDraftController;
 use App\Http\Controllers\Api\V1\IssueController;
 use App\Http\Controllers\Api\V1\MeasurementController;
 use App\Http\Controllers\Api\V1\MeController;
@@ -177,6 +178,17 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::delete('equipment/{equipment}/maintenance/{maintenanceRecord}', [EquipmentController::class, 'destroyMaintenance'])->scopeBindings()->name('equipment.maintenance.destroy');
 
             Route::get('finance', [CostController::class, 'finance'])->name('finance');
+
+            // Pré-faturas (documentos internos sem valor fiscal, para o programa de faturação certificado)
+            Route::get('invoice-drafts', [InvoiceDraftController::class, 'index'])->name('invoices.index');
+            Route::get('invoice-drafts/export', [InvoiceDraftController::class, 'export'])->name('invoices.export');
+            Route::post('invoice-drafts', [InvoiceDraftController::class, 'store'])->name('invoices.store');
+            Route::get('invoice-drafts/{invoiceDraft}', [InvoiceDraftController::class, 'show'])->whereNumber('invoiceDraft')->name('invoices.show');
+            Route::put('invoice-drafts/{invoiceDraft}', [InvoiceDraftController::class, 'update'])->whereNumber('invoiceDraft')->name('invoices.update');
+            Route::delete('invoice-drafts/{invoiceDraft}', [InvoiceDraftController::class, 'destroy'])->whereNumber('invoiceDraft')->name('invoices.destroy');
+            Route::get('invoice-drafts/{invoiceDraft}/pdf', [InvoiceDraftController::class, 'pdf'])->whereNumber('invoiceDraft')->name('invoices.pdf');
+            Route::post('invoice-drafts/{invoiceDraft}/actions/{action}', [InvoiceDraftController::class, 'transition'])
+                ->whereNumber('invoiceDraft')->whereIn('action', ['ready', 'reopen', 'invoice', 'cancel'])->name('invoices.transition');
 
             // Obras. O acesso a cada obra é decidido no controlador (perfil na empresa ou na equipa).
             Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
