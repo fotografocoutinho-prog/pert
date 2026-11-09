@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.18.0
+  version: 0.19.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -81,7 +81,9 @@ paths:
                   status: { type: string, example: ok }
                   version: { type: string }
                   database: { type: string, enum: [ok, error] }
-        "503": { description: Base de dados indisponível }
+                  scheduler: { type: string, enum: [ok, stale, unknown], description: "cron (stale = sem sinal há mais de 5 minutos)" }
+                  queue: { type: string, enum: [ok, stuck], description: "stuck = trabalho à espera há mais de 10 minutos" }
+        "503": { description: Base de dados indisponível, cron parado ou fila parada }
   /api/v1/plans:
     get:
       tags: [Subscrição]
@@ -592,6 +594,12 @@ paths:
     post: { tags: [Calendários], summary: "Juntar os feriados nacionais em falta de um ano (2016–2099), opcionalmente o Carnaval (calendars.manage)", parameters: [{ name: workCalendar, in: path, required: true, schema: { type: integer } }], requestBody: { content: { application/json: { schema: { type: object, required: [year], properties: { year: { type: integer }, carnival: { type: boolean } } } } } }, responses: { "200": { description: "{added}" } } }
   /api/v1/platform/dashboard:
     get: { tags: [Plataforma], summary: Indicadores agregados (equipa da plataforma, 2FA obrigatório), responses: { "200": { description: OK }, "403": { description: PLATFORM_ONLY / MFA_REQUIRED } } }
+  /api/v1/platform/system:
+    get: { tags: [Plataforma], summary: "Saúde do sistema: verificações, tarefas agendadas, trabalhos falhados (equipa da plataforma)" }
+  /api/v1/platform/system/failed-jobs/{uuid}/retry:
+    post: { tags: [Plataforma], summary: "Repetir um trabalho falhado (super administrador)" }
+  /api/v1/platform/system/failed-jobs/{uuid}:
+    delete: { tags: [Plataforma], summary: "Apagar um trabalho falhado (super administrador)" }
   /api/v1/platform/tenants:
     get:
       tags: [Plataforma]

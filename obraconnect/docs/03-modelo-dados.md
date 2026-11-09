@@ -256,6 +256,8 @@ Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_
 
 ### Inteligência e automação (fase 5)
 
+Monitorização (0.19.0), sem empresa: `system_tasks` (uma linha por tarefa agendada: última corrida, êxito, erro, falhas seguidas) e `system_checks` (estado de cada verificação, para avisar uma vez quando falha e outra quando volta ao normal).
+
 Histórico e alertas (0.18.0): `forecast_snapshots` (uma linha por obra e por semana — segunda-feira —, atualizada todos os dias pelo `obraconnect:forecast-watch`) e `project_alerts` (alertas automáticos; `open_key` único só enquanto aberto; `project_id` vazio = alerta da empresa). As regras ficam em `tenants.settings.alerts`.
 
 As previsões explicadas (0.17.0) não têm tabelas: calculam-se no momento a partir do orçamento aprovado, das medições, dos movimentos de custo (`App\Economics\CostReport::movements`) e do planeamento (`App\Forecasting\CostForecast` e `ScheduleForecast`). As tabelas abaixo são as previstas para a IA generativa e as automações.

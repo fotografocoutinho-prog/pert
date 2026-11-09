@@ -361,6 +361,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         // Backoffice da plataforma (exige papel de plataforma e 2FA)
         Route::prefix('platform')->name('platform.')->middleware('platform')->group(function () {
             Route::get('dashboard', Platform\DashboardController::class)->name('dashboard');
+            Route::get('system', [Platform\SystemController::class, 'show'])->name('system');
+            Route::post('system/failed-jobs/{uuid}/retry', [Platform\SystemController::class, 'retry'])
+                ->middleware('platform:super_admin')->name('system.retry');
+            Route::delete('system/failed-jobs/{uuid}', [Platform\SystemController::class, 'forget'])
+                ->middleware('platform:super_admin')->name('system.forget');
 
             Route::get('tenants', [Platform\TenantController::class, 'index'])->name('tenants.index');
             Route::get('tenants/{tenant}', [Platform\TenantController::class, 'show'])->name('tenants.show');

@@ -100,6 +100,7 @@ const routes: RouteRecordRaw[] = [
         children: [
             { path: '', component: () => import('@/pages/platform/PlatformDashboardPage.vue'), meta: { title: 'Plataforma' } },
             { path: 'empresas', component: () => import('@/pages/platform/PlatformTenantsPage.vue'), meta: { title: 'Empresas' } },
+            { path: 'sistema', component: () => import('@/pages/platform/PlatformSystemPage.vue'), meta: { title: 'Saúde do sistema' } },
             { path: 'empresas/:id', component: () => import('@/pages/platform/PlatformTenantPage.vue'), meta: { title: 'Empresa' } },
             { path: 'planos', component: () => import('@/pages/platform/PlatformPlansPage.vue'), meta: { platformRoles: ['billing'], title: 'Planos' } },
             { path: 'suporte', component: () => import('@/pages/platform/PlatformSupportPage.vue'), meta: { platformRoles: ['support'], title: 'Suporte' } },

@@ -52,7 +52,7 @@ return [
     ],
 
     // Leitura de faturas e guias de fornecedores pelo CODA DocIntel. Sem endereço ou sem chave, os
-    // documentos entram na mesma e preenchem-se à mão. A chave cria-se no DocIntel (/docs → auth/api-keys).
+    // documentos entram na mesma e preenchem-se à mão. A chave cria-se no DocIntel (POST /api/v1/auth/api-keys com o administrador).
     'docintel' => [
         'url' => rtrim((string) env('DOCINTEL_URL', ''), '/'),
         'key' => env('DOCINTEL_KEY'),
@@ -75,6 +75,12 @@ return [
     'queue' => [
         // Em cPanel não há supervisor: o agendador lança um worker por minuto.
         'run_via_scheduler' => (bool) env('QUEUE_RUN_VIA_SCHEDULER', true),
+    ],
+
+    // Saúde do sistema (backoffice → Saúde do sistema). Quando uma verificação falha, avisa por email os
+    // super administradores da plataforma e estes endereços (separados por vírgulas).
+    'monitoring' => [
+        'emails' => array_values(array_filter(array_map('trim', explode(',', (string) env('MONITORING_EMAILS', ''))))),
     ],
 
     // Página /instalar para alojamentos sem SSH. Desativa-se sozinha quando

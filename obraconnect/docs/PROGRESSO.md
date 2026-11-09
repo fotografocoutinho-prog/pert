@@ -1,5 +1,16 @@
 # Registo de progresso
 
+## v0.19.0 — Fase 6, parte 1: monitorização (2026-11-09)
+
+| Área | Verificação |
+| --- | --- |
+| Registo das tarefas (êxito, código diferente de 0, exceção relançada) | Testes (`SystemHealthTest`) |
+| `/health` com o cron e a fila: desconhecido antes do primeiro sinal, 503 com o cron parado há mais de 5 minutos ou um trabalho parado há mais de 10 | Testes |
+| Avisos por email: ao falhar, lembrete diário, de volta ao normal; só super administradores e MONITORING_EMAILS | Testes |
+| Página Saúde do sistema (equipa da plataforma) e trabalhos falhados (repetir/apagar só super administrador) | Testes + browser |
+
+Sem tabelas por empresa: `system_tasks` e `system_checks` são da plataforma. O cron morto não consegue avisar ninguém: para isso serve o monitor externo no `/health`.
+
 ## v0.18.0 — Fase 5, parte 3: histórico e alertas automáticos (2026-11-09)
 
 | Área | Verificação |

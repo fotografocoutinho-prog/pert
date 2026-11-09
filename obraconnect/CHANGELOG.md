@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.19.0 — 2026-11-09
+
+Fase 6, parte 1: **monitorização**. O ObraConnect depende do cron (emails, alertas, leituras de faturas); agora sabe-se quando para.
+
+- Cada tarefa agendada fica registada quando corre (`system_tasks`: início, fim, duração, erro, falhas seguidas), com um sinal de vida do cron a cada minuto.
+- **Saúde do sistema** no backoffice da plataforma: cron, cada tarefa agendada, fila (trabalhos parados há mais de 10 minutos), trabalhos falhados (o super administrador pode repeti-los ou apagá-los), DocIntel (responde? documentos presos em leitura?), erros registados hoje, envio de emails, modo de depuração e disco.
+- `obraconnect:system-check` a cada 10 minutos: quando uma verificação passa a falhar, email aos super administradores da plataforma e a `MONITORING_EMAILS` (enviado logo, sem passar pela fila); outro quando volta ao normal; enquanto durar, um lembrete por dia.
+- `/api/v1/health` passa a dizer também `scheduler` (ok, stale, unknown) e `queue` (ok, stuck) e responde 503 quando o cron ou a fila param, para um serviço de monitorização externo (ex.: UptimeRobot) avisar quando o próprio cron morre.
+- O registo de uma tarefa nunca a faz falhar (ex.: durante a atualização, antes da migração).
+
 ## 0.18.0 — 2026-11-09
 
 Fase 5, parte 3: **histórico das previsões e alertas automáticos**, sem IA.

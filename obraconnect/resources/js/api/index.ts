@@ -460,7 +460,37 @@ export const structureApi = {
     locationLinks: (projectId: number, id: number) => getData<StructureLinks>(`/api/v1/projects/${projectId}/locations/${id}/links`),
 };
 
+export interface SystemCheck {
+    key: string;
+    group: string;
+    label: string;
+    status: 'ok' | 'warning' | 'failing';
+    detail: string;
+    since: string | null;
+}
+
+export interface SystemStatus {
+    checked_at: string;
+    checks: SystemCheck[];
+    tasks: {
+        name: string;
+        label: string;
+        last_started_at: string | null;
+        last_finished_at: string | null;
+        last_success_at: string | null;
+        last_status: 'running' | 'ok' | 'failed' | null;
+        last_duration_ms: number | null;
+        last_error: string | null;
+        runs: number;
+    }[];
+    failed_jobs: { uuid: string; queue: string; job: string; error: string; failed_at: string }[];
+    info: { version: string; php: string; laravel: string; environment: string; mailer: string; queue: string; docintel: boolean; alert_recipients: number };
+}
+
 export const platformApi = {
+    system: () => getData<SystemStatus>('/api/v1/platform/system'),
+    retryFailedJob: (uuid: string) => http.post(`/api/v1/platform/system/failed-jobs/${uuid}/retry`),
+    forgetFailedJob: (uuid: string) => http.delete(`/api/v1/platform/system/failed-jobs/${uuid}`),
     dashboard: () => getData<PlatformDashboard>('/api/v1/platform/dashboard'),
     tenants: async (params: { search?: string; status?: string; page?: number }) =>
         (await http.get<Paginated<PlatformTenant>>('/api/v1/platform/tenants', { params })).data,

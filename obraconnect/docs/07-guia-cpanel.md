@@ -150,7 +150,9 @@ Valores de PHP recomendados (MultiPHP INI Editor): ver `deploy/cpanel/user.ini`.
 
 ## 11. Verificação final
 
-- [ ] `https://app.suaempresa.pt/api/v1/health` devolve `"status":"ok"`.
+- [ ] `https://app.suaempresa.pt/api/v1/health` devolve `"status":"ok"` e, um minuto depois, `"scheduler":"ok"` (o cron está a correr).
+- [ ] O `/api/v1/health` está num monitor externo (ex.: UptimeRobot, a cada 5 minutos): responde 503 se o cron ou a fila pararem.
+- [ ] `MONITORING_EMAILS` no `.env` (ou um super administrador da plataforma) para receber os avisos da Saúde do sistema.
 - [ ] `https://app.suaempresa.pt/.env` dá **403** ou mostra a aplicação (nunca o conteúdo do ficheiro).
 - [ ] Registo de uma empresa de teste chega ao email (cron a correr).
 - [ ] Login do super administrador pede 2FA.

@@ -51,6 +51,7 @@ const tenantNav = computed<NavItem[]>(() => [
 const platformNav = computed<NavItem[]>(() => [
     { to: '/plataforma', label: 'Painel da plataforma', show: session.isPlatformStaff },
     { to: '/plataforma/empresas', label: 'Empresas', show: session.isPlatformStaff },
+    { to: '/plataforma/sistema', label: 'Saúde do sistema', show: session.isPlatformStaff },
     { to: '/plataforma/planos', label: 'Planos e preços', show: session.hasPlatformRole('billing') },
     { to: '/plataforma/suporte', label: 'Pedidos de suporte', show: session.hasPlatformRole('support') },
     { to: '/plataforma/seguranca', label: 'Logs de segurança', show: session.hasPlatformRole('support') },
