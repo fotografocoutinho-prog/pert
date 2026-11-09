@@ -51,7 +51,7 @@ Se a subscrição expirar, a empresa passa a **só leitura** (consulta e exporta
 
 Em **Plataforma → Saúde do sistema**: o cron (sinal a cada minuto), cada tarefa agendada (quando correu e se correu bem), a fila de trabalhos, os trabalhos falhados, o DocIntel, os erros registados hoje e a configuração (envio de emails, modo de depuração, disco). Verde está bem, amarelo merece atenção, vermelho está a falhar.
 
-- A cada 10 minutos as verificações correm sozinhas. Quando uma passa a vermelho, os **super administradores da plataforma** recebem um email (e os endereços em `MONITORING_EMAILS` no `.env`, separados por vírgulas); outro quando volta ao normal; enquanto durar, um por dia.
+- A cada 10 minutos as verificações correm sozinhas. Quando uma passa a vermelho e continua assim na verificação seguinte (para não avisar de falhas passageiras), os **super administradores da plataforma** recebem um email (e os endereços em `MONITORING_EMAILS` no `.env`, separados por vírgulas); outro quando volta ao normal; enquanto durar, um por dia.
 - **Trabalhos falhados** (emails ou leituras de faturas que falharam três vezes): o super administrador pode **Repetir** (volta à fila) ou **Apagar**.
 - **Se o cron parar**, também não saem estes avisos. Ponha o endereço `https://…/api/v1/health` num serviço de monitorização externo (o UptimeRobot gratuito chega, a cada 5 minutos): responde **503** quando o cron não corre há mais de 5 minutos ou quando a fila está parada, e o serviço avisa por email.
 

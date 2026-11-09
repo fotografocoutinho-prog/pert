@@ -22,6 +22,9 @@ use Throwable;
 #[Description('Verifica o cron, as tarefas agendadas, a fila, o DocIntel e a configuração')]
 class SystemCheck extends Command
 {
+    /** Uma falha só gera email se ainda lá estiver passado este tempo (a verificação corre a cada 10 minutos). */
+    public const CONFIRM_MINUTES = 9;
+
     public function handle(SystemHealth $health): int
     {
         $now = now();
@@ -39,11 +42,14 @@ class SystemCheck extends Command
                 DB::table('system_checks')->where('key', $c['key'])->update(['detail' => $c['detail'], 'checked_at' => $now, 'updated_at' => $now]);
             }
 
-            if ($c['status'] === 'failing' && ($prev === null || $prev->status !== 'failing')) {
+            // Só se avisa de uma falha que se confirme na verificação seguinte (dez minutos depois): uma falha
+            // passageira não gera email. "Voltou ao normal" só se se tinha avisado da falha.
+            $since = $prev && $prev->status === $c['status'] ? $prev->since : $now;
+            if ($c['status'] === 'failing' && $prev?->status === 'failing' && $prev->notified_at === null && $now->copy()->subMinutes(self::CONFIRM_MINUTES)->gte($since)) {
                 $failing[] = $c;
-            } elseif ($c['status'] === 'failing' && ($prev->notified_at === null || $now->copy()->subDay()->gt($prev->notified_at))) {
+            } elseif ($c['status'] === 'failing' && $prev?->notified_at !== null && $now->copy()->subDay()->gt($prev->notified_at)) {
                 $still[] = $c;
-            } elseif ($c['status'] !== 'failing' && $prev?->status === 'failing') {
+            } elseif ($c['status'] !== 'failing' && $prev?->status === 'failing' && $prev->notified_at !== null) {
                 $recovered[] = $c;
             }
         }

@@ -1,5 +1,9 @@
 # Registo de progresso
 
+## v0.19.1 — correção da monitorização (2026-11-09)
+
+Visto em produção logo a seguir à 0.19.0: a verificação do DocIntel falhava com 5 segundos porque o DocIntel (Passenger) adormece e demora a acordar. Agora 30 segundos com nova tentativa, e nenhuma falha gera email sem ser confirmada na verificação seguinte (teste `test_a_failure_that_comes_and_goes_never_sends_email`).
+
 ## v0.19.0 — Fase 6, parte 1: monitorização (2026-11-09)
 
 | Área | Verificação |

@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 0.19.1 — 2026-11-09
+
+- Saúde do sistema: uma falha só gera email se ainda lá estiver na verificação seguinte (10 minutos depois); "voltou ao normal" só se se tinha avisado da falha. Uma falha passageira já não envia nada.
+- Verificação do DocIntel com até 30 segundos e uma segunda tentativa: em cPanel o DocIntel adormece quando não é usado e o primeiro pedido demora a acordá-lo (em produção dava "não responde" falso).
+
 ## 0.19.0 — 2026-11-09
 
 Fase 6, parte 1: **monitorização**. O ObraConnect depende do cron (emails, alertas, leituras de faturas); agora sabe-se quando para.

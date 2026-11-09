@@ -191,7 +191,9 @@ final class SystemHealth
             return null;
         }
         try {
-            $ok = Http::timeout(5)->acceptJson()->get($url.'/api/v1/health')->successful();
+            // O DocIntel em cPanel (Passenger) adormece quando não é usado e o primeiro pedido acorda-o, o
+            // que pode demorar bastante: dá-se tempo e uma segunda tentativa antes de dizer que não responde.
+            $ok = Http::timeout(30)->retry(2, 1000, throw: false)->acceptJson()->get($url.'/api/v1/health')->successful();
         } catch (Throwable) {
             $ok = false;
         }

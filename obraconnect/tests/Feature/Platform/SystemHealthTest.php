@@ -84,23 +84,28 @@ class SystemHealthTest extends TestCase
         $this->artisan('obraconnect:system-check')->assertSuccessful();
         Mail::assertNothingSent();
 
-        // O cron para: um aviso aos super administradores e aos endereços configurados (não ao suporte).
+        // O cron para. Primeira verificação a falhar: ainda não avisa (pode ser passageiro).
         Carbon::setTestNow('2026-11-10 10:10:00');
+        $this->artisan('obraconnect:system-check')->assertSuccessful();
+        Mail::assertNothingSent();
+
+        // Dez minutos depois continua: aviso aos super administradores e aos endereços configurados (não ao suporte).
+        Carbon::setTestNow('2026-11-10 10:20:00');
         $this->artisan('obraconnect:system-check')->assertSuccessful();
         Mail::assertSent(SystemAlertMail::class, fn (SystemAlertMail $m) => $m->hasTo($admin->email) && $m->hasTo('avisos@exemplo.pt')
             && count($m->failing) === 1 && Str::contains($m->failing[0]['detail'], 'O cron não corre desde'));
         Mail::assertSentCount(1);
 
-        // Dez minutos depois continua parado: não repete (só uma vez por dia).
-        Carbon::setTestNow('2026-11-10 10:20:00');
+        // Mais dez minutos: não repete (só uma vez por dia).
+        Carbon::setTestNow('2026-11-10 10:30:00');
         $this->artisan('obraconnect:system-check')->assertSuccessful();
         Mail::assertSentCount(1);
 
-        // No dia seguinte ainda parado: lembrete do cron, e entretanto as tarefas de hora a hora também falharam.
-        Carbon::setTestNow('2026-11-11 10:21:00');
+        // No dia seguinte ainda parado: lembrete do cron.
+        Carbon::setTestNow('2026-11-11 10:31:00');
         $this->artisan('obraconnect:system-check')->assertSuccessful();
-        Mail::assertSent(SystemAlertMail::class, fn (SystemAlertMail $m) => in_array('task:obraconnect-pulso', array_column($m->still, 'key'), true)
-            && in_array('task:obraconnect-exportacoes', array_column($m->failing, 'key'), true));
+        Mail::assertSent(SystemAlertMail::class, fn (SystemAlertMail $m) => in_array('task:obraconnect-pulso', array_column($m->still, 'key'), true));
+        Mail::assertSentCount(2);
 
         // Volta a correr: aviso de que está tudo normal outra vez.
         TaskMonitor::pulse();
@@ -108,8 +113,26 @@ class SystemHealthTest extends TestCase
             TaskMonitor::run($name, fn () => 0);
         }
         $this->artisan('obraconnect:system-check')->assertSuccessful();
-        Mail::assertSent(SystemAlertMail::class, fn (SystemAlertMail $m) => $m->failing === [] && $m->still === [] && count($m->recovered) >= 1);
+        Mail::assertSent(SystemAlertMail::class, fn (SystemAlertMail $m) => $m->failing === [] && $m->still === []
+            && in_array('task:obraconnect-pulso', array_column($m->recovered, 'key'), true));
         $this->assertSame('ok', DB::table('system_checks')->where('key', 'task:obraconnect-pulso')->value('status'));
+    }
+
+    public function test_a_failure_that_comes_and_goes_never_sends_email(): void
+    {
+        Mail::fake();
+        $this->platformUser();
+        Carbon::setTestNow('2026-11-10 10:00:00');
+        TaskMonitor::pulse();
+        $this->artisan('obraconnect:system-check')->assertSuccessful();
+
+        // Falha numa verificação e volta na seguinte (ex.: o DocIntel a acordar): nem aviso nem "voltou ao normal".
+        Carbon::setTestNow('2026-11-10 10:10:00');
+        $this->artisan('obraconnect:system-check')->assertSuccessful();
+        TaskMonitor::pulse();
+        Carbon::setTestNow('2026-11-10 10:11:00');
+        $this->artisan('obraconnect:system-check')->assertSuccessful();
+        Mail::assertNothingSent();
     }
 
     public function test_backoffice_page_and_failed_jobs_only_for_platform_staff(): void
