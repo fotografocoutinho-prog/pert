@@ -35,7 +35,7 @@ final class RoleTemplates
                     'documents.view', 'documents.upload', 'documents.manage',
                     'inspections.request',
                     'issues.view', 'issues.create', 'issues.resolve', 'issues.validate',
-                    'budgets.view', 'budgets.manage', 'measurements.manage', 'certificates.approve', 'costs.view', 'costs.manage', 'purchases.manage', 'subcontractors.manage', 'workforce.view', 'workforce.manage', 'time.register_own', 'time.approve', 'equipment.manage', 'planning.view', 'planning.manage', 'finance.view', 'invoicing.view', 'reports.export',
+                    'budgets.view', 'budgets.manage', 'measurements.manage', 'certificates.approve', 'costs.view', 'costs.manage', 'purchases.manage', 'subcontractors.manage', 'workforce.view', 'workforce.manage', 'time.register_own', 'time.approve', 'equipment.manage', 'planning.view', 'planning.manage', 'finance.view', 'invoicing.view', 'supplier_docs.manage', 'reports.export',
                 ],
             ],
             'diretor_obra' => [
@@ -82,7 +82,7 @@ final class RoleTemplates
             'administrativo' => [
                 'name' => 'Administrativo',
                 'description' => 'Gestão administrativa e documental.',
-                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'clients.view', 'clients.manage', 'calendars.manage', 'departments.manage', 'cost_centers.manage', 'specialties.manage', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage', 'budgets.view', 'costs.view', 'costs.manage', 'purchases.manage', 'subcontractors.manage', 'workforce.view', 'workforce.manage', 'time.register_own', 'time.approve', 'time.export_payroll', 'equipment.manage', 'finance.view', 'invoicing.view', 'invoicing.manage', 'reports.export'],
+                'permissions' => ['company.view', 'company.update', 'members.view', 'subscription.view', 'clients.view', 'clients.manage', 'calendars.manage', 'departments.manage', 'cost_centers.manage', 'specialties.manage', 'projects.all', 'projects.view', 'documents.view', 'documents.upload', 'documents.manage', 'budgets.view', 'costs.view', 'costs.manage', 'purchases.manage', 'subcontractors.manage', 'workforce.view', 'workforce.manage', 'time.register_own', 'time.approve', 'time.export_payroll', 'equipment.manage', 'finance.view', 'invoicing.view', 'invoicing.manage', 'supplier_docs.manage', 'reports.export'],
             ],
             'trabalhador' => [
                 'name' => 'Trabalhador',

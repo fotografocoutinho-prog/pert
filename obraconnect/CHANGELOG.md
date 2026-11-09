@@ -1,5 +1,17 @@
 # Histórico de versões
 
+## 0.16.0 — 2026-11-08
+
+Fase 5, parte 1: leitura de faturas e guias de fornecedores pelo **CODA DocIntel** (o motor de leitura próprio, já instalado em coda.pt/docintel). Sem IA paga: o DocIntel lê o código QR das faturas portuguesas e o texto dos PDF; a ligação a um modelo de IA fica para quando houver clientes.
+
+- **Faturas de fornecedores** (menu, para quem tem a permissão nova `supplier_docs.manage`) e, em cada obra, no separador **Compras**: juntar faturas, notas de crédito, talões e guias em PDF ou fotografia (vários de uma vez, ou arrastando).
+- **Leitura automática** (quando `DOCINTEL_URL` e `DOCINTEL_KEY` estão definidos): tipo, fornecedor e NIF, número, ATCUD, datas, valores sem IVA/IVA/total, referência da encomenda e linhas. O fornecedor é reconhecido pelo NIF; a **compra** é proposta quando o número da encomenda ou o valor sem IVA batem, e com ela vem a obra. Sem DocIntel, ou se a leitura falhar, preenche-se à mão (o erro fica à vista).
+- **Rever e lançar**: o original ao lado dos dados. Fatura ou talão com compra → a compra fica **faturada** pelo valor sem IVA; sem compra → **custo realizado** da obra (com a natureza escolhida); nota de crédito → custo negativo; guia com compra → a compra fica **recebida**. **Desfazer lançamento** repõe a compra ou retira o custo.
+- **Avisos**: o mesmo ficheiro não entra duas vezes; a mesma fatura (fornecedor + número) é avisada e não se lança duas vezes; NIF do cliente diferente do da empresa; totais que não batem; fornecedor que é subempreiteiro (o custo pode já estar nos autos); documento anulado segundo o QR.
+- Lançar numa compra exige `purchases.manage` na obra; como custo, `costs.manage`. Quem gere compras ou custos numa obra trata os documentos dessa obra; a caixa da empresa (documentos ainda sem obra) é de `supplier_docs.manage` (diretor técnico e administrativo).
+- Custos que vieram de uma fatura não se apagam no mapa de custos (desfaz-se na fatura); fornecedores com faturas não se apagam.
+- Empresa de demonstração com cinco documentos: uma fatura lançada na compra, um talão lançado como custo, uma fatura e uma guia por rever (com a compra proposta) e um duplicado rejeitado.
+
 ## 0.15.0 — 2026-11-08
 
 Pré-faturação: documentos internos, sem valor fiscal, para exportar para o programa de faturação certificado. A ligação direta a um programa de faturação (Fase 6) fica em espera.

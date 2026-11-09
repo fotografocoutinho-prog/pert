@@ -204,7 +204,8 @@ async function removeEntry(id: number): Promise<void> {
                     </span>
                     <span class="flex items-center gap-3 whitespace-nowrap">
                         {{ money(e.amount_cents) }}
-                        <button v-if="canManage" type="button" class="text-xs text-red-700 hover:underline" @click="removeEntry(e.id)">Apagar</button>
+                        <RouterLink v-if="e.supplier_document_id" :to="`/app/faturas-fornecedores/${e.supplier_document_id}`" class="text-xs text-brand-700 hover:underline">Ver a fatura</RouterLink>
+                        <button v-else-if="canManage" type="button" class="text-xs text-red-700 hover:underline" @click="removeEntry(e.id)">Apagar</button>
                     </span>
                 </li>
             </ul>

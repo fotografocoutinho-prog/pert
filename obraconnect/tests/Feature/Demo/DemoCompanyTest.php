@@ -44,13 +44,20 @@ class DemoCompanyTest extends TestCase
             }
             $this->assertSame(0, Media::query()->where('status', '!=', 'ready')->count());
             $this->assertGreaterThan(20, Media::query()->count());
-            foreach (['site_diary_entries', 'documents', 'issues', 'budgets', 'measurements', 'certificates', 'contracts', 'purchase_orders', 'time_entries', 'equipment_usages', 'activities', 'activity_dependencies', 'invoice_drafts'] as $table) {
+            foreach (['site_diary_entries', 'documents', 'issues', 'budgets', 'measurements', 'certificates', 'contracts', 'purchase_orders', 'time_entries', 'equipment_usages', 'activities', 'activity_dependencies', 'invoice_drafts', 'supplier_documents'] as $table) {
                 $this->assertGreaterThan(0, DB::table($table)->count(), $table);
             }
             // Pré-faturas numeradas pela ordem das datas: faturadas, uma pronta e um rascunho.
             $numbered = DB::table('invoice_drafts')->whereNotNull('number')->orderBy('number')->pluck('issue_date')->all();
             $this->assertSame($numbered, collect($numbered)->sort()->values()->all());
             $this->assertSame(['draft' => 1, 'invoiced' => 3, 'ready' => 1], DB::table('invoice_drafts')->groupBy('status')->selectRaw('status, count(*) c')->pluck('c', 'status')->map(fn ($c) => (int) $c)->sortKeys()->all());
+            // Faturas de fornecedores: as por rever já têm a compra proposta pelas regras (valor e n.º de encomenda).
+            $this->assertSame(['posted' => 2, 'rejected' => 1, 'to_review' => 2], DB::table('supplier_documents')->groupBy('status')->selectRaw('status, count(*) c')->pluck('c', 'status')->map(fn ($c) => (int) $c)->sortKeys()->all());
+            $this->assertSame(0, DB::table('supplier_documents')->where('status', 'to_review')->whereNull('purchase_order_id')->count());
+            $this->assertSame(1, DB::table('supplier_documents')->where('status', 'posted')->whereNotNull('cost_entry_id')->count());
+            foreach (DB::table('supplier_documents')->pluck('path') as $path) {
+                $this->assertTrue(Storage::disk(config('obraconnect.files.disk'))->exists($path), $path);
+            }
         });
         $team = User::query()->where('email', 'like', '%@'.DemoCompany::DOMAIN)->count();
         $this->assertSame(15, $team);

@@ -293,6 +293,7 @@ export interface CostReport {
         incurred_on: string;
         cost_center: string | null;
         created_by: string | null;
+        supplier_document_id: number | null;
     }[];
     categories: Option[];
     can_manage: boolean;
@@ -628,6 +629,100 @@ export const invoicingApi = {
         data<InvoiceDraft>(http.post(`/api/v1/invoice-drafts/${id}/actions/${action}`, payload)),
     exportUrl: (format: 'xlsx' | 'csv' | 'json', params: Record<string, unknown> = {}) => `/api/v1/invoice-drafts/export?${query({ format, ...params })}`,
     pdfUrl: (id: number) => `/api/v1/invoice-drafts/${id}/pdf`,
+};
+
+export type SupplierDocStatus = 'reading' | 'to_review' | 'posted' | 'rejected';
+
+export interface SupplierDocSummary {
+    id: number;
+    kind: string;
+    kind_label: string;
+    status: SupplierDocStatus;
+    status_label: string;
+    supplier: string | null;
+    supplier_nif: string | null;
+    number: string | null;
+    issue_date: string | null;
+    net_cents: number | null;
+    gross_cents: number | null;
+    project: { id: number; code: string; name: string } | null;
+    reader: string | null;
+    confidence: number | null;
+    attention: boolean;
+    original_name: string;
+    created_at: string | null;
+}
+
+export interface SupplierDocLine {
+    code: string | null;
+    description: string;
+    quantity: number | null;
+    unit: string | null;
+    unit_price: number | null;
+    vat_rate: number | null;
+    total: number | null;
+    arithmetic_ok: boolean | null;
+}
+
+export interface SupplierDoc extends SupplierDocSummary {
+    net_effective_cents: number | null;
+    category: string;
+    category_label: string;
+    file: { name: string; mime: string; size_bytes: number; is_pdf: boolean };
+    reader_document_id: string | null;
+    review_reasons: string[];
+    read_error: string | null;
+    read_at: string | null;
+    lines: SupplierDocLine[];
+    supplier_name: string | null;
+    customer_nif: string | null;
+    atcud: string | null;
+    due_date: string | null;
+    order_reference: string | null;
+    vat_cents: number | null;
+    notes: string | null;
+    project_id: number | null;
+    partner_id: number | null;
+    partner: { id: number; name: string; nif: string | null; kind: string } | null;
+    purchase_order_id: number | null;
+    purchase_order: { id: number; number: number; status: string; status_label: string; total_cents: number; project_id: number } | null;
+    cost_entry_id: number | null;
+    cost_center_id: number | null;
+    cost_center: string | null;
+    posted_at: string | null;
+    posted_by: string | null;
+    created_by: string | null;
+    warnings: string[];
+    suggestions: {
+        purchase_orders: { id: number; number: number; project: { id: number; code: string; name: string }; status_label: string; total_cents: number; reason: string | null }[];
+    };
+    options: { kinds: Option[]; categories: Option[] };
+    can: { edit: boolean; post: boolean; unpost: boolean; reject: boolean; reopen: boolean; read: boolean; delete: boolean; create_supplier: boolean };
+}
+
+export interface SupplierDocList {
+    data: SupplierDocSummary[];
+    meta: { counts: Record<SupplierDocStatus, number>; reader_enabled: boolean; can_upload: boolean };
+}
+
+export const supplierDocsApi = {
+    list: async (params: Record<string, unknown> = {}) => (await http.get<SupplierDocList>('/api/v1/supplier-documents', { params })).data,
+    get: (id: number) => getData<SupplierDoc>(`/api/v1/supplier-documents/${id}`),
+    upload: async (file: File, projectId?: number | null, onProgress?: (percent: number) => void) => {
+        const form = new FormData();
+        form.append('file', file);
+        if (projectId) form.append('project_id', String(projectId));
+        const r = await http.post<{ data: SupplierDoc }>('/api/v1/supplier-documents', form, {
+            timeout: 600_000,
+            onUploadProgress: (e) => onProgress?.(e.total ? Math.round((e.loaded * 100) / e.total) : 0),
+        });
+        return r.data.data;
+    },
+    update: (id: number, payload: Record<string, unknown>) => data<SupplierDoc>(http.put(`/api/v1/supplier-documents/${id}`, payload)),
+    act: (id: number, action: 'post' | 'unpost' | 'reject' | 'reopen' | 'read', payload: Record<string, unknown> = {}) =>
+        data<SupplierDoc>(http.post(`/api/v1/supplier-documents/${id}/actions/${action}`, payload, { timeout: 180_000 })),
+    remove: (id: number) => http.delete(`/api/v1/supplier-documents/${id}`),
+    fileUrl: (id: number) => `/api/v1/supplier-documents/${id}/file`,
 };
 
 /** "1.234,5" → 123450 (euros escritos → cêntimos); vazio → null. */

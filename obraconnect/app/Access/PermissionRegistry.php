@@ -191,6 +191,12 @@ final class PermissionRegistry
                     'finance.view' => 'Ver o painel financeiro (faturado, custo e margem)',
                 ],
             ],
+            'supplier_docs' => [
+                'label' => 'Faturas e guias de fornecedores',
+                'permissions' => [
+                    'supplier_docs.manage' => 'Receber, rever e lançar as faturas e guias de fornecedores de todas as obras (caixa da empresa)',
+                ],
+            ],
             'invoicing' => [
                 'label' => 'Pré-faturação',
                 'permissions' => [

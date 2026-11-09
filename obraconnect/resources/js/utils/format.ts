@@ -180,6 +180,14 @@ const EVENT_LABELS: Record<string, string> = {
     'invoice_draft.invoice': 'Fatura oficial registada na pré-fatura',
     'invoice_draft.cancel': 'Pré-fatura anulada',
     'invoice_draft.exported': 'Pré-faturas exportadas',
+    'supplier_document.uploaded': 'Documento de fornecedor recebido',
+    'supplier_document.updated': 'Documento de fornecedor alterado',
+    'supplier_document.read': 'Documento de fornecedor mandado ler de novo',
+    'supplier_document.posted': 'Documento de fornecedor lançado',
+    'supplier_document.unposted': 'Lançamento de documento de fornecedor desfeito',
+    'supplier_document.rejected': 'Documento de fornecedor rejeitado',
+    'supplier_document.reopened': 'Documento de fornecedor reaberto',
+    'supplier_document.deleted': 'Documento de fornecedor apagado',
 };
 
 export function eventLabel(event: string): string {

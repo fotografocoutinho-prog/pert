@@ -8,12 +8,14 @@ use App\Economics\CostReport;
 use App\Enums\CostCategory;
 use App\Enums\InvoiceDraftStatus;
 use App\Enums\ProjectStatus;
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\CostCenter;
 use App\Models\CostEntry;
 use App\Models\InvoiceDraft;
 use App\Models\Project;
+use App\Models\SupplierDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -72,6 +74,9 @@ class CostController extends Controller
     {
         $this->authorize('costs.manage', $project);
         $this->assertProjectOpen($project);
+        if ($source = SupplierDocument::query()->where('cost_entry_id', $costEntry->id)->first()) {
+            throw ApiException::conflict("Este custo veio do documento de fornecedor n.º {$source->id} ({$source->label()}): desfaça o lançamento nesse documento.", 'COST_FROM_SUPPLIER_DOC');
+        }
         $costEntry->delete();
         $this->auditor->record('costs.entry_deleted', $project, ['description' => $costEntry->description, 'amount_cents' => $costEntry->amount_cents]);
 
@@ -163,8 +168,11 @@ class CostController extends Controller
             'label' => isset($centers[$id]) ? "{$centers[$id]->code} · {$centers[$id]->name}" : 'Sem centro de custo',
         ])->values()->all();
 
+        $entries = $project->costEntries()->with(['costCenter:id,code,name', 'createdBy:id,name'])->orderByDesc('incurred_on')->get();
+        $sources = SupplierDocument::query()->whereIn('cost_entry_id', $entries->pluck('id'))->pluck('id', 'cost_entry_id');
+
         return $report + [
-            'entries' => $project->costEntries()->with(['costCenter:id,code,name', 'createdBy:id,name'])->orderByDesc('incurred_on')->get()->map(fn (CostEntry $e) => [
+            'entries' => $entries->map(fn (CostEntry $e) => [
                 'id' => $e->id,
                 'category' => $e->category->value,
                 'category_label' => $e->category->label(),
@@ -174,6 +182,8 @@ class CostController extends Controller
                 'incurred_on' => $e->incurred_on->toDateString(),
                 'cost_center' => $e->costCenter ? "{$e->costCenter->code} · {$e->costCenter->name}" : null,
                 'created_by' => $e->createdBy?->name,
+                // Lançado a partir de uma fatura de fornecedor: desfaz-se lá, não se apaga aqui.
+                'supplier_document_id' => $sources[$e->id] ?? null,
             ])->all(),
             'categories' => CostCategory::options(),
             'can_manage' => Gate::allows('costs.manage', $project) && ! $project->isArchived(),

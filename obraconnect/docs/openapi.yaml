@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.15.0
+  version: 0.16.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -62,6 +62,7 @@ tags:
   - name: Custos
   - name: Planeamento
   - name: Pré-faturação
+  - name: Faturas de fornecedores
   - name: Plataforma
 paths:
   /api/v1/health:
@@ -781,6 +782,17 @@ paths:
     get: { tags: [Pré-faturação], summary: "PDF (documento interno sem valor fiscal)" }
   /api/v1/invoice-drafts/{invoiceDraft}/actions/{action}:
     post: { tags: [Pré-faturação], summary: "ready (issue_date; INVOICE_EMPTY, VAT_REASON_REQUIRED) | reopen | invoice (official_number, official_date) | cancel" }
+  /api/v1/supplier-documents:
+    get: { tags: [Faturas de fornecedores], summary: "Documentos (status, project_id, search); meta.counts por estado, meta.reader_enabled, meta.can_upload" }
+    post: { tags: [Faturas de fornecedores], summary: "Juntar PDF ou fotografia (file, project_id opcional); com o DocIntel ligado fica a ler (SUPPLIER_DOC_DUPLICATE_FILE, SUPPLIER_DOC_FILE)" }
+  /api/v1/supplier-documents/{supplierDocument}:
+    get: { tags: [Faturas de fornecedores], summary: "Documento com avisos, compras sugeridas e linhas lidas" }
+    put: { tags: [Faturas de fornecedores], summary: "Corrigir os dados, a obra, o fornecedor e a compra (só por rever; SUPPLIER_DOC_STATUS, SUPPLIER_DOC_PURCHASE)" }
+    delete: { tags: [Faturas de fornecedores], summary: "Apagar (por rever ou rejeitado) e o ficheiro" }
+  /api/v1/supplier-documents/{supplierDocument}/file:
+    get: { tags: [Faturas de fornecedores], summary: "Original (PDF ou imagem, inline)" }
+  /api/v1/supplier-documents/{supplierDocument}/actions/{action}:
+    post: { tags: [Faturas de fornecedores], summary: "post (SUPPLIER_DOC_PROJECT, SUPPLIER_DOC_INCOMPLETE, SUPPLIER_DOC_DUPLICATE, SUPPLIER_DOC_PURCHASE) | unpost | reject (reason) | reopen | read (SUPPLIER_DOC_READER_OFF)" }
 components:
   securitySchemes:
     sessionCookie:

@@ -101,6 +101,12 @@ Gestão económica (0.14.0) — todas valem por obra (● = em todas as obras, p
 Regras da gestão económica (0.14.0): as páginas da empresa (biblioteca de preços, fornecedores, trabalhadores, equipamentos, painel financeiro) aparecem a quem tem a permissão no perfil da empresa; numa obra decide sempre o perfil nessa obra. Sem `workforce.view` nem `costs.view`, as horas aparecem sem custo. Quem só tem `time.register_own` regista e vê apenas as horas dos trabalhadores ligados à sua conta. A biblioteca de preços consulta-se com `budgets.view` e gere-se com `budgets.manage`. `workforce.manage` (nova) gere a lista de trabalhadores e o custo/hora.
 
 
+Faturas e guias de fornecedores (0.16.0) — vale para a empresa toda; quem tem `purchases.manage` ou `costs.manage` numa obra trata também os documentos dessa obra (lançar numa compra: `purchases.manage`; como custo: `costs.manage`):
+
+| Permissão | Descrição | ADM | DT | DO | ENC | PRE | MED | FIS | CSO | TQ | ADV | TRB | SUB | FOR | DON |
+| --- | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| `supplier_docs.manage` | Receber, rever e lançar as faturas e guias de fornecedores de todas as obras (caixa da empresa) | ● | ● | | | | | | | | ● | | | | |
+
 Pré-faturação (0.15.0) — vale para a empresa toda (não por obra):
 
 | Permissão | Descrição | ADM | DT | DO | ENC | PRE | MED | FIS | CSO | TQ | ADV | TRB | SUB | FOR | DON |

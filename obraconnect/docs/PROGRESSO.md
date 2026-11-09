@@ -1,5 +1,25 @@
 # Registo de progresso
 
+## v0.16.0 — Fase 5, parte 1: faturas e guias de fornecedores lidas pelo DocIntel (2026-11-08)
+
+Decisão do cliente: "fico para já com o DocIntel" e, se funcionar, a possibilidade de ligar a Claude, Gemini ou ChatGPT; **sem IA paga enquanto não houver clientes**. O DocIntel (Python/FastAPI, em produção em coda.pt/docintel, Passenger) lê o QR das faturas portuguesas e o texto dos PDF; não lê fotografias de papel no alojamento (não há Tesseract), mas lê o QR de muitas fotografias.
+
+| Área | Verificação |
+| --- | --- |
+| Leitura pelo DocIntel (pedido síncrono `/documents/analyze` com `X-API-Key`), preenchimento dos campos e das linhas, fornecedor pelo NIF, compra proposta pelo n.º da encomenda ou pelo valor | Testes (`SupplierDocumentsTest`, DocIntel simulado com `Http::fake`) + browser com o DocIntel local |
+| Lançar: compra faturada pelo valor sem IVA, custo realizado, nota de crédito negativa, guia → compra recebida; desfazer lançamento | Testes + browser |
+| Duplicados (mesmo ficheiro, mesma fatura), NIF do cliente, totais, documento anulado, leitura falhada (chave recusada) com preenchimento à mão | Testes |
+| Permissões: caixa da empresa (supplier_docs.manage), documentos da obra para quem gere compras/custos, lançar exige purchases.manage ou costs.manage na obra; obra arquivada só consulta; isolamento entre empresas | Testes |
+| Custos vindos de faturas não se apagam no mapa; fornecedores com faturas não se apagam; espaço ocupado da empresa | Testes |
+
+Decisões: o custo é sempre o valor **sem IVA** (como as compras e o orçamento); um recibo não é custo (é a prova de pagamento de uma fatura); uma nota de crédito não se lança numa compra; o DocIntel guarda uma cópia do ficheiro com a referência `obraconnect:<empresa>:<documento>`.
+
+### Limitações
+
+- Sem leitura de fotografias de papel no servidor (sem OCR de imagem no alojamento); o QR de muitas fotografias lê-se na mesma.
+- Sem conciliação linha a linha (quantidades da guia contra a encomenda): a guia dá a compra como recebida por inteiro, como o botão "recebida".
+- A IA generativa (resumos, perguntas aos documentos) fica para depois, desligada por omissão; o DocIntel já tem adaptadores para Claude e OpenAI.
+
 ## v0.15.0 — Pré-faturação para o programa de faturação certificado (2026-11-08)
 
 Decisão do cliente: a ligação a um programa de faturação certificado (Fase 6) fica em espera; entretanto o ObraConnect prepara pré-faturas sem valor fiscal e exporta-as para importar no programa que a empresa já usa.

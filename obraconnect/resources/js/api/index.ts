@@ -200,7 +200,7 @@ export const exportsApi = {
 
 export const projectsApi = {
     // Leituras com cópia local: abrem sem rede com o que foi visto da última vez.
-    list: (params: { search?: string; status?: string; page?: number; client_id?: number }) =>
+    list: (params: { search?: string; status?: string; page?: number; client_id?: number; per_page?: number }) =>
         cachedRead(`projects:${JSON.stringify(params)}`, async () => (await http.get<Paginated<Project>>('/api/v1/projects', { params })).data),
     get: (id: number) => cachedRead(`project:${id}`, () => getData<Project>(`/api/v1/projects/${id}`)),
     create: async (payload: Record<string, unknown>) => (await http.post<{ data: Project }>('/api/v1/projects', payload)).data.data,

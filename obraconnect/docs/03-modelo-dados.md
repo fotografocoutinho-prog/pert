@@ -246,6 +246,14 @@ Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_
 | `invoice_drafts` | project_id, client_id e certificate_id (opcionais, FK composta), series_year + number (internos, únicos por empresa, dados quando fica pronta), status (draft/ready/invoiced/cancelled), issue_date, due_date, cópia dos dados do cliente (nome, NIF, morada, código postal, localidade, país, email), reference, vat_exemption_code/reason, notes, ready_at, official_number + official_date (fatura do programa certificado), invoiced_at/by |
 | `invoice_draft_lines` | invoice_draft_id (cascata), code, description, unit, quantity, unit_price_cents, discount_pct, vat_rate, sort_order |
 
+**Implementado na 0.16.0 (faturas e guias de fornecedores):**
+
+| Tabela | Campos principais |
+| --- | --- |
+| `supplier_documents` | project_id, partner_id, purchase_order_id, cost_entry_id, cost_center_id (opcionais, FK compostas sem set null), kind (invoice/credit_note/receipt/delivery_note/other), status (reading/to_review/posted/rejected), category; ficheiro (disk, path, original_name, mime, size_bytes, sha256 único por empresa); leitura (reader, reader_document_id, confidence, review_reasons, read_error, read_at, lines em JSON só para consulta); dados (supplier_name, supplier_nif, customer_nif, number, atcud, issue_date, due_date, order_reference, net/vat/gross_cents, notes); posted_at/by |
+
+`cost_entries` ganhou a chave única (tenant_id, id) para a FK composta.
+
 ### Inteligência e automação (fase 5)
 
 | Tabela | Campos principais |

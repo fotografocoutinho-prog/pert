@@ -51,6 +51,16 @@ return [
         'retention_hours' => 48,
     ],
 
+    // Leitura de faturas e guias de fornecedores pelo CODA DocIntel. Sem endereço ou sem chave, os
+    // documentos entram na mesma e preenchem-se à mão. A chave cria-se no DocIntel (/docs → auth/api-keys).
+    'docintel' => [
+        'url' => rtrim((string) env('DOCINTEL_URL', ''), '/'),
+        'key' => env('DOCINTEL_KEY'),
+        'timeout' => (int) env('DOCINTEL_TIMEOUT', 120),
+        // O DocIntel em cPanel aceita até MAX_UPLOAD_MB = 25.
+        'max_mb' => (int) env('DOCINTEL_MAX_MB', 25),
+    ],
+
     'security' => [
         'force_https' => (bool) env('FORCE_HTTPS', false),
         'password_min_length' => 10,

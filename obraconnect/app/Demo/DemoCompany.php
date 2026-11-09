@@ -3,6 +3,7 @@
 namespace App\Demo;
 
 use App\Actions\Tenancy\RegisterCompany;
+use App\Billing\StorageUsage;
 use App\Calendar\PortugueseHolidays;
 use App\Calendar\WorkCalendars;
 use App\Documents\DocumentStorage;
@@ -53,10 +54,12 @@ use App\Models\PurchaseOrderLine;
 use App\Models\Role;
 use App\Models\Specialty;
 use App\Models\Subscription;
+use App\Models\SupplierDocument;
 use App\Models\Tenant;
 use App\Models\TimeEntry;
 use App\Models\User;
 use App\Models\Worker;
+use App\Purchasing\SupplierDocuments;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -760,14 +763,26 @@ final class DemoCompany
 
         // Compras
         $this->purchase($p, 'ferros', 'material', $d(12), 'invoiced', [['MT.02', '3.1.2', 'Aço A500 NR (fundações)', 'kg', 5500, 98]], ['FA 3310', $d(19)]);
-        $this->purchase($p, 'betoes', 'material', $d(14), 'invoiced', [['MT.01', '3.1.1', 'Betão C25/30 XC2 S3 para sapatas', 'm3', 62, 9200]], ['FT 2026/1184', $d(20)]);
+        $footingConcrete = $this->purchase($p, 'betoes', 'material', $d(14), 'invoiced', [['MT.01', '3.1.1', 'Betão C25/30 XC2 S3 para sapatas', 'm3', 62, 9200]], ['FT 2026/1184', $d(20)]);
         $this->purchase($p, 'aluguer', 'equipment', $d(18), 'invoiced', [[null, null, 'Aluguer de andaimes de fachada (3 meses)', 'vg', 1, 240000]], ['FT A/552', $d(24)]);
         $this->purchase($p, 'betoes', 'material', $d(39), 'invoiced', [['MT.01', '3.2.2', 'Betão C25/30 para a laje do R/C', 'm3', 60, 9200]], ['FT 2026/1530', $d(45)]);
         $this->purchase($p, 'ferros', 'material', $d(46), 'received', [['MT.02', '3.2.3', 'Aço A500 NR (estrutura elevada)', 'kg', 7200, 98]]);
         $this->purchase($p, 'ferros', 'material', $d(46), 'cancelled', [['MT.02', '3.2.3', 'Aço A500 NR (encomenda em duplicado)', 'kg', 7200, 98]]);
-        $this->purchase($p, 'betoes', 'material', $d(52), 'approved', [['MT.01', '3.2.2', 'Betão C25/30 para a laje do piso 1', 'm3', 58, 9200], [null, '3.2.2', 'Autobomba (meio dia)', 'vg', 1, 55000]]);
+        $slabConcrete = $this->purchase($p, 'betoes', 'material', $d(52), 'approved', [['MT.01', '3.2.2', 'Betão C25/30 para a laje do piso 1', 'm3', 58, 9200], [null, '3.2.2', 'Autobomba (meio dia)', 'vg', 1, 55000]]);
         $this->purchase($p, 'materiais', 'material', $d(53), 'approved', [['MT.03', '4.1', 'Bloco térmico 30x20x25', 'un', 5200, 115], ['MT.04', '4.1', 'Argamassa pré-doseada', 'kg', 11000, 9]]);
         $this->purchase($p, 'ceramica', 'material', $d(54), 'draft', [['MT.09', '8.2', 'Ladrilho cerâmico 60x60 (amostra aprovada)', 'm2', 275, 1650], ['MT.10', '8.2', 'Cimento-cola C2TE', 'kg', 1300, 42]]);
+
+        // Faturas e guias de fornecedores: uma lançada na compra, uma fatura e uma guia por rever (com a compra
+        // proposta), um talão lançado como custo e um duplicado rejeitado.
+        $this->supplierDocument($p, 'betoes', 'invoice', 'FT 2026/1184', $d(20), [['Betão C25/30 XC2 S3 para sapatas', 'm3', 62, 9200]], 'posted', ['order' => $footingConcrete, 'confidence' => 0.9812]);
+        $this->supplierDocument($p, 'betoes', 'invoice', 'FT 2026/1184', $d(21), [['Betão C25/30 XC2 S3 para sapatas', 'm3', 62, 9200]], 'rejected', ['confidence' => 0.9655, 'reason' => 'Duplicado (a mesma fatura chegou também por email).']);
+        $this->supplierDocument($p, null, 'receipt', 'FS 12/3391', $d(33), [['Discos de corte para rebarbadora', 'un', 10, 290], ['Fita sinalizadora', 'rolo', 4, 450], ['Silicone neutro', 'un', 3, 650]], 'posted', [
+            'supplier_name' => 'Drogaria Central de Aveiro', 'category' => 'other', 'confidence' => 0.8120,
+        ]);
+        $this->supplierDocument($p, 'ferros', 'invoice', 'FA 3488', $this->lastWorkdays(2)[0], [['Aço A500 NR (estrutura elevada)', 'kg', 7200, 98]], 'to_review', ['confidence' => 0.9734]);
+        $this->supplierDocument($p, 'betoes', 'delivery_note', 'GR 2026/2210', $this->lastWorkdays(1)[0], [['Betão C25/30 para a laje do piso 1', 'm3', 58, null]], 'to_review', [
+            'confidence' => 0.9105, 'order_reference' => "N/ encomenda n.º {$slabConcrete->number}",
+        ]);
 
         foreach ([
             [$d(1), 'other', 'actual', 'Taxas municipais da licença de construção', 385000],
@@ -1293,6 +1308,114 @@ final class DemoCompany
         }
 
         return $order;
+    }
+
+    /**
+     * Documento de fornecedor como se o DocIntel o tivesse lido (o PDF é gerado aqui). Lançado: na compra
+     * (que já está faturada com o mesmo número) ou como custo; por rever: com a compra proposta pelas regras.
+     *
+     * @param  list<array{0: string, 1: string, 2: float|int, 3: ?int}>  $lines  descrição, unidade, quantidade, preço (cêntimos, sem IVA)
+     * @param  array{order?: PurchaseOrder, confidence?: float, reason?: string, supplier_name?: string, category?: string, order_reference?: string}  $o
+     */
+    private function supplierDocument(Project $p, ?string $partner, string $kind, string $number, CarbonImmutable $date, array $lines, string $status, array $o = []): SupplierDocument
+    {
+        $this->at($date->setTime(16, 30));
+        $partnerModel = $partner ? $this->partners[$partner] : null;
+        $supplierName = $partnerModel?->name ?? $o['supplier_name'];
+        $net = $kind === 'delivery_note' ? null : (int) round(collect($lines)->sum(fn ($l) => $l[2] * $l[3]));
+        $vat = $net === null ? null : (int) collect($lines)->sum(fn ($l) => (int) round($l[2] * $l[3] * 0.23));
+
+        $file = $this->supplierPdf($kind, $supplierName, $number, $date, $lines, $net, $vat, $o['order_reference'] ?? null);
+        $doc = new SupplierDocument;
+        $doc->forceFill([
+            'project_id' => $p->id, 'partner_id' => $partnerModel?->id, 'cost_center_id' => $p->cost_center_id,
+            'kind' => $kind, 'status' => 'to_review', 'category' => $o['category'] ?? 'material',
+            'disk' => config('obraconnect.files.disk'), 'path' => '', 'original_name' => $file->getClientOriginalName(),
+            'mime' => 'application/pdf', 'size_bytes' => $file->getSize(), 'sha256' => hash_file('sha256', $file->getRealPath()),
+            'reader' => 'docintel', 'reader_document_id' => (string) Str::uuid(), 'confidence' => $o['confidence'] ?? 0.95,
+            'review_reasons' => [], 'read_at' => now()->addMinute(),
+            'lines' => array_map(fn ($l) => [
+                'code' => null, 'description' => $l[0], 'quantity' => (float) $l[2], 'unit' => $l[1],
+                'unit_price' => $l[3] === null ? null : $l[3] / 100, 'vat_rate' => $l[3] === null ? null : 23.0,
+                'total' => $l[3] === null ? null : round($l[2] * $l[3] / 100, 2), 'arithmetic_ok' => $l[3] === null ? null : true,
+            ], $lines),
+            'supplier_name' => $supplierName, 'number' => $number, 'issue_date' => $date->toDateString(),
+            'due_date' => $kind === 'invoice' ? $date->addDays(30)->toDateString() : null,
+            'order_reference' => $o['order_reference'] ?? null,
+            'net_cents' => $net, 'vat_cents' => $vat, 'gross_cents' => $net === null ? null : $net + $vat,
+            'created_by_user_id' => $this->users['sofia.carvalho']->id,
+        ])->save();
+        $disk = Storage::disk($doc->disk);
+        $doc->forceFill(['path' => $disk->putFileAs($doc->directory(), $file, 'original-'.Str::lower(Str::random(8)).'.pdf')])->save();
+        app(StorageUsage::class)->add($this->tenant, $doc->size_bytes);
+
+        if ($status === 'to_review') {
+            SupplierDocuments::guessLinks($doc);
+            $doc->save();
+        } elseif ($status === 'rejected') {
+            $doc->forceFill(['status' => 'rejected', 'notes' => 'Rejeitado: '.$o['reason']])->save();
+        } elseif ($status === 'posted') {
+            $this->at($date->setTime(17, 45));
+            if (isset($o['order'])) {
+                // A compra já foi faturada (purchase()) com o mesmo número e valor: só se liga.
+                $doc->purchase_order_id = $o['order']->id;
+            } else {
+                $entry = new CostEntry([
+                    'category' => $doc->category, 'kind' => 'actual', 'description' => mb_substr($doc->label(), 0, 255),
+                    'amount_cents' => $net, 'incurred_on' => $date->toDateString(), 'cost_center_id' => $p->cost_center_id,
+                ]);
+                $entry->project_id = $p->id;
+                $entry->created_by_user_id = $this->users['sofia.carvalho']->id;
+                $entry->save();
+                $doc->cost_entry_id = $entry->id;
+            }
+            $doc->forceFill(['status' => 'posted', 'posted_at' => now(), 'posted_by_user_id' => $this->users['sofia.carvalho']->id])->save();
+        }
+
+        return $doc;
+    }
+
+    /** @param  list<array{0: string, 1: string, 2: float|int, 3: ?int}>  $lines */
+    private function supplierPdf(string $kind, string $supplier, string $number, CarbonImmutable $date, array $lines, ?int $net, ?int $vat, ?string $orderReference): UploadedFile
+    {
+        $money = fn (?int $c) => $c === null ? '' : number_format($c / 100, 2, ',', '.').' €';
+        $title = ['invoice' => 'Fatura', 'receipt' => 'Fatura simplificada', 'credit_note' => 'Nota de crédito', 'delivery_note' => 'Guia de remessa'][$kind] ?? 'Documento';
+        $rows = implode('', array_map(fn ($l) => '<tr><td>'.e($l[0]).'</td><td class="r">'.e(str_replace('.', ',', (string) $l[2])).' '.e($l[1]).'</td>'
+            .'<td class="r">'.($l[3] === null ? '' : $money($l[3])).'</td><td class="r">'.($l[3] === null ? '' : '23%').'</td>'
+            .'<td class="r">'.($l[3] === null ? '' : $money((int) round($l[2] * $l[3]))).'</td></tr>', $lines));
+        $totals = $net === null ? '' : '<table class="tot"><tr><td>Total sem IVA</td><td class="r">'.$money($net).'</td></tr>'
+            .'<tr><td>IVA 23%</td><td class="r">'.$money($vat).'</td></tr><tr><td><strong>Total</strong></td><td class="r"><strong>'.$money($net + $vat).'</strong></td></tr></table>';
+        $html = '<html><head><meta charset="utf-8"><style>
+            body{font-family:"DejaVu Sans",sans-serif;font-size:9.5pt;color:#1e293b;margin:28px}
+            h1{font-size:15pt;margin:0 0 2px} .muted{color:#64748b}
+            table{border-collapse:collapse;width:100%;margin-top:16px} th,td{border-bottom:1px solid #cbd5e1;padding:5px;text-align:left}
+            .r{text-align:right} .tot{width:45%;margin-left:55%}
+            .stamp{margin-top:36px;font-size:8.5pt;color:#b91c1c;border:1px dashed #b91c1c;padding:8px;text-align:center}
+            </style></head><body>'
+            .'<h1>'.e($supplier).'</h1><div class="muted">Fornecedor fictício · Distrito de Aveiro</div>'
+            .'<p><strong>'.e($title).' '.e($number).'</strong><br>Data: '.e($date->format('d/m/Y'))
+            .'<br>Cliente: Atlântico Construções, Lda.'.($orderReference ? '<br>'.e($orderReference) : '').'</p>'
+            .'<table><tr><th>Descrição</th><th class="r">Quantidade</th><th class="r">Preço</th><th class="r">IVA</th><th class="r">Valor</th></tr>'.$rows.'</table>'
+            .$totals
+            .'<div class="stamp">Documento fictício, gerado para a demonstração do ObraConnect. Não tem valor fiscal.</div>'
+            .'</body></html>';
+
+        $dir = storage_path('app/dompdf');
+        File::ensureDirectoryExists($dir);
+        $options = new Options;
+        $options->setIsRemoteEnabled(false);
+        $options->setIsPhpEnabled(false);
+        $options->setDefaultFont('DejaVu Sans');
+        $options->setTempDir($dir);
+        $options->setFontCache($dir);
+        $pdf = new Dompdf($options);
+        $pdf->loadHtml($html, 'UTF-8');
+        $pdf->setPaper('A4');
+        $pdf->render();
+        $path = $this->tempPath('pdf');
+        file_put_contents($path, $pdf->output());
+
+        return new UploadedFile($path, Str::slug($title.' '.$number).'.pdf', 'application/pdf', null, true);
     }
 
     /** @param  list<string>  $workers */

@@ -29,6 +29,8 @@
         <env name="PLATFORM_REQUIRES_MFA" value="true"/>
         <env name="SETUP_TOKEN" value=""/>
         <env name="TRUSTED_PROXIES" value=""/>
+        <env name="DOCINTEL_URL" value=""/>
+        <env name="DOCINTEL_KEY" value=""/>
         <env name="OBRA_PRIVATE_DISK" value="private"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

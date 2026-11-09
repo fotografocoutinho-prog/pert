@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SpecialtyController;
 use App\Http\Controllers\Api\V1\StructureController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
+use App\Http\Controllers\Api\V1\SupplierDocumentController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
 use App\Http\Controllers\Api\V1\TimeEntryController;
 use App\Http\Controllers\Api\V1\WorkCalendarController;
@@ -189,6 +190,16 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('invoice-drafts/{invoiceDraft}/pdf', [InvoiceDraftController::class, 'pdf'])->whereNumber('invoiceDraft')->name('invoices.pdf');
             Route::post('invoice-drafts/{invoiceDraft}/actions/{action}', [InvoiceDraftController::class, 'transition'])
                 ->whereNumber('invoiceDraft')->whereIn('action', ['ready', 'reopen', 'invoice', 'cancel'])->name('invoices.transition');
+
+            // Faturas e guias de fornecedores (lidas pelo DocIntel, revistas e lançadas nas compras ou nos custos)
+            Route::get('supplier-documents', [SupplierDocumentController::class, 'index'])->name('supplier-docs.index');
+            Route::post('supplier-documents', [SupplierDocumentController::class, 'store'])->middleware('throttle:uploads')->name('supplier-docs.store');
+            Route::get('supplier-documents/{supplierDocument}', [SupplierDocumentController::class, 'show'])->whereNumber('supplierDocument')->name('supplier-docs.show');
+            Route::put('supplier-documents/{supplierDocument}', [SupplierDocumentController::class, 'update'])->whereNumber('supplierDocument')->name('supplier-docs.update');
+            Route::delete('supplier-documents/{supplierDocument}', [SupplierDocumentController::class, 'destroy'])->whereNumber('supplierDocument')->name('supplier-docs.destroy');
+            Route::get('supplier-documents/{supplierDocument}/file', [SupplierDocumentController::class, 'file'])->whereNumber('supplierDocument')->name('supplier-docs.file');
+            Route::post('supplier-documents/{supplierDocument}/actions/{action}', [SupplierDocumentController::class, 'transition'])
+                ->whereNumber('supplierDocument')->whereIn('action', ['post', 'unpost', 'reject', 'reopen', 'read'])->name('supplier-docs.transition');
 
             // Obras. O acesso a cada obra é decidido no controlador (perfil na empresa ou na equipa).
             Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');

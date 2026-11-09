@@ -18,6 +18,7 @@ import AppModal from '@/components/ui/AppModal.vue';
 import AppSelect from '@/components/ui/AppSelect.vue';
 import AppSpinner from '@/components/ui/AppSpinner.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import SupplierDocsList from '@/components/purchases/SupplierDocsList.vue';
 
 const props = defineProps<{ project: Project }>();
 const session = useSessionStore();
@@ -28,6 +29,7 @@ const has = (p: string) => props.project.permissions.includes(p);
 const canBuy = computed(() => open.value && has('purchases.manage'));
 const canSub = computed(() => open.value && has('subcontractors.manage'));
 const showPurchases = computed(() => has('purchases.manage') || has('costs.view'));
+const showSupplierDocs = computed(() => has('purchases.manage') || has('costs.manage') || session.can('supplier_docs.manage'));
 const showContracts = computed(() => has('subcontractors.manage') || has('costs.view') || has('certificates.approve'));
 
 const CATEGORIES = [
@@ -301,6 +303,14 @@ const costCenterOptions = computed(() => [{ value: '', label: '(o da obra)' }, .
                     </button>
                 </li>
             </ul>
+        </AppCard>
+
+        <AppCard
+            v-if="showSupplierDocs"
+            title="Faturas e guias de fornecedores"
+            description="Junte aqui as faturas, notas de crédito, talões e guias desta obra: são lidos, revistos e lançados na compra certa ou como custo."
+        >
+            <SupplierDocsList :project-id="project.id" />
         </AppCard>
 
         <AppCard v-if="showContracts" title="Subempreitadas" description="Contrato adjudicado = custo comprometido; autos aprovados = custo realizado (com retenção de garantia).">

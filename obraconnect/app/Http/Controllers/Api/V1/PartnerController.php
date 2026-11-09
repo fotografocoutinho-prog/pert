@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Models\PartnerDocument;
+use App\Models\SupplierDocument;
 use App\Rules\ValidPortugueseNif;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -76,8 +77,9 @@ class PartnerController extends Controller
     public function destroy(Partner $partner): Response
     {
         $this->authorizeKind($partner->kind->value);
-        if ($partner->contracts()->exists() || $partner->purchaseOrders()->exists() || $partner->workers()->exists()) {
-            throw ApiException::conflict('Tem contratos, compras ou trabalhadores. Arquive-o em vez de o apagar.', 'PARTNER_IN_USE');
+        if ($partner->contracts()->exists() || $partner->purchaseOrders()->exists() || $partner->workers()->exists()
+            || SupplierDocument::query()->where('partner_id', $partner->id)->exists()) {
+            throw ApiException::conflict('Tem contratos, compras, trabalhadores ou faturas. Arquive-o em vez de o apagar.', 'PARTNER_IN_USE');
         }
         $partner->delete();
 

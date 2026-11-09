@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.15.0)
+# Manual do utilizador (versão 0.16.0)
 
 ## Entrar
 
@@ -194,6 +194,22 @@ No separador **Medições e autos**:
 - **Nova subempreitada**: subempreiteiro, objeto, retenção de garantia (%) e os trabalhos com os preços acordados. **Adjudicar** → comprometido. Em curso, **Novo auto** cria o auto da subempreitada: escreva a quantidade do período em cada trabalho; a retenção calcula-se sozinha. Autos aprovados contam como realizado.
 
 Os fornecedores e subempreiteiros criam-se em **Fornecedores e subempreiteiros**, com especialidades e documentos com validade (alvará, seguros, certidões): aparece o aviso quando estão a expirar ou expirados.
+
+## Faturas e guias de fornecedores
+
+Em **Faturas de fornecedores** (menu) ou no separador **Compras** de uma obra, junte as faturas, notas de crédito, talões e guias que chegam dos fornecedores, em PDF ou fotografia. Pode juntar vários de uma vez ou arrastá-los para a caixa.
+
+1. Se a **leitura automática** estiver ligada, o documento fica uns segundos "a ler" e depois aparecem o fornecedor (reconhecido pelo NIF), o número, a data e os valores. Nas faturas portuguesas os dados vêm sobretudo do **código QR**. Se a leitura não for possível, preencha à mão.
+2. Abra o documento: o original fica ao lado dos dados. Confira-os e veja os **avisos** (por exemplo, a mesma fatura já registada, ou dirigida a outro NIF).
+3. Em **Lançamento**, confirme a **obra** e a **compra**. Quando o número da encomenda ou o valor batem, a compra já vem escolhida.
+4. **Lançar**:
+   - fatura ou talão com compra → a compra fica **faturada** (pelo valor sem IVA);
+   - sem compra → entra como **custo** da obra, com a natureza escolhida;
+   - nota de crédito → custo negativo;
+   - guia com compra → a compra fica **recebida**.
+5. Enganou-se? **Desfazer lançamento** volta a pôr a compra como estava ou retira o custo. Documentos que não são para lançar (duplicados, de outra empresa) **rejeitam-se**.
+
+Se o fornecedor ainda não estiver na lista, use **Criar fornecedor com este nome e NIF**.
 
 ## Horas e equipamentos
 
