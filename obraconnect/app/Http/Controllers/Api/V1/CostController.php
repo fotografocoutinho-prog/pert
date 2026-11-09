@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Access\AccessResolver;
 use App\Audit\Auditor;
+use App\Calendar\WorkCalendars;
 use App\Economics\CostReport;
 use App\Enums\CostCategory;
 use App\Enums\InvoiceDraftStatus;
 use App\Enums\ProjectStatus;
 use App\Exceptions\ApiException;
+use App\Forecasting\CostForecast;
+use App\Forecasting\ScheduleForecast;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\CostCenter;
@@ -16,6 +19,7 @@ use App\Models\CostEntry;
 use App\Models\InvoiceDraft;
 use App\Models\Project;
 use App\Models\SupplierDocument;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -92,7 +96,7 @@ class CostController extends Controller
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
             $m = fn (?int $c) => $c === null ? '' : number_format($c / 100, 2, ',', '');
-            fputcsv($out, ['Natureza', 'Previsto', 'Comprometido', 'Realizado', 'Previsão final'], ';');
+            fputcsv($out, ['Natureza', 'Previsto', 'Comprometido', 'Realizado', 'Realizado + comprometido'], ';');
             foreach ($report['by_category'] as $row) {
                 fputcsv($out, [$row['label'], $m($row['planned_cents']), $m($row['committed_cents']), $m($row['actual_cents']), $m($row['forecast_cents'])], ';');
             }
@@ -102,8 +106,12 @@ class CostController extends Controller
         }, "custos-{$project->code}.csv", ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    /** Painel da empresa: uma linha por obra visível (contrato, autado, custo, previsão e margem). */
-    public function finance(AccessResolver $access): JsonResponse
+    /**
+     * Painel da empresa: uma linha por obra visível (contrato, autado, custo, previsão e margem).
+     * "forecast_cents" continua a ser realizado + comprometido; a previsão do custo no fim (com o que
+     * falta fazer) e o fim previsto da obra vêm em "outlook".
+     */
+    public function finance(AccessResolver $access, WorkCalendars $calendars): JsonResponse
     {
         $this->authorize('finance.view');
         $membership = $this->tenantContext()->membership();
@@ -119,8 +127,12 @@ class CostController extends Controller
             ->whereIn('project_id', $projects->pluck('id'))->get()
             ->groupBy('project_id')->map(fn ($drafts) => (int) $drafts->sum(fn (InvoiceDraft $d) => $d->totals()['net_cents']));
 
-        $rows = $projects->map(function (Project $p) use ($invoiced) {
-            $r = CostReport::for($p);
+        $today = CarbonImmutable::today('Europe/Lisbon');
+        $rows = $projects->map(function (Project $p) use ($invoiced, $today, $calendars) {
+            $movements = CostReport::movements($p);
+            $r = CostReport::for($p, $movements);
+            $cost = CostForecast::for($p, $today, $movements, $r);
+            $schedule = Gate::any(['planning.view', 'planning.manage'], $p) ? ScheduleForecast::for($p, $today, $calendars->forProject($p)) : null;
 
             return [
                 'id' => $p->id,
@@ -139,6 +151,23 @@ class CostController extends Controller
                 'ceiling_used_pct' => $r['ceiling_used_pct'],
                 'alert' => $r['alert'],
                 'margin_forecast_cents' => $r['margin_forecast_cents'],
+                'outlook' => [
+                    'cost_available' => $cost['available'],
+                    'eac_cents' => $cost['available'] ? $cost['forecast_cents'] : null,
+                    'method' => $cost['method'] ?? null,
+                    'confidence' => $cost['confidence'] ?? null,
+                    'alert' => $cost['alert'] ?? null,
+                    'ceiling_used_pct' => $cost['ceiling_used_pct'] ?? null,
+                    'margin_cents' => $cost['available'] ? $cost['margin_cents'] : null,
+                    'margin_pct' => $cost['margin_pct'] ?? null,
+                    'top_reason' => ($cost['reasons'] ?? [])[0]['text'] ?? null,
+                    'schedule_available' => $schedule['available'] ?? false,
+                    'schedule_status' => $schedule['status'] ?? null,
+                    'forecast_finish_on' => $schedule['forecast_finish_on'] ?? null,
+                    'contract_end_on' => $schedule['contract_end_on'] ?? $p->planned_end_on?->toDateString(),
+                    'delay_contract_days' => $schedule['delay_contract_days'] ?? null,
+                    'delay_plan_days' => $schedule['delay_plan_days'] ?? null,
+                ],
             ];
         })->values();
 
@@ -154,6 +183,8 @@ class CostController extends Controller
                 'committed_cents' => $sum('committed_cents'),
                 'forecast_cents' => $sum('forecast_cents'),
                 'margin_forecast_cents' => $sum('margin_forecast_cents'),
+                'eac_cents' => (int) $rows->sum(fn ($r) => $r['outlook']['eac_cents'] ?? 0),
+                'eac_margin_cents' => (int) $rows->sum(fn ($r) => $r['outlook']['margin_cents'] ?? 0),
             ],
         ]]);
     }

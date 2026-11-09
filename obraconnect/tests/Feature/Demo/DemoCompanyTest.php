@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Demo;
 
+use App\Calendar\WorkCalendars;
 use App\Demo\DemoCompany;
 use App\Economics\CostReport;
+use App\Forecasting\CostForecast;
+use App\Forecasting\ScheduleForecast;
 use App\Inspections\InspectionHistory;
 use App\Models\Inspection;
 use App\Models\Media;
@@ -11,6 +14,7 @@ use App\Models\Project;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\TenantContext;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -38,6 +42,25 @@ class DemoCompanyTest extends TestCase
         app(TenantContext::class)->runAs($demo, function (): void {
             $alerts = Project::query()->orderBy('code')->get()->mapWithKeys(fn (Project $p) => [$p->code => CostReport::for($p)['alert']])->all();
             $this->assertSame(['ATL-26-00' => 'warning', 'ATL-26-01' => 'ok', 'ATL-26-02' => 'over', 'ATL-26-03' => null], $alerts);
+
+            // Previsões: custo nas obras com orçamento aprovado, fim em todas; a reabilitação passa o teto.
+            $today = CarbonImmutable::today('Europe/Lisbon');
+            foreach (Project::query()->orderBy('code')->get() as $p) {
+                $cost = CostForecast::for($p, $today);
+                $schedule = ScheduleForecast::for($p, $today, app(WorkCalendars::class)->forProject($p));
+                $this->assertSame($p->code !== 'ATL-26-03', $cost['available'], $p->code);
+                $this->assertTrue($schedule['available'], $p->code);
+                $this->assertNotEmpty($schedule['reasons'], $p->code);
+                if ($cost['available']) {
+                    $this->assertNotEmpty($cost['reasons'], $p->code);
+                }
+                match ($p->code) {
+                    'ATL-26-00' => $this->assertSame('finished', $schedule['status']),
+                    'ATL-26-02' => $this->assertSame('over', $cost['alert']),
+                    'ATL-26-03' => $this->assertFalse($schedule['started']),
+                    default => null,
+                };
+            }
 
             foreach (Inspection::query()->with('events')->get() as $inspection) {
                 $this->assertNull(InspectionHistory::firstBroken($inspection->events->sortBy('sequence')->values()), "Cadeia da inspeção {$inspection->number}");

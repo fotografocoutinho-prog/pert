@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.16.0)
+# Manual do utilizador (versão 0.17.0)
 
 ## Entrar
 
@@ -224,13 +224,13 @@ Em **Trabalhadores** gerem-se as pessoas e o custo/hora (de subempreiteiros tamb
 
 ## Custos
 
-O separador **Custos** compara o **previsto** (orçamento aprovado) com o **comprometido** (encomendas aprovadas e subempreitadas por faturar), o **realizado** (faturas, autos de subempreitada aprovados, horas, equipamentos e lançamentos) e a **previsão final** (realizado + comprometido), por natureza, por centro de custo e por mês.
+O separador **Custos** compara o **previsto** (orçamento aprovado) com o **comprometido** (encomendas aprovadas e subempreitadas por faturar), o **realizado** (faturas, autos de subempreitada aprovados, horas, equipamentos e lançamentos) e o **realizado + comprometido** (o que já se sabe que a obra custa), por natureza, por centro de custo e por mês. A previsão do custo no fim, com o que falta fazer, está no separador **Previsões**.
 
-- **Teto**: por omissão é o custo do orçamento; **Alterar teto** escreve outro. Aparece o aviso **Perto do teto** a partir de 90% e **Acima do teto** quando a previsão o passa.
+- **Teto**: por omissão é o custo do orçamento; **Alterar teto** escreve outro. Aparece o aviso **Perto do teto** a partir de 90% e **Acima do teto** quando o realizado + comprometido o passa.
 - **Lançamentos**: custos que não vêm de compras, autos, horas ou equipamentos (taxas, licenças, seguros, ajustes).
 - **Exportar mapa de custos (CSV)**.
 
-O **Painel financeiro** (menu) junta todas as obras: contrato, autado, realizado, comprometido, previsão, margem e situação face ao teto.
+O **Painel financeiro** (menu) junta todas as obras: contrato, autado, faturado, realizado + comprometido, custo previsto no fim, margem prevista, situação face ao teto e fim previsto.
 
 ## Faturação (pré-faturas)
 
@@ -252,6 +252,26 @@ No separador **Planeamento**:
 2. Abra a atividade e junte as **precedências** (fim → início, início → início, fim → fim, início → fim, com desfasamento em dias).
 3. O **Gantt** mostra as datas calculadas, o **caminho crítico** a vermelho, o avanço (parte cheia da barra), hoje (azul) e o fim previsto da obra (roxo). Se o plano acabar depois do fim previsto, aparece o aviso.
 4. **Avanço (%)**: a 100% a atividade fica concluída — exceto se tiver um **ponto de paragem** por libertar (marca **PP**). Ao criar uma inspeção pode escolher a atividade a que pertence.
+
+## Previsões
+
+O separador **Previsões** diz quanto a obra vai custar e quando acaba, e **porquê**. Não usa inteligência artificial: faz as contas do controlo de obra com o que está no ObraConnect — por isso, quanto mais em dia estiverem as medições, os custos e o avanço do planeamento, melhor.
+
+**Custo no fim da obra**
+
+- O número grande é a previsão; ao lado, a diferença para o custo do orçamento, a situação face ao teto e a **confiança** (sobe com o trabalho medido e desce se a última medição tiver mais de 30 dias).
+- A barra mostra o realizado, o comprometido e o que ainda falta gastar, com o teto marcado.
+- **Cenários**: "o que falta custa o orçamentado", "continua como até aqui" (com quanto está a custar cada euro orçamentado) e o mínimo (realizado + comprometido). O cenário usado está a negrito: até metade da obra medida conta-se o que falta ao preço do orçamento; daí em diante, ao ritmo de até aqui.
+- **Porquê**: as razões, das mais graves para as boas notícias — teto, margem, ritmo de custo, artigos medidos acima do orçamentado, naturezas acima do previsto, medições atrasadas. Cada uma tem a ligação para o separador onde se trata.
+
+**Fim da obra**
+
+- A data prevista, comparada com o planeamento (em dias úteis) e com o prazo contratual (em dias, indicado em **Dados da obra**).
+- **Planeado para hoje** contra **feito**, pesado pela duração das atividades.
+- **Porquê**: as atividades do caminho crítico atrasadas (por não terem começado ou por estarem abaixo do avanço planeado), os pontos de paragem por libertar e as atividades atrasadas que ainda têm folga.
+- A lista **Atividades atrasadas ou empurradas** mostra o avanço feito e o planeado e o fim previsto contra o do plano; "À espera da anterior" quer dizer que só não começou porque a anterior ainda não acabou.
+
+Para a previsão ficar certa: registe as medições do que está feito, aprove as horas, passe as faturas às compras e atualize o avanço do planeamento.
 
 ## Empresa de demonstração
 

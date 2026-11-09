@@ -256,6 +256,8 @@ Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_
 
 ### Inteligência e automação (fase 5)
 
+As previsões explicadas (0.17.0) não têm tabelas: calculam-se no momento a partir do orçamento aprovado, das medições, dos movimentos de custo (`App\Economics\CostReport::movements`) e do planeamento (`App\Forecasting\CostForecast` e `ScheduleForecast`). As tabelas abaixo são as previstas para a IA generativa e as automações.
+
 | Tabela | Campos principais |
 | --- | --- |
 | `ai_usage` | user_id, feature, provider, model, tokens_in, tokens_out, cost_micros, created_at |

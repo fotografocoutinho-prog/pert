@@ -1,5 +1,17 @@
 # Histórico de versões
 
+## 0.17.0 — 2026-11-09
+
+Fase 5, parte 2: **previsões explicadas**. Sem IA: as contas do controlo de obra, feitas com os dados que já estão no ObraConnect, e cada número com as razões escritas.
+
+- Separador **Previsões** em cada obra (quem vê custos ou o planeamento da obra; cada parte só a quem tem acesso a ela).
+- **Custo no fim da obra**: trabalho medido (quantidades medidas × custo unitário do orçamento aprovado), o que falta (quantidades por medir × custo unitário) e o custo até à última medição (realizado e material recebido ainda por faturar). Daí o **ritmo de custo** (quanto custa cada euro orçamentado). A previsão conta o que falta ao preço do orçamento enquanto houver menos de metade medida e ao ritmo de até aqui a partir daí, e nunca fica abaixo do realizado mais o comprometido. Três cenários lado a lado, margem prevista face à do orçamento, situação face ao teto e **confiança** (baixa, média, alta) conforme o que está medido e a idade da última medição.
+- **Razões do custo**: teto passado ou perto, margem que desce ou sobe, ritmo de custo acima ou abaixo do orçamento, artigos medidos acima da quantidade orçamentada (com o custo a mais), naturezas (materiais, mão de obra…) acima do previsto, medições atrasadas com os custos que entraram depois, já gasto + comprometido acima da conta.
+- **Fim da obra**: o planeamento (caminho crítico) recalculado a partir de hoje — o que está feito já não ocupa tempo, o que está em curso só o que lhe falta, nada do que falta começa antes de hoje. Comparado com o planeamento e com o prazo contratual; planeado para hoje contra feito.
+- **Razões do prazo**: as atividades do caminho crítico atrasadas por si próprias (as que estão só à espera da anterior não contam como causa), pontos de paragem por libertar, atividades atrasadas com folga, prazo contratual passado ou com folga. Lista das atividades atrasadas ou empurradas.
+- **Painel financeiro**: custo previsto no fim (com a confiança), margem prevista com ele, teto face à previsão e **fim previsto** de cada obra; o realizado e o comprometido ficam numa coluna. O separador **Custos** passa a chamar "realizado + comprometido" ao que antes chamava "previsão final" e aponta para as Previsões.
+- Medições feitas numa versão anterior do orçamento contam no artigo com o mesmo código da versão aprovada.
+
 ## 0.16.0 — 2026-11-08
 
 Fase 5, parte 1: leitura de faturas e guias de fornecedores pelo **CODA DocIntel** (o motor de leitura próprio, já instalado em coda.pt/docintel). Sem IA paga: o DocIntel lê o código QR das faturas portuguesas e o texto dos PDF; a ligação a um modelo de IA fica para quando houver clientes.

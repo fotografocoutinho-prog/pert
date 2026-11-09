@@ -29,8 +29,8 @@ onMounted(async () => {
 const money = (c: number | null | undefined) => (c === null || c === undefined ? '—' : formatMoney(c));
 const alert = computed(() => {
     const a = report.value?.alert;
-    if (a === 'over') return { color: 'red' as const, label: 'Acima do teto', text: 'A previsão de custo final ultrapassa o teto da obra.' };
-    if (a === 'warning') return { color: 'amber' as const, label: 'Perto do teto', text: 'A previsão de custo final já passa 90% do teto.' };
+    if (a === 'over') return { color: 'red' as const, label: 'Acima do teto', text: 'O realizado mais o comprometido já ultrapassa o teto da obra.' };
+    if (a === 'warning') return { color: 'amber' as const, label: 'Perto do teto', text: 'O realizado mais o comprometido já passa 90% do teto.' };
     if (a === 'ok') return { color: 'green' as const, label: 'Dentro do teto', text: null };
     return { color: 'gray' as const, label: 'Sem teto', text: null };
 });
@@ -93,7 +93,11 @@ async function removeEntry(id: number): Promise<void> {
             <AppCard><p class="text-xs text-slate-500">Previsto (orçamento)</p><p class="text-lg font-bold">{{ money(report.planned_cents) }}</p></AppCard>
             <AppCard><p class="text-xs text-slate-500">Comprometido</p><p class="text-lg font-bold">{{ money(report.committed_cents) }}</p><p class="text-xs text-slate-500">encomendas e contratos por faturar</p></AppCard>
             <AppCard><p class="text-xs text-slate-500">Realizado</p><p class="text-lg font-bold">{{ money(report.actual_cents) }}</p></AppCard>
-            <AppCard><p class="text-xs text-slate-500">Previsão final</p><p class="text-lg font-bold">{{ money(report.forecast_cents) }}</p></AppCard>
+            <AppCard>
+                <p class="text-xs text-slate-500">Realizado + comprometido</p>
+                <p class="text-lg font-bold">{{ money(report.forecast_cents) }}</p>
+                <RouterLink :to="{ query: { separador: 'previsoes' } }" class="text-xs font-semibold text-brand-700 hover:underline">Previsão no fim da obra →</RouterLink>
+            </AppCard>
             <AppCard>
                 <div class="flex items-start justify-between gap-1">
                     <p class="text-xs text-slate-500">Teto</p>
@@ -124,7 +128,7 @@ async function removeEntry(id: number): Promise<void> {
                 <p v-if="report.revenue.certified_pct !== null" class="text-xs text-slate-500">{{ formatPct(report.revenue.certified_pct) }} do contrato</p>
             </AppCard>
             <AppCard>
-                <p class="text-xs text-slate-500">Margem prevista</p>
+                <p class="text-xs text-slate-500">Venda menos realizado e comprometido</p>
                 <p class="text-lg font-bold" :class="(report.margin_forecast_cents ?? 0) < 0 ? 'text-red-700' : 'text-green-700'">{{ money(report.margin_forecast_cents) }}</p>
             </AppCard>
         </div>
@@ -137,7 +141,7 @@ async function removeEntry(id: number): Promise<void> {
                             <span class="font-medium">{{ c.label }}</span>
                             <span class="text-xs text-slate-600">previsto {{ money(c.planned_cents) }} · real {{ money(c.actual_cents) }} · comp. {{ money(c.committed_cents) }}</span>
                         </div>
-                        <div class="relative mt-1 h-2 rounded-full bg-slate-100" :title="`Previsão final ${money(c.forecast_cents)}`">
+                        <div class="relative mt-1 h-2 rounded-full bg-slate-100" :title="`Realizado + comprometido ${money(c.forecast_cents)}`">
                             <div class="absolute h-2 rounded-full bg-slate-300" :style="{ width: `${(c.planned_cents * 100) / barMax}%` }" />
                             <div class="absolute h-2 rounded-full" :class="c.forecast_cents > c.planned_cents ? 'bg-red-500' : 'bg-brand-600'" :style="{ width: `${(c.forecast_cents * 100) / barMax}%`, opacity: 0.85 }" />
                         </div>

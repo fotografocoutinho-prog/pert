@@ -18,6 +18,7 @@ import ProjectTeamTab from '@/components/projects/ProjectTeamTab.vue';
 
 const ProjectBudgetTab = defineAsyncComponent(() => import('@/components/projects/ProjectBudgetTab.vue'));
 const ProjectCostsTab = defineAsyncComponent(() => import('@/components/projects/ProjectCostsTab.vue'));
+const ProjectForecastTab = defineAsyncComponent(() => import('@/components/projects/ProjectForecastTab.vue'));
 const ProjectMeasurementsTab = defineAsyncComponent(() => import('@/components/projects/ProjectMeasurementsTab.vue'));
 const ProjectPlanningTab = defineAsyncComponent(() => import('@/components/projects/ProjectPlanningTab.vue'));
 const ProjectPurchasesTab = defineAsyncComponent(() => import('@/components/projects/ProjectPurchasesTab.vue'));
@@ -46,6 +47,7 @@ const tabs = computed(() =>
         { key: 'horas', label: 'Horas e equipamentos', show: any('workforce.view', 'time.register_team', 'time.register_own', 'time.approve', 'equipment.manage', 'costs.view') },
         { key: 'custos', label: 'Custos', show: any('costs.view', 'costs.manage', 'finance.view') },
         { key: 'planeamento', label: 'Planeamento', show: any('planning.view', 'planning.manage') },
+        { key: 'previsoes', label: 'Previsões', show: any('costs.view', 'costs.manage', 'finance.view', 'planning.view', 'planning.manage') },
         { key: 'estrutura', label: 'Estrutura', show: true },
         { key: 'equipa', label: 'Equipa', show: true },
         { key: 'dados', label: 'Dados da obra', show: true },
@@ -119,6 +121,7 @@ function select(key: string): void {
                 <ProjectTimeTab v-else-if="tab === 'horas'" :project="project" />
                 <ProjectCostsTab v-else-if="tab === 'custos'" :project="project" />
                 <ProjectPlanningTab v-else-if="tab === 'planeamento'" :project="project" />
+                <ProjectForecastTab v-else-if="tab === 'previsoes'" :project="project" />
                 <ProjectStructureTab v-else-if="tab === 'estrutura'" :project="project" />
                 <ProjectTeamTab v-else-if="tab === 'equipa'" :project="project" @changed="load" />
                 <ProjectDetailsTab v-else :project="project" @updated="(p) => (project = p)" />

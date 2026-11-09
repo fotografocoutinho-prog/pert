@@ -316,6 +316,114 @@ export interface FinanceRow {
     ceiling_used_pct: number | null;
     alert: 'ok' | 'warning' | 'over' | null;
     margin_forecast_cents: number | null;
+    outlook: FinanceOutlook;
+}
+
+export interface FinanceOutlook {
+    cost_available: boolean;
+    eac_cents: number | null;
+    method: 'trend' | 'budget' | null;
+    confidence: ForecastConfidence | null;
+    alert: 'ok' | 'warning' | 'over' | null;
+    ceiling_used_pct: number | null;
+    margin_cents: number | null;
+    margin_pct: number | null;
+    top_reason: string | null;
+    schedule_available: boolean;
+    schedule_status: ScheduleStatus | null;
+    forecast_finish_on: string | null;
+    contract_end_on: string | null;
+    delay_contract_days: number | null;
+    delay_plan_days: number | null;
+}
+
+export type ForecastLevel = 'danger' | 'warning' | 'info' | 'good';
+export type ForecastConfidence = 'low' | 'medium' | 'high';
+export type ScheduleStatus = 'finished' | 'late' | 'behind' | 'on_track';
+
+export interface ForecastReason {
+    level: ForecastLevel;
+    text: string;
+    /** Separador da obra onde se trata o assunto. */
+    tab: string | null;
+}
+
+export interface CostForecast {
+    available: boolean;
+    message?: string;
+    budget?: { id: number; code: string; version: number };
+    bac_cents: number;
+    earned_cents: number;
+    progress_pct: number;
+    remaining_cents: number;
+    actual_cents: number;
+    incurred_cents: number;
+    received_cents: number;
+    incurred_to_measurement_cents: number;
+    committed_cents: number;
+    last_measured_on: string | null;
+    measurement_age_days: number | null;
+    cost_per_euro: number | null;
+    method: 'trend' | 'budget';
+    trend_available: boolean;
+    forecast_cents: number;
+    at_budget_cents: number;
+    at_trend_cents: number | null;
+    floor_cents: number;
+    floor_binds: boolean;
+    variance_cents: number;
+    ceiling_cents: number | null;
+    ceiling_used_pct: number | null;
+    alert: 'ok' | 'warning' | 'over' | null;
+    sale_cents: number;
+    margin_cents: number;
+    margin_pct: number | null;
+    budget_margin_pct: number | null;
+    confidence: ForecastConfidence;
+    confidence_text: string;
+    reasons: ForecastReason[];
+}
+
+export interface ScheduleForecastActivity {
+    id: number;
+    code: string;
+    name: string;
+    progress_pct: number;
+    planned_pct: number;
+    planned_start_on: string;
+    planned_finish_on: string;
+    forecast_start_on: string;
+    forecast_finish_on: string;
+    slip_days: number;
+    critical: boolean;
+    late_start: boolean;
+    behind: boolean;
+    waiting: boolean;
+    holds: { id: number; number: number }[];
+}
+
+export interface ScheduleForecast {
+    available: boolean;
+    message?: string;
+    started: boolean;
+    finished: boolean;
+    status: ScheduleStatus;
+    start_on: string;
+    planned_finish_on: string | null;
+    forecast_finish_on: string | null;
+    contract_end_on: string | null;
+    delay_plan_days: number | null;
+    delay_contract_days: number | null;
+    planned_progress_pct: number;
+    progress_pct: number;
+    activities: ScheduleForecastActivity[];
+    reasons: ForecastReason[];
+}
+
+export interface ProjectForecast {
+    as_of: string;
+    cost: CostForecast | null;
+    schedule: ScheduleForecast | null;
 }
 
 export interface Worker {
@@ -519,6 +627,10 @@ export const costsApi = {
     removeEntry: (projectId: number, id: number) => data<CostReport>(http.delete(`${p(projectId)}/cost-entries/${id}`)),
     exportUrl: (projectId: number) => `${p(projectId)}/costs/export`,
     finance: () => getData<{ projects: FinanceRow[]; totals: Record<string, number> }>('/api/v1/finance'),
+};
+
+export const forecastApi = {
+    get: (projectId: number) => getData<ProjectForecast>(`${p(projectId)}/forecast`),
 };
 
 export const workersApi = {

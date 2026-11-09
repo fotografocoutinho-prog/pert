@@ -1,5 +1,26 @@
 # Registo de progresso
 
+## v0.17.0 — Fase 5, parte 2: previsões explicadas (2026-11-09)
+
+Continua a decisão de não usar IA paga: as previsões são as contas do controlo de obra (valor ganho e caminho crítico), com as razões escritas em português e ligadas ao separador onde se resolve cada uma.
+
+| Área | Verificação |
+| --- | --- |
+| Custo no fim: trabalho medido, o que falta, custo até à última medição com o material recebido por faturar, ritmo de custo, cenário escolhido (orçamento até 50 % medido, ritmo depois), mínimo realizado + comprometido, teto, margem, confiança | Testes (`ForecastTest`, valores exatos: 12 720 € pelo ritmo de 1,20 €) + browser com a demonstração |
+| Razões do custo: teto, margem, ritmo, quantidades acima do orçamento, naturezas acima do previsto, medições com mais de 30 dias numa obra em curso, já gasto + comprometido acima da conta | Testes + browser |
+| Fim da obra: CPM recalculado a partir de hoje (feito = 0 dias, em curso = o que falta, nada antes de hoje), atraso face ao plano em dias úteis e ao prazo contratual em dias, planeado para hoje contra feito (pesado pela duração) | Testes (datas exatas em novembro de 2026) + browser |
+| Razões do prazo: causas no caminho crítico (sem as que só esperam pela anterior), pontos de paragem, atrasadas com folga | Testes + demonstração (Moradia: alvenarias por começar e laje do piso 1 com ponto de paragem) |
+| Permissões: custo para costs.view/costs.manage/finance.view, prazo para planning.view/planning.manage; isolamento entre empresas | Testes |
+| Painel financeiro com custo previsto no fim, margem, teto e fim previsto; 360 px sem nada a sair do ecrã | Testes + browser |
+
+Decisões: com menos de metade do trabalho medido a previsão conta o que falta ao preço do orçamento (as compras feitas de uma vez no início fazem o ritmo parecer muito pior do que é) e mostra o ritmo como cenário; o material recebido por faturar conta como gasto ao comparar com o trabalho medido; a margem prevista usa a venda do orçamento (trabalhos a mais faturáveis não entram); o mapa de custos mantém o "realizado + comprometido" (o que já se sabe), agora com esse nome.
+
+### Limitações
+
+- Sem histórico das previsões (não se vê como a previsão mudou de semana para semana); calcula-se sempre com os dados de hoje.
+- O avanço das atividades não guarda as datas reais de início: o que está feito deixa de ocupar tempo, mas não se compara a duração real com a planeada.
+- O prazo não sabe de recursos (equipas, equipamentos): uma atividade em curso acaba no proporcional à duração planeada.
+
 ## v0.16.0 — Fase 5, parte 1: faturas e guias de fornecedores lidas pelo DocIntel (2026-11-08)
 
 Decisão do cliente: "fico para já com o DocIntel" e, se funcionar, a possibilidade de ligar a Claude, Gemini ou ChatGPT; **sem IA paga enquanto não houver clientes**. O DocIntel (Python/FastAPI, em produção em coda.pt/docintel, Passenger) lê o QR das faturas portuguesas e o texto dos PDF; não lê fotografias de papel no alojamento (não há Tesseract), mas lê o QR de muitas fotografias.

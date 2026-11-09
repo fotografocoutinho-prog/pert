@@ -26,57 +26,38 @@ use App\Models\TimeEntry;
  * - realizado: compras faturadas (valor da fatura), horas aprovadas, horas de equipamento, autos de
  *   subempreitada aprovados e os realizados lançados à mão.
  *
- * O teto é o da obra (se escrito) ou o custo previsto. Previsão final = realizado + comprometido.
+ * O teto é o da obra (se escrito) ou o custo previsto. "forecast_cents" = realizado + comprometido
+ * (o que já se sabe que a obra custa); a previsão do custo no fim, com o que falta fazer, é a de
+ * App\Forecasting\CostForecast.
  */
 final class CostReport
 {
     /** A partir daqui (% do teto) a previsão final fica em alerta. */
     public const WARNING_PCT = 90;
 
-    /** @return array<string, mixed> */
-    public static function for(Project $project): array
+    /**
+     * Cada custo da obra, com a data e a natureza: a base do mapa e da previsão (que precisa de saber
+     * o realizado até à data da última medição).
+     *
+     * "received_on" só nas compras recebidas por faturar: o material já está em obra (custo incorrido),
+     * mesmo sem fatura — a previsão conta-o como gasto ao comparar com o trabalho medido.
+     *
+     * @return list<array{kind: 'actual'|'committed', category: string, cents: int, date: string|null, center_id: int|null, received_on?: string|null}>
+     */
+    public static function movements(Project $project): array
     {
-        $categories = array_map(fn (CostCategory $c) => $c->value, CostCategory::cases());
-        $zero = array_fill_keys($categories, 0);
-        $planned = $zero;
-        $committed = $zero;
-        $actual = $zero;
-        $byCenter = [];
-        $months = [];
-        $defaultCenter = $project->cost_center_id;
-        $add = function (array &$bucket, string $category, int $cents) {
-            $bucket[$category] += $cents;
+        $rows = [];
+        $add = function (string $kind, string $category, int $cents, ?string $date, ?int $center, array $extra = []) use (&$rows): void {
+            $rows[] = ['kind' => $kind, 'category' => $category, 'cents' => $cents, 'date' => $date, 'center_id' => $center] + $extra;
         };
-        $center = function (?int $centerId, string $kind, int $cents) use (&$byCenter, $defaultCenter) {
-            $key = $centerId ?? $defaultCenter ?? 0;
-            $byCenter[$key] ??= ['committed_cents' => 0, 'actual_cents' => 0];
-            $byCenter[$key][$kind.'_cents'] += $cents;
-        };
-        $month = function (?string $date, int $cents) use (&$months) {
-            if ($date !== null) {
-                $key = substr($date, 0, 7);
-                $months[$key] = ($months[$key] ?? 0) + $cents;
-            }
-        };
-
-        $budget = $project->budgets()->where('status', BudgetStatus::Approved->value)->latest('approved_at')->first();
-        $budgetTotals = $budget ? BudgetCalculator::totals($budget) : null;
-        if ($budgetTotals) {
-            $planned = array_merge($planned, $budgetTotals['by_category']);
-        }
 
         foreach ($project->purchaseOrders()->with('lines')->get() as $order) {
             /** @var PurchaseOrder $order */
-            $category = $order->category->value;
             if ($order->status === PurchaseStatus::Invoiced) {
-                $cents = (int) ($order->invoiced_cents ?? $order->totalCents());
-                $add($actual, $category, $cents);
-                $center($order->cost_center_id, 'actual', $cents);
-                $month($order->invoiced_on?->toDateString(), $cents);
+                $add('actual', $order->category->value, (int) ($order->invoiced_cents ?? $order->totalCents()), $order->invoiced_on?->toDateString(), $order->cost_center_id);
             } elseif (in_array($order->status, [PurchaseStatus::Approved, PurchaseStatus::Received], true)) {
-                $cents = $order->totalCents();
-                $add($committed, $category, $cents);
-                $center($order->cost_center_id, 'committed', $cents);
+                $received = $order->status === PurchaseStatus::Received ? ($order->received_at?->toDateString() ?? $order->updated_at?->toDateString()) : null;
+                $add('committed', $order->category->value, $order->totalCents(), null, $order->cost_center_id, ['received_on' => $received]);
             }
         }
 
@@ -87,45 +68,66 @@ final class CostReport
                 /** @var Certificate $certificate */
                 if ($certificate->status === CertificateStatus::Approved) {
                     $certified += $certificate->amount_cents;
-                    $add($actual, CostCategory::Subcontract->value, $certificate->amount_cents);
-                    $center(null, 'actual', $certificate->amount_cents);
-                    $month($certificate->period_end->toDateString(), $certificate->amount_cents);
+                    $add('actual', CostCategory::Subcontract->value, $certificate->amount_cents, $certificate->period_end->toDateString(), null);
                 }
             }
             if ($contract->status === ContractStatus::Active) {
-                $remaining = max(0, $contract->valueCents() - $certified);
-                $add($committed, CostCategory::Subcontract->value, $remaining);
-                $center(null, 'committed', $remaining);
+                $add('committed', CostCategory::Subcontract->value, max(0, $contract->valueCents() - $certified), null, null);
             }
         }
 
         foreach ($project->timeEntries()->where('status', TimeEntryStatus::Approved->value)->get() as $entry) {
             /** @var TimeEntry $entry */
-            $cents = $entry->costCents();
-            $add($actual, CostCategory::Labor->value, $cents);
-            $center(null, 'actual', $cents);
-            $month($entry->work_date->toDateString(), $cents);
+            $add('actual', CostCategory::Labor->value, $entry->costCents(), $entry->work_date->toDateString(), null);
         }
 
         foreach ($project->equipmentUsages()->get() as $usage) {
             /** @var EquipmentUsage $usage */
-            $cents = $usage->costCents();
-            $add($actual, CostCategory::Equipment->value, $cents);
-            $center(null, 'actual', $cents);
-            $month($usage->used_on->toDateString(), $cents);
+            $add('actual', CostCategory::Equipment->value, $usage->costCents(), $usage->used_on->toDateString(), null);
         }
 
         foreach ($project->costEntries()->get() as $entry) {
             /** @var CostEntry $entry */
             $kind = $entry->kind === 'committed' ? 'committed' : 'actual';
-            if ($kind === 'committed') {
-                $add($committed, $entry->category->value, $entry->amount_cents);
-            } else {
-                $add($actual, $entry->category->value, $entry->amount_cents);
-                $month($entry->incurred_on->toDateString(), $entry->amount_cents);
-            }
-            $center($entry->cost_center_id, $kind, $entry->amount_cents);
+            $add($kind, $entry->category->value, $entry->amount_cents, $kind === 'actual' ? $entry->incurred_on->toDateString() : null, $entry->cost_center_id);
         }
+
+        return $rows;
+    }
+
+    /**
+     * @param  list<array{kind: string, category: string, cents: int, date: string|null, center_id: int|null}>|null  $movements  os de movements(), se já calculados
+     * @return array<string, mixed>
+     */
+    public static function for(Project $project, ?array $movements = null): array
+    {
+        $categories = array_map(fn (CostCategory $c) => $c->value, CostCategory::cases());
+        $zero = array_fill_keys($categories, 0);
+        $planned = $zero;
+        $buckets = ['committed' => $zero, 'actual' => $zero];
+        $byCenter = [];
+        $months = [];
+        $defaultCenter = $project->cost_center_id;
+
+        $budget = $project->budgets()->where('status', BudgetStatus::Approved->value)->latest('approved_at')->first();
+        $budgetTotals = $budget ? BudgetCalculator::totals($budget) : null;
+        if ($budgetTotals) {
+            $planned = array_merge($planned, $budgetTotals['by_category']);
+        }
+
+        foreach ($movements ?? self::movements($project) as $m) {
+            $kind = $m['kind'] === 'committed' ? 'committed' : 'actual';
+            $buckets[$kind][$m['category']] += $m['cents'];
+            $key = $m['center_id'] ?? $defaultCenter ?? 0;
+            $byCenter[$key] ??= ['committed_cents' => 0, 'actual_cents' => 0];
+            $byCenter[$key][$kind.'_cents'] += $m['cents'];
+            if ($kind === 'actual' && $m['date'] !== null) {
+                $month = substr($m['date'], 0, 7);
+                $months[$month] = ($months[$month] ?? 0) + $m['cents'];
+            }
+        }
+        $committed = $buckets['committed'];
+        $actual = $buckets['actual'];
 
         $plannedTotal = array_sum($planned);
         $committedTotal = array_sum($committed);
@@ -144,7 +146,7 @@ final class CostReport
             'actual_cents' => $actualTotal,
             'forecast_cents' => $forecast,
             'ceiling_used_pct' => $ceiling ? round($forecast * 100 / $ceiling, 1) : null,
-            'alert' => $ceiling === null ? null : ($forecast > $ceiling ? 'over' : ($forecast * 100 >= $ceiling * self::WARNING_PCT ? 'warning' : 'ok')),
+            'alert' => self::alert($forecast, $ceiling),
             'revenue' => [
                 'contract_cents' => $budgetTotals['sale_cents'] ?? ($project->contract_value_cents ?? null),
                 'certified_cents' => $certified,
@@ -162,6 +164,16 @@ final class CostReport
             'by_cost_center' => $byCenter,
             'monthly_actual' => collect($months)->map(fn ($cents, $m) => ['month' => $m, 'actual_cents' => $cents])->values()->all(),
         ];
+    }
+
+    /** ok, warning (a partir de WARNING_PCT do teto) ou over; null sem teto. */
+    public static function alert(int $cents, ?int $ceiling): ?string
+    {
+        if ($ceiling === null) {
+            return null;
+        }
+
+        return $cents > $ceiling ? 'over' : ($cents * 100 >= $ceiling * self::WARNING_PCT ? 'warning' : 'ok');
     }
 
     /** @param  array<string, mixed>  $totals */

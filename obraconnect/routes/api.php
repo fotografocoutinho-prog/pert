@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\DocumentFolderController;
 use App\Http\Controllers\Api\V1\EquipmentController;
 use App\Http\Controllers\Api\V1\ExportController;
+use App\Http\Controllers\Api\V1\ForecastController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InspectionController;
 use App\Http\Controllers\Api\V1\InspectionItemController;
@@ -322,6 +323,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::put('costs/ceiling', [CostController::class, 'updateCeiling'])->name('costs.ceiling');
                 Route::post('cost-entries', [CostController::class, 'storeEntry'])->name('costs.entries.store');
                 Route::delete('cost-entries/{costEntry}', [CostController::class, 'destroyEntry'])->name('costs.entries.destroy');
+                Route::get('forecast', [ForecastController::class, 'show'])->name('forecast.show');
 
                 Route::get('time-entries', [TimeEntryController::class, 'index'])->name('time.index');
                 Route::post('time-entries', [TimeEntryController::class, 'store'])->name('time.store');

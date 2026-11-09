@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { costsApi, formatPct, type FinanceRow } from '@/api/economics';
-import { formatMoney } from '@/utils/format';
+import { costsApi, formatPct, type FinanceOutlook, type FinanceRow } from '@/api/economics';
+import { formatDate, formatMoney } from '@/utils/format';
 import AppBadge from '@/components/ui/AppBadge.vue';
 import AppCard from '@/components/ui/AppCard.vue';
 import AppSpinner from '@/components/ui/AppSpinner.vue';
@@ -20,13 +20,27 @@ onMounted(async () => {
 const money = (c: number | null | undefined) => (c === null || c === undefined ? '—' : formatMoney(c));
 const alertColor = (a: string | null) => (a === 'over' ? 'red' : a === 'warning' ? 'amber' : 'green');
 const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a === 'warning' ? 'Perto do teto' : a === 'ok' ? 'Dentro do teto' : 'Sem teto');
+const confidenceLabel = (c: string | null) => (c === 'high' ? 'confiança alta' : c === 'medium' ? 'confiança média' : 'confiança baixa');
+const days = (n: number) => `${Math.abs(n)} ${Math.abs(n) === 1 ? 'dia' : 'dias'}`;
+function finish(o: FinanceOutlook): { color: 'red' | 'amber' | 'green' | 'gray'; label: string } {
+    switch (o.schedule_status) {
+        case 'late':
+            return { color: 'red', label: o.delay_contract_days ? `${days(o.delay_contract_days)} depois do prazo` : 'Depois do prazo' };
+        case 'behind':
+            return { color: 'amber', label: 'Atrás do plano' };
+        case 'finished':
+            return { color: 'green', label: 'Concluída' };
+        default:
+            return { color: 'green', label: 'No prazo' };
+    }
+}
 </script>
 
 <template>
     <div>
         <PageHeader
             title="Painel financeiro"
-            description="Por obra: valor do contrato (orçamento aprovado), autado ao dono de obra, faturado (pré-faturas com a fatura oficial registada, sem IVA), custo realizado e comprometido, previsão final face ao teto e margem prevista."
+            description="Por obra: valor do contrato (orçamento aprovado), autado ao dono de obra, faturado (pré-faturas com a fatura oficial registada, sem IVA), realizado e comprometido, previsão do custo no fim face ao teto, margem prevista e fim previsto. As razões de cada previsão estão no separador Previsões da obra."
         />
         <div v-if="loading" class="flex justify-center py-16"><AppSpinner class="h-6 w-6 text-brand-700" /></div>
         <template v-else>
@@ -37,10 +51,14 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
                     <p class="text-xs text-slate-500">Faturado (faturas oficiais)</p>
                     <p class="text-xl font-bold">{{ money(totals.invoiced_cents) }}</p>
                 </AppCard>
-                <AppCard><p class="text-xs text-slate-500">Previsão de custo</p><p class="text-xl font-bold">{{ money(totals.forecast_cents) }}</p></AppCard>
+                <AppCard>
+                    <p class="text-xs text-slate-500">Custo previsto no fim</p>
+                    <p class="text-xl font-bold">{{ money(totals.eac_cents) }}</p>
+                    <p class="text-xs text-slate-500">já realizado + comprometido: {{ money(totals.forecast_cents) }}</p>
+                </AppCard>
                 <AppCard>
                     <p class="text-xs text-slate-500">Margem prevista</p>
-                    <p class="text-xl font-bold" :class="(totals.margin_forecast_cents ?? 0) < 0 ? 'text-red-700' : 'text-green-700'">{{ money(totals.margin_forecast_cents) }}</p>
+                    <p class="text-xl font-bold" :class="(totals.eac_margin_cents ?? 0) < 0 ? 'text-red-700' : 'text-green-700'">{{ money(totals.eac_margin_cents) }}</p>
                 </AppCard>
             </div>
             <AppCard>
@@ -53,17 +71,17 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
                                 <th class="py-2 pr-3 text-right">Contrato</th>
                                 <th class="py-2 pr-3 text-right">Autado</th>
                                 <th class="py-2 pr-3 text-right">Faturado</th>
-                                <th class="py-2 pr-3 text-right">Realizado</th>
-                                <th class="py-2 pr-3 text-right">Comprometido</th>
-                                <th class="py-2 pr-3 text-right">Previsão</th>
-                                <th class="py-2 pr-3 text-right">Margem</th>
-                                <th class="py-2">Teto</th>
+                                <th class="py-2 pr-3 text-right">Realizado + comprometido</th>
+                                <th class="py-2 pr-3 text-right">Custo previsto no fim</th>
+                                <th class="py-2 pr-3 text-right">Margem prevista</th>
+                                <th class="py-2 pr-3">Teto</th>
+                                <th class="py-2">Fim previsto</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr v-for="r in rows" :key="r.id">
                                 <td class="py-2 pr-3">
-                                    <RouterLink :to="`/app/obras/${r.id}?separador=custos`" class="font-medium text-brand-700 hover:underline">{{ r.code }}</RouterLink>
+                                    <RouterLink :to="`/app/obras/${r.id}?separador=previsoes`" class="font-medium text-brand-700 hover:underline">{{ r.code }}</RouterLink>
                                     <span class="block text-xs text-slate-500">{{ r.name }}</span>
                                 </td>
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.contract_cents) }}</td>
@@ -71,13 +89,30 @@ const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a ===
                                     {{ money(r.certified_cents) }}<span v-if="r.certified_pct !== null" class="block text-xs text-slate-500">{{ formatPct(r.certified_pct) }}</span>
                                 </td>
                                 <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.invoiced_cents) }}</td>
-                                <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.actual_cents) }}</td>
-                                <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.committed_cents) }}</td>
-                                <td class="py-2 pr-3 text-right whitespace-nowrap">{{ money(r.forecast_cents) }}</td>
-                                <td class="py-2 pr-3 text-right whitespace-nowrap" :class="(r.margin_forecast_cents ?? 0) < 0 ? 'text-red-700' : ''">{{ money(r.margin_forecast_cents) }}</td>
-                                <td class="py-2">
-                                    <AppBadge :color="alertColor(r.alert)">{{ alertLabel(r.alert) }}</AppBadge>
-                                    <span v-if="r.ceiling_used_pct !== null" class="block text-xs text-slate-500">{{ formatPct(r.ceiling_used_pct) }} de {{ money(r.ceiling_cents) }}</span>
+                                <td class="py-2 pr-3 text-right whitespace-nowrap">
+                                    {{ money(r.forecast_cents) }}
+                                    <span class="block text-xs text-slate-500">{{ money(r.actual_cents) }} + {{ money(r.committed_cents) }}</span>
+                                </td>
+                                <td class="py-2 pr-3 text-right whitespace-nowrap">
+                                    <template v-if="r.outlook.cost_available">
+                                        <span class="font-semibold">{{ money(r.outlook.eac_cents) }}</span>
+                                        <span class="block text-xs text-slate-500">{{ confidenceLabel(r.outlook.confidence) }}</span>
+                                    </template>
+                                    <span v-else class="text-xs text-slate-500">sem orçamento aprovado</span>
+                                </td>
+                                <td class="py-2 pr-3 text-right whitespace-nowrap" :class="(r.outlook.margin_cents ?? 0) < 0 ? 'text-red-700' : ''">
+                                    {{ money(r.outlook.margin_cents) }}<span v-if="r.outlook.margin_pct !== null" class="block text-xs text-slate-500">{{ formatPct(r.outlook.margin_pct) }}</span>
+                                </td>
+                                <td class="py-2 pr-3">
+                                    <AppBadge :color="alertColor(r.outlook.alert)">{{ alertLabel(r.outlook.alert) }}</AppBadge>
+                                    <span v-if="r.outlook.ceiling_used_pct !== null" class="block text-xs text-slate-500">{{ formatPct(r.outlook.ceiling_used_pct) }} de {{ money(r.ceiling_cents) }}</span>
+                                </td>
+                                <td class="py-2 whitespace-nowrap">
+                                    <template v-if="r.outlook.schedule_available">
+                                        {{ formatDate(r.outlook.forecast_finish_on) }}
+                                        <span class="block"><AppBadge :color="finish(r.outlook).color">{{ finish(r.outlook).label }}</AppBadge></span>
+                                    </template>
+                                    <span v-else class="text-xs text-slate-500">—</span>
                                 </td>
                             </tr>
                         </tbody>

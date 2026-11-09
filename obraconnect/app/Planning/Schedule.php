@@ -33,7 +33,11 @@ final class Schedule
         $parents = $activities->pluck('parent_id')->filter()->unique()->flip();
         $leaves = $byId->reject(fn (Activity $a) => $parents->has($a->id));
 
-        $days = self::workdays($calendar, $start, max(60, (int) ($leaves->sum('duration_days') * 1.6) + 30));
+        // Dias úteis carregados: as durações com folga, a contar da restrição "não antes de" mais tardia
+        // (a previsão põe as atividades por fazer "não antes de hoje", que pode estar longe do início).
+        $latest = $leaves->map(fn (Activity $a) => $a->start_no_earlier_than)->filter()->max();
+        $offset = $latest ? max(0, (int) CarbonImmutable::parse($start->toDateString())->diffInDays($latest)) : 0;
+        $days = self::workdays($calendar, $start, max(60, (int) ($leaves->sum('duration_days') * 1.6) + 30 + $offset));
         $firstDay = $days[0] ?? CarbonImmutable::parse($start->toDateString());
         $indexOf = fn (CarbonInterface $date) => self::indexOf($days, $date);
 
