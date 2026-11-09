@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.20.0 — 2026-11-09
+
+Fecha a Fase 4: **portal de subempreiteiros**.
+
+- Em **Fornecedores e subempreiteiros → Portal**, quem gere subempreiteiros convida por email as pessoas de um subempreiteiro (nome e email), reenvia o convite e retira o acesso. Convite válido 14 dias, guardado só como hash.
+- Quem é convidado cria a conta (só a conta, sem empresa) ou entra com a que já tem e aceita. Não passa a ser membro da empresa: o portal é uma área à parte (`/portal`), sem nada da empresa para além do que é desse subempreiteiro.
+- No portal: os contratos do subempreiteiro em curso e fechados (os em preparação não aparecem), com o valor, o autado e aprovado, o retido e, por artigo, o que falta; os autos (os rascunhos que a empresa está a preparar aparecem só como "em preparação", sem valores).
+- **Propor o auto do período**: as quantidades por artigo (não pode passar o que falta do contrato; só um auto por decidir de cada vez). Entra como **submetido**, com "Proposto no portal por …", e avisa por email quem aprova autos na obra. Aprovar ou devolver avisa as pessoas do subempreiteiro.
+- **Documentos**: o subempreiteiro envia seguro, alvará, declarações de não dívida… com a validade e o ficheiro (PDF ou fotografia, até 20 MB); a empresa vê-os na ficha do subempreiteiro ("Enviado no portal") e abre o ficheiro. A empresa também pode juntar o ficheiro aos documentos que regista.
+- Quem é membro de uma empresa e também tem acesso a um portal vê "Portal de subempreiteiro" no menu.
+
 ## 0.19.1 — 2026-11-09
 
 - Saúde do sistema: uma falha só gera email se ainda lá estiver na verificação seguinte (10 minutos depois); "voltou ao normal" só se se tinha avisado da falha. Uma falha passageira já não envia nada.

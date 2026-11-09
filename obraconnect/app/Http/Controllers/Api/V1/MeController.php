@@ -11,7 +11,9 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\ResolveTenant;
 use App\Models\Membership;
+use App\Models\PartnerPortalUser;
 use App\Models\SupportAccessGrant;
+use App\Portal\PortalAccess;
 use App\Tenancy\TenantResolver;
 use App\Tenancy\TenantScope;
 use Illuminate\Http\JsonResponse;
@@ -87,6 +89,12 @@ class MeController extends Controller
             ])->values(),
             'current' => $currentPayload,
             'support_session' => $this->supportSession($request),
+            // Acessos ao portal de subempreiteiros (pode não ter empresa nenhuma).
+            'portal' => app(PortalAccess::class)->accessesFor($user)->map(fn (PartnerPortalUser $a) => [
+                'id' => $a->id,
+                'company' => $a->tenant->name,
+                'partner' => $a->partner->name,
+            ])->values(),
         ]]);
     }
 

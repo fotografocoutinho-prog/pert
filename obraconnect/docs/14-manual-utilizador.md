@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.18.0)
+# Manual do utilizador (versão 0.20.0)
 
 ## Entrar
 
@@ -193,7 +193,16 @@ No separador **Medições e autos**:
 - **Nova compra**: fornecedor, natureza (materiais, equipamentos…), centro de custo e linhas (pode ligar cada linha a um artigo do orçamento). **Aprovar** → o valor passa a custo **comprometido**; **Recebida**; **Registar fatura** (número, data, valor) → passa a custo **realizado**. Também se cancela.
 - **Nova subempreitada**: subempreiteiro, objeto, retenção de garantia (%) e os trabalhos com os preços acordados. **Adjudicar** → comprometido. Em curso, **Novo auto** cria o auto da subempreitada: escreva a quantidade do período em cada trabalho; a retenção calcula-se sozinha. Autos aprovados contam como realizado.
 
-Os fornecedores e subempreiteiros criam-se em **Fornecedores e subempreiteiros**, com especialidades e documentos com validade (alvará, seguros, certidões): aparece o aviso quando estão a expirar ou expirados.
+Os fornecedores e subempreiteiros criam-se em **Fornecedores e subempreiteiros**, com especialidades e documentos com validade (alvará, seguros, certidões), com ou sem o ficheiro: aparece o aviso quando estão a expirar ou expirados.
+
+## Portal de subempreiteiros
+
+Em **Fornecedores e subempreiteiros**, o botão **Portal** de um subempreiteiro mostra quem dele tem acesso e envia convites (nome e email). A pessoa convidada recebe um email, cria a conta (ou entra com a que tem) e passa a ver, em **Portal de subempreiteiros**, só os contratos desse subempreiteiro com a empresa — mais nada da empresa.
+
+- No portal vê, por contrato: o valor, o que já foi autado e aprovado, o retido e o que falta por artigo; e os autos.
+- **Propor o auto do período**: escreve as quantidades feitas por artigo. O auto chega à empresa como **submetido**, com "Proposto no portal por …", e quem aprova autos na obra recebe um email. A empresa aprova ou devolve como em qualquer auto; o subempreiteiro recebe um email com a decisão.
+- **Documentos**: o subempreiteiro envia o seguro, o alvará e as declarações de não dívida com a validade e o ficheiro; aparecem na ficha dele ("Enviado no portal").
+- Para tirar o acesso: **Portal → Retirar acesso**.
 
 ## Faturas e guias de fornecedores
 

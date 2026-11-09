@@ -97,6 +97,7 @@ const statusColor = (s: string) => (s === 'approved' ? 'green' : s === 'submitte
                         Período de {{ formatDate(cert.period_start) }} a {{ formatDate(cert.period_end) }}
                         <template v-if="cert.approved_by"> · aprovado por {{ cert.approved_by }} a {{ formatDate(cert.approved_at) }}</template>
                     </p>
+                    <p v-if="cert.proposed_by" class="mt-1"><AppBadge color="brand">Proposto no portal por {{ cert.proposed_by }}</AppBadge></p>
                 </div>
                 <AppBadge :color="statusColor(cert.status)">{{ cert.status_label }}</AppBadge>
             </div>

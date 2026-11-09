@@ -1,5 +1,17 @@
 # Registo de progresso
 
+## v0.20.0 — portal de subempreiteiros (2026-11-09)
+
+| Área | Verificação |
+| --- | --- |
+| Convite, conta nova sem empresa, aceitação com conta existente, revogação | Testes (`PartnerPortalTest`) |
+| Isolamento: só os contratos do próprio subempreiteiro (ativos e fechados), nada das rotas da empresa, acesso de outra conta ou revogado = 404 | Testes |
+| Proposta de auto (período futuro, artigo de outro contrato, acima do contrato, vazia, um por decidir de cada vez), emails à empresa e ao subempreiteiro, rascunhos internos escondidos | Testes + browser |
+| Documentos com ficheiro (portal e empresa), só PDF/JPG/PNG até 20 MB, download só do próprio | Testes + browser |
+| Portal, contrato, documentos e janela do portal na empresa a 360 px | Browser |
+
+Decisão: um auto proposto entra como submetido (a empresa decide como em qualquer auto) e não pode passar o que falta do contrato; trabalhos a mais pedem revisão do contrato pela empresa.
+
 ## v0.19.1 — correção da monitorização (2026-11-09)
 
 Visto em produção logo a seguir à 0.19.0: a verificação do DocIntel falhava com 5 segundos porque o DocIntel (Passenger) adormece e demora a acordar. Agora 30 segundos com nova tentativa, e nenhuma falha gera email sem ser confirmada na verificação seguinte (teste `test_a_failure_that_comes_and_goes_never_sends_email`).

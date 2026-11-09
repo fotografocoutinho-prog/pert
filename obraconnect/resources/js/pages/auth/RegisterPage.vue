@@ -16,9 +16,12 @@ const router = useRouter();
 const session = useSessionStore();
 
 const invitationToken = computed(() => (typeof route.query.convite === 'string' ? route.query.convite : null));
+// Convite para o portal de subempreiteiros: só a conta, sem empresa.
+const portalToken = computed(() => (typeof route.query.portal === 'string' && !invitationToken.value ? route.query.portal : null));
+const invited = computed(() => invitationToken.value !== null || portalToken.value !== null);
 
 const form = useForm({
-    name: '',
+    name: typeof route.query.nome === 'string' ? route.query.nome : '',
     email: typeof route.query.email === 'string' ? route.query.email : '',
     password: '',
     password_confirmation: '',
@@ -31,8 +34,9 @@ async function submit(): Promise<void> {
     const ok = await form.submit((d) =>
         authApi.register({
             ...d,
-            company_name: invitationToken.value ? null : d.company_name,
+            company_name: invited.value ? null : d.company_name,
             invitation_token: invitationToken.value,
+            portal_token: portalToken.value,
         }).then(() => true),
     );
     if (!ok) return;
@@ -44,14 +48,21 @@ async function submit(): Promise<void> {
 
 <template>
     <AuthLayout
-        :title="invitationToken ? 'Criar conta e aceitar convite' : 'Registar empresa'"
-        :subtitle="invitationToken ? 'Crie a sua conta para entrar na empresa que o convidou.' : 'Comece o período experimental gratuito. Não pedimos cartão.'"
+        :title="invited ? 'Criar conta e aceitar convite' : 'Registar empresa'"
+        :subtitle="
+            portalToken
+                ? 'Crie a sua conta para entrar no portal de subempreiteiros.'
+                : invitationToken
+                  ? 'Crie a sua conta para entrar na empresa que o convidou.'
+                  : 'Comece o período experimental gratuito. Não pedimos cartão.'
+        "
     >
         <form class="space-y-4" novalidate @submit.prevent="submit">
             <AppAlert v-if="form.message.value" type="error">{{ form.message.value }}</AppAlert>
             <AppAlert v-if="form.errors.value.invitation_token" type="error">{{ form.errors.value.invitation_token }}</AppAlert>
+            <AppAlert v-if="form.errors.value.portal_token" type="error">{{ form.errors.value.portal_token }}</AppAlert>
 
-            <template v-if="!invitationToken">
+            <template v-if="!invited">
                 <AppInput v-model="form.data.company_name" label="Nome da empresa" required autocomplete="organization" :error="form.errors.value.company_name" />
                 <AppInput v-model="form.data.nif" label="NIF da empresa" inputmode="numeric" :maxlength="12" hint="Opcional. Pode preencher mais tarde." :error="form.errors.value.nif" />
             </template>
@@ -74,7 +85,7 @@ async function submit(): Promise<void> {
             </AppCheckbox>
 
             <AppButton type="submit" block size="lg" :loading="form.processing.value">
-                {{ invitationToken ? 'Criar conta' : 'Criar empresa' }}
+                {{ invited ? 'Criar conta' : 'Criar empresa' }}
             </AppButton>
         </form>
         <template #footer>

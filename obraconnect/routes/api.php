@@ -30,9 +30,11 @@ use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PartnerController;
+use App\Http\Controllers\Api\V1\PartnerPortalController;
 use App\Http\Controllers\Api\V1\PermissionController;
 use App\Http\Controllers\Api\V1\PlanningController;
 use App\Http\Controllers\Api\V1\Platform;
+use App\Http\Controllers\Api\V1\Portal;
 use App\Http\Controllers\Api\V1\PriceLibraryController;
 use App\Http\Controllers\Api\V1\ProjectCalendarController;
 use App\Http\Controllers\Api\V1\ProjectController;
@@ -62,6 +64,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('plans', PublicPlanController::class)->name('plans');
     Route::get('invitations/lookup/{token}', [InvitationAcceptanceController::class, 'show'])
         ->middleware('throttle:invitation-lookup')->name('invitations.lookup');
+    Route::get('portal-invitations/{token}', [Portal\PortalInvitationController::class, 'show'])
+        ->middleware('throttle:invitation-lookup')->name('portal.invitations.lookup');
 
     Route::middleware(['auth:sanctum', 'account.active'])->group(function () {
 
@@ -70,6 +74,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('me/tenants/{tenantId}/switch', [MeController::class, 'switchTenant'])
             ->whereNumber('tenantId')->name('me.switch');
         Route::post('invitations/accept', [InvitationAcceptanceController::class, 'store'])->name('invitations.accept');
+
+        // Portal de subempreiteiros (sem empresa própria: o acesso diz de que empresa e de que subempreiteiro)
+        Route::post('portal-invitations/accept', [Portal\PortalInvitationController::class, 'accept'])->name('portal.invitations.accept');
+        Route::get('portal/accesses', [Portal\PortalController::class, 'accesses'])->name('portal.accesses');
+        Route::prefix('portal/{access}')->whereNumber('access')->middleware('portal')->name('portal.')->group(function () {
+            Route::get('contracts', [Portal\PortalController::class, 'contracts'])->name('contracts');
+            Route::get('contracts/{contract}', [Portal\PortalController::class, 'contract'])->whereNumber('contract')->name('contract');
+            Route::post('contracts/{contract}/proposals', [Portal\PortalController::class, 'propose'])->whereNumber('contract')->middleware('throttle:uploads')->name('proposals');
+            Route::get('documents', [Portal\PortalController::class, 'documents'])->name('documents');
+            Route::post('documents', [Portal\PortalController::class, 'storeDocument'])->middleware('throttle:uploads')->name('documents.store');
+            Route::get('documents/{document}/file', [Portal\PortalController::class, 'documentFile'])->whereNumber('document')->name('documents.file');
+        });
 
         // Empresa ativa
         Route::middleware(['verified', 'tenant'])->group(function () {
@@ -166,6 +182,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::delete('partners/{partner}', [PartnerController::class, 'destroy'])->name('partners.destroy');
             Route::post('partners/{partner}/documents', [PartnerController::class, 'storeDocument'])->name('partners.documents.store');
             Route::delete('partners/{partner}/documents/{document}', [PartnerController::class, 'destroyDocument'])->scopeBindings()->name('partners.documents.destroy');
+            Route::get('partners/{partner}/documents/{document}/file', [PartnerController::class, 'documentFile'])->scopeBindings()->name('partners.documents.file');
+            Route::get('partners/{partner}/portal-users', [PartnerPortalController::class, 'index'])->name('partners.portal.index');
+            Route::post('partners/{partner}/portal-users', [PartnerPortalController::class, 'store'])->name('partners.portal.store');
+            Route::post('partners/{partner}/portal-users/{portalUser}/resend', [PartnerPortalController::class, 'resend'])->name('partners.portal.resend');
+            Route::delete('partners/{partner}/portal-users/{portalUser}', [PartnerPortalController::class, 'destroy'])->name('partners.portal.destroy');
 
             Route::get('workers', [WorkerController::class, 'index'])->name('workers.index');
             Route::post('workers', [WorkerController::class, 'store'])->name('workers.store');

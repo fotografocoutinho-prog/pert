@@ -6,16 +6,21 @@ use App\Audit\Auditor;
 use App\Enums\PartnerKind;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
+use App\Http\Controllers\Api\V1\Portal\PortalController;
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
 use App\Models\PartnerDocument;
+use App\Models\PartnerPortalUser;
 use App\Models\SupplierDocument;
 use App\Rules\ValidPortugueseNif;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Fornecedores e subempreiteiros da empresa, com especialidades e documentos com validade (alvará,
@@ -89,18 +94,36 @@ class PartnerController extends Controller
     public function storeDocument(Request $request, Partner $partner): JsonResponse
     {
         $this->authorizeKind($partner->kind->value);
-        $partner->documents()->create($request->validate([
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'reference' => ['nullable', 'string', 'max:100'],
             'expires_on' => ['nullable', 'date_format:Y-m-d'],
-        ], [], ['title' => 'documento', 'expires_on' => 'validade']));
+            'file' => ['nullable', 'file', 'extensions:pdf,jpg,jpeg,png', 'max:'.PortalController::DOCUMENT_MAX_KB],
+        ], [], ['title' => 'documento', 'expires_on' => 'validade', 'file' => 'ficheiro']);
+        if ($request->hasFile('file')) {
+            PortalController::storeFile($partner, $data, $request->file('file'), null);
+        } else {
+            $partner->documents()->create(Arr::only($data, ['title', 'reference', 'expires_on']));
+        }
 
         return response()->json(['data' => $this->present($this->fresh($partner))], 201);
+    }
+
+    /** Ficheiro de um documento (enviado pela empresa ou pelo subempreiteiro no portal). */
+    public function documentFile(Partner $partner, PartnerDocument $document): StreamedResponse
+    {
+        $this->authorizeAny(['purchases.manage', 'subcontractors.manage', 'costs.view', 'workforce.manage']);
+        abort_if($document->path === null, 404);
+
+        return PortalController::download($document);
     }
 
     public function destroyDocument(Partner $partner, PartnerDocument $document): JsonResponse
     {
         $this->authorizeKind($partner->kind->value);
+        if ($document->path) {
+            Storage::disk($document->disk ?: config('obraconnect.files.disk'))->delete($document->path);
+        }
         $document->delete();
 
         return response()->json(['data' => $this->present($this->fresh($partner))]);
@@ -172,7 +195,12 @@ class PartnerController extends Controller
                 'reference' => $d->reference,
                 'expires_on' => $d->expires_on?->toDateString(),
                 'state' => $d->expires_on === null ? 'valid' : ($d->expires_on->lt($today) ? 'expired' : ($d->expires_on->lte($today->copy()->addDays(self::EXPIRING_DAYS)) ? 'expiring' : 'valid')),
+                'has_file' => $d->path !== null,
+                'original_name' => $d->original_name,
+                'from_portal' => $d->uploaded_by_portal_user_id !== null,
             ])->all(),
+            'portal_users_count' => $p->kind === PartnerKind::Subcontractor
+                ? PartnerPortalUser::query()->where('partner_id', $p->id)->whereNotNull('accepted_at')->whereNull('revoked_at')->count() : 0,
             'contracts_count' => (int) ($p->contracts_count ?? 0),
             'purchase_orders_count' => (int) ($p->purchase_orders_count ?? 0),
         ];

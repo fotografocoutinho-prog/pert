@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.19.0
+  version: 0.20.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -691,6 +691,32 @@ paths:
     post: { tags: [Medições e autos], summary: "Aprovar (certificates.approve)" }
   /api/v1/projects/{project}/certificates/{certificate}/reopen:
     post: { tags: [Medições e autos], summary: "Devolver a rascunho (certificates.approve)" }
+  /api/v1/portal-invitations/{token}:
+    get: { tags: [Portal], summary: "Convite para o portal (público): empresa, subempreiteiro, email, se a conta já existe" }
+  /api/v1/portal-invitations/accept:
+    post: { tags: [Portal], summary: "Aceitar o convite com a sessão iniciada (o email tem de ser o do convite)" }
+  /api/v1/portal/accesses:
+    get: { tags: [Portal], summary: "Acessos ao portal do utilizador (empresa e subempreiteiro)" }
+  /api/v1/portal/{access}/contracts:
+    get: { tags: [Portal], summary: "Contratos ativos e fechados do subempreiteiro" }
+  /api/v1/portal/{access}/contracts/{contract}:
+    get: { tags: [Portal], summary: "Contrato: artigos com autado e o que falta, autos (sem os rascunhos internos da empresa)" }
+  /api/v1/portal/{access}/contracts/{contract}/proposals:
+    post: { tags: [Portal], summary: "Propor o auto do período (entra como submetido)" }
+  /api/v1/portal/{access}/documents:
+    get: { tags: [Portal], summary: "Documentos do subempreiteiro" }
+    post: { tags: [Portal], summary: "Enviar documento com validade e ficheiro (PDF/JPG/PNG até 20 MB)" }
+  /api/v1/portal/{access}/documents/{document}/file:
+    get: { tags: [Portal], summary: "Ficheiro de um documento do próprio subempreiteiro" }
+  /api/v1/partners/{partner}/portal-users:
+    get: { tags: [Compras], summary: "Pessoas do subempreiteiro com acesso ao portal (subcontractors.manage)" }
+    post: { tags: [Compras], summary: "Convidar para o portal (nome, email)" }
+  /api/v1/partners/{partner}/portal-users/{portalUser}/resend:
+    post: { tags: [Compras], summary: "Reenviar o convite" }
+  /api/v1/partners/{partner}/portal-users/{portalUser}:
+    delete: { tags: [Compras], summary: "Retirar o acesso" }
+  /api/v1/partners/{partner}/documents/{document}/file:
+    get: { tags: [Compras], summary: "Ficheiro de um documento do fornecedor ou subempreiteiro" }
   /api/v1/partners:
     get: { tags: [Compras e subempreitadas], summary: "Fornecedores e subempreiteiros (filtro kind)" }
     post: { tags: [Compras e subempreitadas], summary: "Criar" }

@@ -4,10 +4,12 @@ import { specialtiesApi } from '@/api';
 import { ApiError } from '@/api/http';
 import type { Specialty } from '@/api/types';
 import { partnersApi, type Partner } from '@/api/economics';
+import { partnerPortalApi, type PortalUserRow } from '@/api/portal';
+import { appUrl } from '@/utils/base';
 import { useForm } from '@/composables/useForm';
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatDateTime } from '@/utils/format';
 import AppAlert from '@/components/ui/AppAlert.vue';
 import AppBadge from '@/components/ui/AppBadge.vue';
 import AppButton from '@/components/ui/AppButton.vue';
@@ -87,15 +89,51 @@ async function archive(p: Partner): Promise<void> {
 // Documentos com validade
 const docsFor = ref<Partner | null>(null);
 const docForm = useForm({ title: '', reference: '', expires_on: '' });
+const docFile = ref<File | null>(null);
 async function addDocument(): Promise<void> {
     if (!docsFor.value) return;
-    const saved = await docForm.submit(() =>
-        partnersApi.addDocument(docsFor.value!.id, { title: docForm.data.title, reference: docForm.data.reference || null, expires_on: docForm.data.expires_on || null }),
-    );
+    const body = new FormData();
+    body.append('title', docForm.data.title);
+    body.append('reference', docForm.data.reference);
+    body.append('expires_on', docForm.data.expires_on);
+    if (docFile.value) body.append('file', docFile.value);
+    const saved = await docForm.submit(() => partnersApi.addDocument(docsFor.value!.id, body));
     if (saved) {
         docsFor.value = saved;
         docForm.reset();
+        docFile.value = null;
         await load();
+    }
+}
+
+// Portal de subempreiteiros: quem do subempreiteiro tem acesso
+const portalFor = ref<Partner | null>(null);
+const portalUsers = ref<PortalUserRow[]>([]);
+const portalForm = useForm({ name: '', email: '' });
+const portalStatus = (s: PortalUserRow['status']) => (s === 'active' ? 'green' : s === 'pending' ? 'amber' : 'gray');
+async function openPortal(p: Partner): Promise<void> {
+    portalFor.value = p;
+    portalForm.reset({ name: p.contact_name ?? '', email: p.email ?? '' });
+    portalUsers.value = await partnerPortalApi.list(p.id);
+}
+async function invitePortal(): Promise<void> {
+    if (!portalFor.value) return;
+    const rows = await portalForm.submit(() => partnerPortalApi.invite(portalFor.value!.id, { ...portalForm.data }), { success: 'Convite enviado por email.' });
+    if (rows) {
+        portalUsers.value = rows;
+        portalForm.reset();
+        await load();
+    }
+}
+async function portalAction(row: PortalUserRow, action: 'resend' | 'revoke'): Promise<void> {
+    if (!portalFor.value) return;
+    if (action === 'revoke' && !window.confirm(`Retirar o acesso ao portal a ${row.name}?`)) return;
+    try {
+        portalUsers.value = action === 'resend' ? await partnerPortalApi.resend(portalFor.value.id, row.id) : await partnerPortalApi.revoke(portalFor.value.id, row.id);
+        toast.success(action === 'resend' ? 'Convite reenviado.' : 'Acesso retirado.');
+        await load();
+    } catch (e) {
+        toast.error(e instanceof ApiError ? e.message : 'Não foi possível.');
     }
 }
 async function removeDocument(id: number): Promise<void> {
@@ -151,6 +189,7 @@ function toggleSpecialty(id: number, on: boolean): void {
                     </div>
                     <div v-if="canKind(p.kind)" class="flex flex-wrap gap-1">
                         <AppButton size="sm" variant="ghost" @click="docsFor = p">Documentos ({{ p.documents.length }})</AppButton>
+                        <AppButton v-if="p.kind === 'subcontractor' && canSub" size="sm" variant="ghost" @click="openPortal(p)">Portal ({{ p.portal_users_count ?? 0 }})</AppButton>
                         <AppButton size="sm" variant="ghost" @click="edit(p)">Editar</AppButton>
                         <AppButton size="sm" variant="ghost" class="text-red-700" @click="archive(p)">{{ p.archived ? 'Reativar' : p.contracts_count || p.purchase_orders_count ? 'Arquivar' : 'Apagar' }}</AppButton>
                     </div>
@@ -193,8 +232,12 @@ function toggleSpecialty(id: number, on: boolean): void {
                         <span>
                             <strong>{{ d.title }}</strong><template v-if="d.reference"> · {{ d.reference }}</template>
                             <AppBadge class="ml-2" :color="documentBadge(d.state)">{{ d.expires_on ? `válido até ${formatDate(d.expires_on)}` : 'sem validade' }}</AppBadge>
+                            <AppBadge v-if="d.from_portal" class="ml-1" color="brand">Enviado no portal</AppBadge>
                         </span>
-                        <button type="button" class="text-xs font-medium text-red-700 hover:underline" @click="removeDocument(d.id)">Retirar</button>
+                        <span class="flex shrink-0 items-center gap-3">
+                            <a v-if="d.has_file" :href="appUrl(partnerPortalApi.documentUrl(docsFor.id, d.id))" target="_blank" rel="noopener" class="text-xs font-medium text-brand-700 hover:underline">Abrir</a>
+                            <button type="button" class="text-xs font-medium text-red-700 hover:underline" @click="removeDocument(d.id)">Retirar</button>
+                        </span>
                     </li>
                     <li v-if="!docsFor.documents.length" class="py-2 text-slate-500">Sem documentos.</li>
                 </ul>
@@ -211,10 +254,47 @@ function toggleSpecialty(id: number, on: boolean): void {
                     />
                     <AppInput v-model="docForm.data.reference" label="N.º / apólice" />
                     <AppInput v-model="docForm.data.expires_on" type="date" label="Válido até" :error="docForm.errors.value.expires_on" />
+                    <label class="text-sm sm:col-span-4">
+                        <span class="font-medium text-slate-700">Ficheiro (opcional, PDF ou fotografia até 20 MB)</span>
+                        <input type="file" accept="application/pdf,image/jpeg,image/png" class="mt-1 block w-full text-sm" @change="docFile = ($event.target as HTMLInputElement).files?.[0] ?? null" />
+                        <span v-if="docForm.errors.value.file" class="mt-1 block text-red-700">{{ docForm.errors.value.file }}</span>
+                    </label>
                     <div class="sm:col-span-4"><AppButton type="submit" size="sm" :loading="docForm.processing.value" :disabled="!docForm.data.title">Juntar documento</AppButton></div>
                 </form>
             </template>
             <template #footer><AppButton variant="secondary" @click="docsFor = null">Fechar</AppButton></template>
+        </AppModal>
+
+        <AppModal :open="portalFor !== null" :title="`Portal de ${portalFor?.name ?? ''}`" size="lg" @close="portalFor = null">
+            <template v-if="portalFor">
+                <p class="mb-3 text-sm text-slate-600">
+                    No portal, as pessoas do subempreiteiro veem os contratos dele com a empresa (em curso e fechados), propõem os autos de cada período e enviam documentos.
+                    Não veem mais nada da empresa. Os autos propostos chegam como submetidos para aprovar ou devolver.
+                </p>
+                <ul class="mb-4 divide-y divide-slate-100 text-sm" data-test="portal-users">
+                    <li v-for="u in portalUsers" :key="u.id" class="flex flex-wrap items-center justify-between gap-2 py-2">
+                        <span class="min-w-0">
+                            <strong>{{ u.name }}</strong> · {{ u.email }}
+                            <AppBadge class="ml-2" :color="portalStatus(u.status)">{{ u.status_label }}</AppBadge>
+                            <span v-if="u.last_seen_at" class="block text-xs text-slate-500">última visita {{ formatDateTime(u.last_seen_at) }}</span>
+                        </span>
+                        <span class="flex gap-3">
+                            <button v-if="u.status === 'pending' || u.status === 'expired'" type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="portalAction(u, 'resend')">Reenviar convite</button>
+                            <button v-if="u.status !== 'revoked'" type="button" class="text-xs font-medium text-red-700 hover:underline" @click="portalAction(u, 'revoke')">Retirar acesso</button>
+                        </span>
+                    </li>
+                    <li v-if="!portalUsers.length" class="py-2 text-slate-500">Ainda ninguém tem acesso.</li>
+                </ul>
+                <form class="grid gap-3 sm:grid-cols-3" novalidate @submit.prevent="invitePortal">
+                    <AppAlert v-if="portalForm.message.value" type="error" class="sm:col-span-3">{{ portalForm.message.value }}</AppAlert>
+                    <AppInput v-model="portalForm.data.name" label="Nome" :error="portalForm.errors.value.name" />
+                    <AppInput v-model="portalForm.data.email" type="email" label="Email" class="sm:col-span-2" :error="portalForm.errors.value.email" />
+                    <div class="sm:col-span-3">
+                        <AppButton type="submit" size="sm" :loading="portalForm.processing.value" :disabled="!portalForm.data.name || !portalForm.data.email">Enviar convite</AppButton>
+                    </div>
+                </form>
+            </template>
+            <template #footer><AppButton variant="secondary" @click="portalFor = null">Fechar</AppButton></template>
         </AppModal>
     </div>
 </template>

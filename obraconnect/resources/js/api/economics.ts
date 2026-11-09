@@ -151,6 +151,8 @@ export interface CertificateSummary {
     retention_cents: number;
     net_cents: number;
     approved_at: string | null;
+    /** Nome de quem o propôs no portal de subempreiteiros (null = feito pela empresa). */
+    proposed_by?: string | null;
 }
 
 export interface CertificateLine {
@@ -183,6 +185,9 @@ export interface PartnerDocument {
     reference: string | null;
     expires_on: string | null;
     state: 'valid' | 'expiring' | 'expired';
+    has_file?: boolean;
+    original_name?: string | null;
+    from_portal?: boolean;
 }
 
 export interface Partner {
@@ -198,6 +203,7 @@ export interface Partner {
     notes: string | null;
     archived: boolean;
     specialties: { id: number; code: string; name: string }[];
+    portal_users_count?: number;
     documents: PartnerDocument[];
     contracts_count: number;
     purchase_orders_count: number;
@@ -656,7 +662,7 @@ export const partnersApi = {
     create: (payload: Record<string, unknown>) => data<Partner>(http.post('/api/v1/partners', payload)),
     update: (id: number, payload: Record<string, unknown>) => data<Partner>(http.put(`/api/v1/partners/${id}`, payload)),
     remove: (id: number) => http.delete(`/api/v1/partners/${id}`),
-    addDocument: (id: number, payload: Record<string, unknown>) => data<Partner>(http.post(`/api/v1/partners/${id}/documents`, payload)),
+    addDocument: (id: number, payload: Record<string, unknown> | FormData) => data<Partner>(http.post(`/api/v1/partners/${id}/documents`, payload)),
     removeDocument: (id: number, documentId: number) => data<Partner>(http.delete(`/api/v1/partners/${id}/documents/${documentId}`)),
 };
 

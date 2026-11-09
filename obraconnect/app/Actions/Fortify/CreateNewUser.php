@@ -5,7 +5,9 @@ namespace App\Actions\Fortify;
 use App\Actions\Tenancy\AcceptInvitation;
 use App\Actions\Tenancy\RegisterCompany;
 use App\Models\Invitation;
+use App\Models\PartnerPortalUser;
 use App\Models\User;
+use App\Portal\PortalAccess;
 use App\Rules\ValidPortugueseNif;
 use App\Support\PortugueseNif;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +39,8 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         $hasInvitation = filled($input['invitation_token'] ?? null);
+        // Convite para o portal de subempreiteiros: cria só a conta (sem empresa própria).
+        $hasPortal = ! $hasInvitation && filled($input['portal_token'] ?? null);
 
         $validated = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -44,7 +48,8 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
             'accept_terms' => ['accepted'],
             'invitation_token' => ['nullable', 'string', 'size:64'],
-            'company_name' => [Rule::requiredIf(! $hasInvitation), 'nullable', 'string', 'max:150'],
+            'portal_token' => ['nullable', 'string', 'size:64'],
+            'company_name' => [Rule::requiredIf(! $hasInvitation && ! $hasPortal), 'nullable', 'string', 'max:150'],
             'nif' => ['nullable', 'string', 'max:20', new ValidPortugueseNif],
         ], [], [
             'company_name' => 'nome da empresa',
@@ -61,7 +66,16 @@ class CreateNewUser implements CreatesNewUsers
             }
         }
 
-        return DB::transaction(function () use ($validated, $hasInvitation): User {
+        if ($hasPortal) {
+            $access = PartnerPortalUser::findByToken($validated['portal_token']);
+            if (! $access?->isPending() || $access->email !== Str::lower($validated['email'])) {
+                throw ValidationException::withMessages([
+                    'portal_token' => 'Convite inválido, expirado ou destinado a outro email.',
+                ]);
+            }
+        }
+
+        return DB::transaction(function () use ($validated, $hasInvitation, $hasPortal): User {
             $user = User::query()->create([
                 'name' => $validated['name'],
                 'email' => Str::lower($validated['email']),
@@ -70,6 +84,8 @@ class CreateNewUser implements CreatesNewUsers
 
             if ($hasInvitation) {
                 $this->acceptInvitation->handle($user, $validated['invitation_token']);
+            } elseif ($hasPortal) {
+                app(PortalAccess::class)->accept($user, $validated['portal_token']);
             } else {
                 $this->registerCompany->handle($user, [
                     'name' => $validated['company_name'],

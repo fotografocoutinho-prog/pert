@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePlatformStaff;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\InitializeRequestContext;
+use App\Http\Middleware\ResolvePortalAccess;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Tenancy\MissingTenantContextException;
@@ -34,11 +35,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant' => ResolveTenant::class,
             'platform' => EnsurePlatformStaff::class,
             'account.active' => EnsureAccountActive::class,
+            'portal' => ResolvePortalAccess::class,
         ]);
 
         // O contexto da empresa tem de existir antes do route model binding,
         // porque os modelos de empresa falham fechado sem contexto.
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ResolveTenant::class);
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ResolvePortalAccess::class);
 
         // A SPA volta ao endereço pedido depois do login (só caminhos relativos).
         $middleware->redirectGuestsTo(fn (Request $request) => url('entrar').'?redirect='.urlencode(

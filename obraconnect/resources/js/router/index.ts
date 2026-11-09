@@ -32,6 +32,19 @@ const routes: RouteRecordRaw[] = [
     { path: '/2fa', component: () => import('@/pages/auth/TwoFactorChallengePage.vue'), meta: { guest: true, title: 'Verificação em dois passos' } },
     { path: '/verificar-email', component: () => import('@/pages/auth/VerifyEmailPage.vue'), meta: { auth: true, title: 'Confirmar email' } },
     { path: '/convite/:token', component: () => import('@/pages/auth/InvitationPage.vue'), meta: { title: 'Convite' } },
+    { path: '/portal/convite/:token', component: () => import('@/pages/portal/PortalInvitationPage.vue'), meta: { title: 'Convite para o portal' } },
+
+    // Portal de subempreiteiros (sem empresa: o acesso diz a empresa e o subempreiteiro)
+    {
+        path: '/portal',
+        component: () => import('@/pages/portal/PortalShell.vue'),
+        meta: { auth: true },
+        children: [
+            { path: '', component: () => import('@/pages/portal/PortalHomePage.vue'), meta: { title: 'Portal de subempreiteiros' } },
+            { path: ':access/contratos/:contract', component: () => import('@/pages/portal/PortalContractPage.vue'), meta: { title: 'Contrato' } },
+            { path: ':access/documentos', component: () => import('@/pages/portal/PortalDocumentsPage.vue'), meta: { title: 'Documentos' } },
+        ],
+    },
 
     // Aplicação da empresa
     {
@@ -121,6 +134,7 @@ export const router = createRouter({
 export function homeFor(session: ReturnType<typeof useSessionStore>): string {
     if (session.current || session.supportSession) return '/app';
     if (session.isPlatformStaff) return '/plataforma';
+    if (session.portal.length) return '/portal';
     return '/app/sem-empresa';
 }
 

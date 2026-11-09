@@ -15,7 +15,9 @@ use App\Models\Certificate;
 use App\Models\CertificateLine;
 use App\Models\Contract;
 use App\Models\InvoiceDraft;
+use App\Models\PartnerPortalUser;
 use App\Models\Project;
+use App\Portal\PortalNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,7 +34,7 @@ class CertificateController extends Controller
 {
     use GuardsProjectWrites;
 
-    public function __construct(private readonly Auditor $auditor) {}
+    public function __construct(private readonly Auditor $auditor, private readonly PortalNotifier $portal) {}
 
     public function index(Request $request, Project $project): JsonResponse
     {
@@ -107,6 +109,9 @@ class CertificateController extends Controller
         $this->assertStatus($certificate, [CertificateStatus::Submitted], 'aprovar');
         $certificate->forceFill(['status' => CertificateStatus::Approved, 'approved_by_user_id' => $request->user()->id, 'approved_at' => now()])->save();
         $this->auditor->record('certificate.approved', $certificate, ['project' => $project->code, 'number' => $certificate->number, 'amount_cents' => $certificate->amount_cents]);
+        if ($certificate->contract_id) {
+            $this->portal->certificateDecided($certificate, 'approved');
+        }
 
         return response()->json(['data' => $this->present($certificate)]);
     }
@@ -118,6 +123,10 @@ class CertificateController extends Controller
         $this->assertProjectOpen($project);
         $this->assertStatus($certificate, [CertificateStatus::Submitted], 'devolver');
         $certificate->forceFill(['status' => CertificateStatus::Draft, 'submitted_at' => null])->save();
+        // Proposto pelo subempreiteiro no portal: avisa-o de que foi devolvido.
+        if ($certificate->proposed_by_portal_user_id) {
+            $this->portal->certificateDecided($certificate, 'returned');
+        }
 
         return response()->json(['data' => $this->present($certificate)]);
     }
@@ -170,6 +179,9 @@ class CertificateController extends Controller
             'retention_cents' => $c->retention_cents,
             'net_cents' => $c->amount_cents - $c->retention_cents,
             'approved_at' => $c->approved_at?->toIso8601String(),
+            'proposed_by' => $c->proposed_by_portal_user_id
+                ? PartnerPortalUser::query()->whereKey($c->proposed_by_portal_user_id)->value('name') ?? 'subempreiteiro'
+                : null,
         ];
     }
 

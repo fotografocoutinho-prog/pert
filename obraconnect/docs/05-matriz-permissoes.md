@@ -101,6 +101,8 @@ Gestão económica (0.14.0) — todas valem por obra (● = em todas as obras, p
 Regras da gestão económica (0.14.0): as páginas da empresa (biblioteca de preços, fornecedores, trabalhadores, equipamentos, painel financeiro) aparecem a quem tem a permissão no perfil da empresa; numa obra decide sempre o perfil nessa obra. Sem `workforce.view` nem `costs.view`, as horas aparecem sem custo. Quem só tem `time.register_own` regista e vê apenas as horas dos trabalhadores ligados à sua conta. A biblioteca de preços consulta-se com `budgets.view` e gere-se com `budgets.manage`. `workforce.manage` (nova) gere a lista de trabalhadores e o custo/hora.
 
 
+Portal de subempreiteiros (0.20.0) — sem permissões novas: convidar e retirar acessos com `subcontractors.manage`; as pessoas do subempreiteiro não são membros da empresa nem têm perfil: o acesso só deixa ver os contratos (ativos e fechados) e autos desse subempreiteiro, propor autos e enviar documentos. Os avisos de autos propostos vão a quem tem `certificates.approve` na obra.
+
 Alertas automáticos (0.18.0) — sem permissões novas: cada alerta aparece a quem vê essa parte da obra (custos, planeamento, medições, inspeções) ou, nas faturas por rever, a quem tem `supplier_docs.manage`; as regras mudam-se com `company.update`.
 
 Previsões (0.17.0) — sem permissões novas: o custo no fim aparece a quem tem `costs.view`, `costs.manage` ou `finance.view` na obra; o fim previsto, a quem tem `planning.view` ou `planning.manage`. No painel financeiro, o fim previsto de cada obra só aparece com o planeamento dessa obra.

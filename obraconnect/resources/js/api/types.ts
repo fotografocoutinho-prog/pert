@@ -61,11 +61,19 @@ export interface SupportSession {
     access_level: string;
 }
 
+export interface PortalAccessOption {
+    id: number;
+    company: string;
+    partner: string;
+}
+
 export interface MePayload {
     user: SessionUser;
     tenants: TenantOption[];
     current: CurrentTenant | null;
     support_session: SupportSession | null;
+    /** Acessos ao portal de subempreiteiros. */
+    portal?: PortalAccessOption[];
 }
 
 export interface Company {

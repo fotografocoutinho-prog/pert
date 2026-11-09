@@ -27,6 +27,7 @@ watch(() => route.fullPath, () => (menuOpen.value = false));
 const anyOf = (...permissions: string[]) => permissions.some((p) => session.can(p));
 const tenantNav = computed<NavItem[]>(() => [
     { to: '/app', label: 'Painel', show: true },
+    { to: '/portal', label: 'Portal de subempreiteiro', show: session.portal.length > 0 },
     { to: '/app/obras', label: 'Obras', show: session.can('projects.view') },
     { to: '/app/clientes', label: 'Clientes', show: session.can('clients.view') },
     { to: '/app/financas', label: 'Painel financeiro', show: session.can('finance.view') },

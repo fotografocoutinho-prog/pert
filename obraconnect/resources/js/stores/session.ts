@@ -19,6 +19,7 @@ export const useSessionStore = defineStore('session', () => {
     const current = computed(() => me.value?.current ?? null);
     const tenants = computed(() => me.value?.tenants ?? []);
     const supportSession = computed(() => me.value?.support_session ?? null);
+    const portal = computed(() => me.value?.portal ?? []);
     const isAuthenticated = computed(() => user.value !== null);
     const isPlatformStaff = computed(() => Boolean(user.value?.platform_role));
     const isReadOnly = computed(() => current.value?.tenant.status === 'read_only' || supportSession.value !== null);
@@ -97,6 +98,7 @@ export const useSessionStore = defineStore('session', () => {
         current,
         tenants,
         supportSession,
+        portal,
         isAuthenticated,
         isPlatformStaff,
         isReadOnly,

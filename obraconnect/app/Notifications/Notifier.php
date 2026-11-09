@@ -4,8 +4,11 @@ namespace App\Notifications;
 
 use App\Enums\InspectionStatus;
 use App\Mail\ProjectNoticeMail;
+use App\Models\Certificate;
+use App\Models\Contract;
 use App\Models\Inspection;
 use App\Models\Issue;
+use App\Models\PartnerPortalUser;
 use App\Models\Project;
 use App\Models\User;
 use App\Tenancy\TenantContext;
@@ -128,6 +131,23 @@ final class Notifier
      * @param  Collection<int, User>  $users
      * @param  list<string|null>  $lines
      */
+    /** Um subempreiteiro propôs um auto no portal: avisa quem aprova autos na obra. */
+    public function portalProposal(Project $project, Contract $contract, Certificate $certificate, PartnerPortalUser $by): void
+    {
+        $users = $this->audience->withPermission($project, 'certificates.approve');
+        $actor = $by->user ?? new User;
+
+        $this->send($project, $users, $actor,
+            "Auto proposto pelo subempreiteiro: {$contract->code} n.º {$certificate->number}",
+            'Há um auto de subempreitada para decidir',
+            [
+                $this->e($by->name).' ('.$this->e($contract->partner?->name).') propôs no portal o auto n.º '.$certificate->number.' do contrato **'.$this->e($contract->code.' · '.$contract->title).'**,',
+                'de '.$certificate->period_start->format('d/m/Y').' a '.$certificate->period_end->format('d/m/Y').': '.number_format($certificate->amount_cents / 100, 2, ',', ' ').' € (sem IVA).',
+                'Aprove-o ou devolva-o para corrigir, como num auto feito por si.',
+            ],
+            url("/app/obras/{$project->id}?separador=compras"), 'Abrir a obra');
+    }
+
     private function send(Project $project, Collection $users, User $actor, string $subject, string $heading, array $lines, string $url, string $button): void
     {
         $company = $this->tenants->tenantOrFail()->name;

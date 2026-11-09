@@ -256,6 +256,8 @@ Não foram criadas: `price_records` (histórico de preços), `materials`/`labor_
 
 ### Inteligência e automação (fase 5)
 
+Portal de subempreiteiros (0.20.0): `partner_portal_users` (pessoa de um subempreiteiro com acesso: email, nome, utilizador quando aceita, token do convite só em hash, revogação, última visita); `partner_documents` passa a ter o ficheiro (disk, path, original_name, mime, size_bytes, uploaded_by_portal_user_id); `certificates.proposed_by_portal_user_id` marca o auto proposto no portal.
+
 Monitorização (0.19.0), sem empresa: `system_tasks` (uma linha por tarefa agendada: última corrida, êxito, erro, falhas seguidas) e `system_checks` (estado de cada verificação, para avisar uma vez quando falha e outra quando volta ao normal).
 
 Histórico e alertas (0.18.0): `forecast_snapshots` (uma linha por obra e por semana — segunda-feira —, atualizada todos os dias pelo `obraconnect:forecast-watch`) e `project_alerts` (alertas automáticos; `open_key` único só enquanto aberto; `project_id` vazio = alerta da empresa). As regras ficam em `tenants.settings.alerts`.
