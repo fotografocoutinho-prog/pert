@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Alerts\AlertSettings;
 use App\Audit\Auditor;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Http\Resources\CompanyResource;
 use App\Support\PortugueseNif;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -135,5 +137,31 @@ class CompanyController extends Controller
         $this->auditor->record('company.logo_removed', $tenant);
 
         return new CompanyResource($tenant);
+    }
+
+    /** Regras dos alertas automáticos das obras (o que gera alerta, a partir de quando, e se vai por email). */
+    public function alerts(): JsonResponse
+    {
+        $this->authorize('company.view');
+
+        return response()->json(['data' => AlertSettings::for($this->tenantContext()->tenantOrFail())]);
+    }
+
+    public function updateAlerts(Request $request): JsonResponse
+    {
+        $this->authorize('company.update');
+
+        $data = AlertSettings::clean($request->validate(AlertSettings::validationRules()));
+        $tenant = $this->tenantContext()->tenantOrFail();
+        $tenant->settings = array_replace($tenant->settings ?? [], ['alerts' => $data]);
+        $tenant->save();
+
+        $this->auditor->record('company.alerts_updated', $tenant, [
+            'enabled' => $data['enabled'],
+            'email' => $data['email'],
+            'off' => array_keys(array_filter($data['rules'], fn (array $r) => ! $r['on'])),
+        ]);
+
+        return response()->json(['data' => AlertSettings::for($tenant)]);
     }
 }

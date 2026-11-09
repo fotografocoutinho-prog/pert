@@ -3,14 +3,18 @@
 namespace App\Demo;
 
 use App\Actions\Tenancy\RegisterCompany;
+use App\Alerts\ForecastWatch;
 use App\Billing\StorageUsage;
 use App\Calendar\PortugueseHolidays;
 use App\Calendar\WorkCalendars;
 use App\Documents\DocumentStorage;
 use App\Economics\BudgetCalculator;
 use App\Economics\CertificateBuilder;
+use App\Economics\CostReport;
 use App\Enums\InspectionStatus as S;
 use App\Enums\SubscriptionStatus;
+use App\Forecasting\CostForecast;
+use App\Forecasting\ScheduleForecast;
 use App\Inspections\EvidenceIndex;
 use App\Inspections\InspectionHistory;
 use App\Invoicing\InvoiceDrafts;
@@ -36,6 +40,7 @@ use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\Equipment;
 use App\Models\EquipmentUsage;
+use App\Models\ForecastSnapshot;
 use App\Models\Inspection;
 use App\Models\InvoiceDraft;
 use App\Models\Issue;
@@ -214,6 +219,7 @@ final class DemoCompany
                     $this->plannedProject();
                     $this->finishedProject();
                     $this->flushInvoices();
+                    $this->forecastHistory();
                 });
 
                 return $tenant;
@@ -1693,6 +1699,55 @@ final class DemoCompany
     // ------------------------------------------------------------------ datas, ficheiros
 
     /** Faz de conta que agora é $when (datas de criação e cadeia de hash coerentes); nunca no futuro. */
+    /**
+     * Histórico das previsões e alertas. As seis semanas anteriores das duas obras em curso são
+     * fictícias (como tudo nesta empresa) e caminham para os valores de hoje: a moradia quase estável,
+     * a reabilitação a piorar todas as semanas. Depois corre o vigia de hoje, que guarda a semana atual
+     * e abre os alertas (sem emails: é a empresa de demonstração).
+     */
+    private function forecastHistory(): void
+    {
+        $this->at($this->realNow);
+        $calendars = app(WorkCalendars::class);
+        $week = ForecastWatch::weekStart($this->today);
+        // semanas para trás => [fator do custo previsto, dias a menos no fim previsto, pontos a menos de avanço]
+        $paths = [
+            'ATL-26-01' => [6 => [0.976, 14, 15], 5 => [0.980, 12, 12], 4 => [0.984, 10, 10], 3 => [0.988, 8, 7], 2 => [0.992, 5, 5], 1 => [0.996, 3, 2]],
+            'ATL-26-02' => [6 => [0.80, 21, 16], 5 => [0.82, 18, 13], 4 => [0.85, 14, 10], 3 => [0.88, 11, 8], 2 => [0.92, 9, 5], 1 => [0.95, 7, 3]],
+        ];
+
+        foreach ($paths as $code => $weeks) {
+            $p = Project::query()->where('code', $code)->firstOrFail();
+            $now = ForecastWatch::snapshot(CostForecast::for($p, $this->today), ScheduleForecast::for($p, $this->today, $calendars->forProject($p)), $this->today);
+            foreach ($weeks as $back => [$factor, $daysEarlier, $points]) {
+                $start = $week->subWeeks($back);
+                $row = $now;
+                $row['taken_on'] = $start->addDays(4)->toDateString();
+                if ($now['cost_available']) {
+                    $row['forecast_cents'] = (int) round($now['forecast_cents'] * $factor);
+                    $row['actual_cents'] = (int) round($now['actual_cents'] * (1 - 0.07 * $back));
+                    $row['cost_progress_pct'] = max(0, round($now['cost_progress_pct'] - $points, 1));
+                    $row['margin_pct'] = $now['sale_cents'] ? round(($now['sale_cents'] - $row['forecast_cents']) * 100 / $now['sale_cents'], 2) : null;
+                    $row['cost_alert'] = $now['ceiling_cents'] ? CostReport::alert($row['forecast_cents'], $now['ceiling_cents']) : null;
+                }
+                if ($now['schedule_available'] && $now['forecast_finish_on']) {
+                    $finish = CarbonImmutable::parse($now['forecast_finish_on'])->subDays($daysEarlier);
+                    while (! $this->isWorkday($finish)) {
+                        $finish = $finish->subDay();
+                    }
+                    $row['forecast_finish_on'] = $finish->toDateString();
+                    $row['schedule_progress_pct'] = max(0, round($now['schedule_progress_pct'] - $points, 1));
+                    $row['planned_progress_pct'] = max(0, round($now['planned_progress_pct'] - 4 * $back, 1));
+                    $row['delay_contract_days'] = $now['contract_end_on']
+                        ? (int) CarbonImmutable::parse($now['contract_end_on'])->diffInDays(CarbonImmutable::parse($row['forecast_finish_on']), false) : null;
+                }
+                ForecastSnapshot::query()->create($row + ['project_id' => $p->id, 'week_start' => $start->toDateString()]);
+            }
+        }
+
+        app(ForecastWatch::class)->run($this->tenant, $this->today, email: false);
+    }
+
     private function at(CarbonInterface $when): void
     {
         if (isset($this->realNow) && $when->greaterThan($this->realNow)) {

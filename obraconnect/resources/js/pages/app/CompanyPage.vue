@@ -12,6 +12,7 @@ import AppButton from '@/components/ui/AppButton.vue';
 import AppCard from '@/components/ui/AppCard.vue';
 import AppCheckbox from '@/components/ui/AppCheckbox.vue';
 import AppInput from '@/components/ui/AppInput.vue';
+import AlertSettingsCard from '@/components/company/AlertSettingsCard.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const session = useSessionStore();
@@ -159,5 +160,7 @@ async function saveSecurity(): Promise<void> {
                 </AppCard>
             </div>
         </div>
+
+        <AlertSettingsCard class="mt-4" :can-edit="canEdit" />
     </div>
 </template>

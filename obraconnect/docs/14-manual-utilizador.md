@@ -1,4 +1,4 @@
-# Manual do utilizador (versão 0.17.0)
+# Manual do utilizador (versão 0.18.0)
 
 ## Entrar
 
@@ -272,6 +272,17 @@ O separador **Previsões** diz quanto a obra vai custar e quando acaba, e **porq
 - A lista **Atividades atrasadas ou empurradas** mostra o avanço feito e o planeado e o fim previsto contra o do plano; "À espera da anterior" quer dizer que só não começou porque a anterior ainda não acabou.
 
 Para a previsão ficar certa: registe as medições do que está feito, aprove as horas, passe as faturas às compras e atualize o avanço do planeamento.
+
+**Evolução semana a semana**: todos os dias às 7h a previsão fica guardada como a da semana. O cartão mostra como mudaram o custo previsto no fim e o fim previsto (com o teto, o orçamento, o prazo e o plano marcados) e, em **Ver em tabela**, a diferença de cada semana. O histórico começa na semana em que a versão 0.18 foi instalada.
+
+## Alertas automáticos
+
+Todos os dias às 7h o ObraConnect revê as obras e abre alertas quando: o custo previsto no fim passa ou se aproxima do teto; sobe numa semana; o fim previsto passa o prazo contratual ou atrasa numa semana; a última medição é antiga; um ponto de paragem segura os trabalhos há demasiados dias; há faturas de fornecedores por rever há demasiado tempo.
+
+- Aparecem no **Painel** (cartão **Alertas das obras**) e no topo do separador **Previsões** da obra; cada pessoa só vê os da parte da obra a que tem acesso.
+- Cada alerta novo vai uma vez por email ao diretor de obra (sem diretor, aos administradores); os das faturas, a quem as revê. Volta a avisar se passar de aviso a grave.
+- Fecham-se sozinhos quando a situação passa.
+- As regras e os limites mudam-se em **Empresa → Alertas automáticos** (quem pode editar os dados da empresa).
 
 ## Empresa de demonstração
 

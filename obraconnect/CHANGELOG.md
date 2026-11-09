@@ -1,5 +1,17 @@
 # Histórico de versões
 
+## 0.18.0 — 2026-11-09
+
+Fase 5, parte 3: **histórico das previsões e alertas automáticos**, sem IA.
+
+- Todos os dias às 7h (`obraconnect:forecast-watch`) a previsão de cada obra em preparação, em curso ou suspensa fica guardada como a da semana (tabela `forecast_snapshots`, uma linha por obra e por semana).
+- Separador **Previsões**: cartão **Evolução semana a semana** com o custo previsto no fim (teto e orçamento marcados) e o fim previsto (prazo e plano marcados), e a tabela com a diferença de cada semana; os alertas abertos da obra aparecem no topo.
+- **Alertas automáticos** (tabela `project_alerts`): custo previsto perto ou acima do teto, custo a subir numa semana, fim depois do prazo contratual, fim a atrasar numa semana, medições atrasadas, pontos de paragem por libertar, faturas de fornecedores por rever. Abrem e fecham-se sozinhos; cada um vai uma vez por email (um email por pessoa) ao diretor de obra que vê essa parte (sem diretor, aos administradores); volta a avisar se passar de aviso a grave.
+- **Painel**: cartão **Alertas das obras**, cada pessoa só vê os alertas da parte da obra a que tem acesso.
+- **Empresa → Alertas automáticos**: ligar/desligar, email, cada regra e o seu limite (company.update).
+- **Painel financeiro**: diferença do custo previsto no fim e do fim previsto para a semana anterior.
+- Empresa de demonstração: seis semanas de histórico fictício nas obras em curso e alertas abertos (sem emails).
+
 ## 0.17.0 — 2026-11-09
 
 Fase 5, parte 2: **previsões explicadas**. Sem IA: as contas do controlo de obra, feitas com os dados que já estão no ObraConnect, e cada número com as razões escritas.

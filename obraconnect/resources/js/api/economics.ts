@@ -335,6 +335,7 @@ export interface FinanceOutlook {
     contract_end_on: string | null;
     delay_contract_days: number | null;
     delay_plan_days: number | null;
+    previous: { taken_on: string; eac_cents: number | null; forecast_finish_on: string | null } | null;
 }
 
 export type ForecastLevel = 'danger' | 'warning' | 'info' | 'good';
@@ -420,10 +421,66 @@ export interface ScheduleForecast {
     reasons: ForecastReason[];
 }
 
+export interface CostHistoryPoint {
+    week_start: string;
+    taken_on: string;
+    forecast_cents: number;
+    bac_cents: number | null;
+    ceiling_cents: number | null;
+    actual_cents: number | null;
+    committed_cents: number | null;
+    progress_pct: number | null;
+    margin_pct: number | null;
+    confidence: ForecastConfidence | null;
+    current: boolean;
+}
+
+export interface ScheduleHistoryPoint {
+    week_start: string;
+    taken_on: string;
+    forecast_finish_on: string;
+    planned_finish_on: string | null;
+    contract_end_on: string | null;
+    progress_pct: number | null;
+    planned_progress_pct: number | null;
+    current: boolean;
+}
+
 export interface ProjectForecast {
     as_of: string;
     cost: CostForecast | null;
     schedule: ScheduleForecast | null;
+    history: { cost: CostHistoryPoint[] | null; schedule: ScheduleHistoryPoint[] | null };
+}
+
+export type AlertTypeKey = 'cost_ceiling' | 'cost_worse' | 'finish_contract' | 'finish_worse' | 'measurements_stale' | 'hold_point' | 'supplier_docs';
+
+export interface ProjectAlert {
+    id: number;
+    type: AlertTypeKey;
+    type_label: string;
+    level: 'danger' | 'warning';
+    title: string;
+    detail: string;
+    project: { id: number; code: string; name: string } | null;
+    path: string;
+    opened_at: string;
+}
+
+export interface AlertRules {
+    cost_ceiling: { on: boolean; pct: number };
+    cost_worse: { on: boolean; pct: number };
+    finish_contract: { on: boolean };
+    finish_worse: { on: boolean; days: number };
+    measurements_stale: { on: boolean; days: number };
+    hold_point: { on: boolean; days: number };
+    supplier_docs: { on: boolean; days: number };
+}
+
+export interface AlertSettings {
+    enabled: boolean;
+    email: boolean;
+    rules: AlertRules;
 }
 
 export interface Worker {
@@ -631,6 +688,12 @@ export const costsApi = {
 
 export const forecastApi = {
     get: (projectId: number) => getData<ProjectForecast>(`${p(projectId)}/forecast`),
+};
+
+export const alertsApi = {
+    list: (projectId?: number) => getData<ProjectAlert[]>('/api/v1/alerts' + (projectId ? `?project_id=${projectId}` : '')),
+    settings: () => getData<AlertSettings>('/api/v1/company/alerts'),
+    saveSettings: (payload: AlertSettings) => data<AlertSettings>(http.put('/api/v1/company/alerts', payload)),
 };
 
 export const workersApi = {

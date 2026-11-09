@@ -1,5 +1,16 @@
 # Registo de progresso
 
+## v0.18.0 — Fase 5, parte 3: histórico e alertas automáticos (2026-11-09)
+
+| Área | Verificação |
+| --- | --- |
+| Fotografia semanal (uma por obra e semana, atualizada todos os dias), histórico no separador Previsões e diferença no painel financeiro | Testes (`ForecastWatchTest`) + browser com a demonstração |
+| Alertas: abrem, passam de aviso a grave (novo email), fecham-se; um email por pessoa; regras da empresa (limites validados); permissões por parte da obra | Testes |
+| Pontos de paragem e faturas por rever há demasiado tempo | Testes |
+| Painel, Previsões, Empresa e painel financeiro a 360 px sem nada a sair do ecrã | Browser |
+
+186 testes (2196 verificações). Limitações: o histórico começa quando a versão é instalada (o avanço do planeamento não guarda datas, por isso não se reconstrói o passado); os alertas não se podem silenciar à mão (fecham quando a situação passa ou quando a regra é desligada).
+
 ## v0.17.0 — Fase 5, parte 2: previsões explicadas (2026-11-09)
 
 Continua a decisão de não usar IA paga: as previsões são as contas do controlo de obra (valor ganho e caminho crítico), com as razões escritas em português e ligadas ao separador onde se resolve cada uma.

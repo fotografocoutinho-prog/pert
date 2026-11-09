@@ -3,16 +3,19 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Project } from '@/api/types';
 import { ApiError } from '@/api/http';
-import { forecastApi, formatPct, type ForecastLevel, type ForecastReason, type ProjectForecast } from '@/api/economics';
+import { alertsApi, forecastApi, formatPct, type ForecastLevel, type ForecastReason, type ProjectAlert, type ProjectForecast } from '@/api/economics';
 import { formatDate, formatMoney } from '@/utils/format';
 import AppAlert from '@/components/ui/AppAlert.vue';
 import AppBadge from '@/components/ui/AppBadge.vue';
 import AppCard from '@/components/ui/AppCard.vue';
 import AppSpinner from '@/components/ui/AppSpinner.vue';
+import TrendChart from '@/components/ui/TrendChart.vue';
+import { dateTicks, dayLabel, dayNumber, type TrendPoint, type TrendReference } from '@/components/ui/trend';
 
 const props = defineProps<{ project: Project }>();
 const router = useRouter();
 const forecast = ref<ProjectForecast | null>(null);
+const alerts = ref<ProjectAlert[]>([]);
 const error = ref<string | null>(null);
 
 onMounted(async () => {
@@ -21,6 +24,7 @@ onMounted(async () => {
     } catch (e) {
         error.value = e instanceof ApiError ? e.message : 'Não foi possível calcular as previsões.';
     }
+    alerts.value = await alertsApi.list(props.project.id).catch(() => []);
 });
 
 const cost = computed(() => forecast.value?.cost ?? null);
@@ -81,6 +85,70 @@ const scheduleBadge = computed(() => {
             return { color: 'green' as const, label: 'Dentro do previsto' };
     }
 });
+
+// Evolução semana a semana: as fotografias de cada segunda-feira e o valor de hoje.
+const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+const euros = (v: number) => `${Math.round(v).toLocaleString('pt-PT')} €`;
+const costHistory = computed(() => forecast.value?.history.cost ?? []);
+const scheduleHistory = computed(() => forecast.value?.history.schedule ?? []);
+const costPoints = computed<TrendPoint[]>(() =>
+    costHistory.value.map((h) => ({
+        label: h.current ? 'hoje' : shortDate(h.week_start),
+        value: h.forecast_cents / 100,
+        title: `${h.current ? 'Hoje' : `Semana de ${formatDate(h.week_start)}`}: ${money(h.forecast_cents)}`,
+        current: h.current,
+    })),
+);
+const costRefs = computed<TrendReference[]>(() => {
+    const last = costHistory.value[costHistory.value.length - 1];
+    const refs: TrendReference[] = [];
+    // Teto e orçamento quase iguais (a menos de 1 %): uma linha só.
+    const same = !!last?.ceiling_cents && !!last.bac_cents && Math.abs(last.bac_cents - last.ceiling_cents) < last.ceiling_cents * 0.01;
+    if (last?.ceiling_cents) refs.push({ value: last.ceiling_cents / 100, label: `Teto${same ? ' ≈ orçamento' : ''} ${money(last.ceiling_cents)}`, color: 'red' });
+    if (last?.bac_cents && !same) refs.push({ value: last.bac_cents / 100, label: `Orçamento ${money(last.bac_cents)}`, color: 'slate' });
+    return refs;
+});
+const finishPoints = computed<TrendPoint[]>(() =>
+    scheduleHistory.value.map((h) => ({
+        label: h.current ? 'hoje' : shortDate(h.week_start),
+        value: dayNumber(h.forecast_finish_on),
+        title: `${h.current ? 'Hoje' : `Semana de ${formatDate(h.week_start)}`}: fim previsto a ${formatDate(h.forecast_finish_on)}`,
+        current: h.current,
+    })),
+);
+const finishRefs = computed<TrendReference[]>(() => {
+    const last = scheduleHistory.value[scheduleHistory.value.length - 1];
+    const refs: TrendReference[] = [];
+    if (last?.contract_end_on) refs.push({ value: dayNumber(last.contract_end_on), label: `Prazo ${formatDate(last.contract_end_on)}`, color: 'red' });
+    if (last?.planned_finish_on && last.planned_finish_on !== last.contract_end_on) {
+        refs.push({ value: dayNumber(last.planned_finish_on), label: `Plano ${formatDate(last.planned_finish_on)}`, color: 'slate' });
+    }
+    return refs;
+});
+const hasHistory = computed(() => costHistory.value.length > 1 || scheduleHistory.value.length > 1);
+const showHistoryCard = computed(() => costHistory.value.length > 0 || scheduleHistory.value.length > 0);
+// Tabela: uma linha por semana, com a diferença para a semana anterior.
+const historyRows = computed(() => {
+    const weeks = new Map<string, { week: string; current: boolean; cost: number | null; finish: string | null }>();
+    for (const h of costHistory.value) weeks.set(h.week_start, { week: h.week_start, current: h.current, cost: h.forecast_cents, finish: null });
+    for (const h of scheduleHistory.value) {
+        const row = weeks.get(h.week_start) ?? { week: h.week_start, current: h.current, cost: null, finish: null };
+        row.finish = h.forecast_finish_on;
+        weeks.set(h.week_start, row);
+    }
+    const rows = [...weeks.values()].sort((a, b) => a.week.localeCompare(b.week));
+    return rows
+        .map((r, i) => {
+            const prev = rows[i - 1];
+            return {
+                ...r,
+                costDelta: prev && prev.cost !== null && r.cost !== null ? r.cost - prev.cost : null,
+                finishDelta: prev?.finish && r.finish ? dayNumber(r.finish) - dayNumber(prev.finish) : null,
+            };
+        })
+        .reverse();
+});
+const signedDays = (n: number) => (n > 0 ? `+${days(n)}` : n < 0 ? `−${days(n)}` : 'igual');
 </script>
 
 <template>
@@ -94,9 +162,27 @@ const scheduleBadge = computed(() => {
                 planeamento. Cada número vem com as razões.
             </p>
 
+            <ul v-if="alerts.length" class="space-y-2" data-test="project-alerts">
+                <li
+                    v-for="a in alerts"
+                    :key="a.id"
+                    class="flex gap-3 rounded-lg border p-3 text-sm"
+                    :class="a.level === 'danger' ? 'border-red-200 bg-red-50 text-red-900' : 'border-amber-200 bg-amber-50 text-amber-900'"
+                >
+                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" :class="a.level === 'danger' ? 'bg-red-600' : 'bg-amber-500'" />
+                    <span class="min-w-0">
+                        <span class="font-semibold">{{ a.title }}.</span> {{ a.detail }}
+                        <RouterLink v-if="a.type === 'hold_point' || a.type === 'measurements_stale'" :to="a.path" class="ml-1 text-xs font-semibold whitespace-nowrap underline">
+                            {{ a.type === 'hold_point' ? 'Inspeções' : 'Medições e autos' }} →
+                        </RouterLink>
+                        <span class="mt-0.5 block text-xs opacity-75">Alerta automático desde {{ formatDate(a.opened_at) }}</span>
+                    </span>
+                </li>
+            </ul>
+
             <div class="grid gap-6 lg:grid-cols-2">
                 <!-- Custo no fim -->
-                <AppCard v-if="cost" title="Custo no fim da obra">
+                <AppCard v-if="cost" title="Custo no fim da obra" class="min-w-0">
                     <p v-if="!cost.available" class="text-sm text-slate-600">{{ cost.message }}</p>
                     <div v-else class="space-y-4">
                         <div class="flex flex-wrap items-start justify-between gap-2">
@@ -192,7 +278,7 @@ const scheduleBadge = computed(() => {
                 </AppCard>
 
                 <!-- Fim da obra -->
-                <AppCard v-if="schedule" title="Fim da obra">
+                <AppCard v-if="schedule" title="Fim da obra" class="min-w-0">
                     <div v-if="!schedule.available" class="text-sm text-slate-600">
                         {{ schedule.message }}
                         <button type="button" class="ml-1 font-semibold text-brand-700 hover:underline" @click="router.replace({ query: { separador: 'planeamento' } })">Planeamento →</button>
@@ -291,6 +377,51 @@ const scheduleBadge = computed(() => {
                 </AppCard>
             </div>
 
+            <AppCard v-if="showHistoryCard" title="Evolução semana a semana">
+                <p v-if="!hasHistory" class="text-sm text-slate-600" data-test="history-empty">
+                    O histórico começa esta semana. Todos os dias a previsão da semana fica guardada; a partir da próxima segunda-feira vê-se aqui como evolui.
+                </p>
+                <div v-else class="space-y-6" data-test="history">
+                    <div class="grid gap-6 lg:grid-cols-2">
+                        <div v-if="costPoints.length > 1" class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-900">Custo previsto no fim</p>
+                            <TrendChart :points="costPoints" :references="costRefs" :format="euros" label="Evolução do custo previsto no fim da obra, semana a semana" />
+                        </div>
+                        <div v-if="finishPoints.length > 1" class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-900">Fim previsto</p>
+                            <TrendChart :points="finishPoints" :references="finishRefs" :format="dayLabel" :tick-values="dateTicks" label="Evolução da data prevista para o fim da obra, semana a semana" />
+                        </div>
+                    </div>
+                    <details class="text-sm">
+                        <summary class="cursor-pointer font-medium text-brand-700">Ver em tabela</summary>
+                        <div class="mt-2 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="text-left text-xs text-slate-500">
+                                    <tr>
+                                        <th class="py-1.5 pr-2">Semana</th>
+                                        <th v-if="costHistory.length" class="py-1.5 pr-2 text-right">Custo previsto</th>
+                                        <th v-if="scheduleHistory.length" class="py-1.5 text-right">Fim previsto</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="r in historyRows" :key="r.week">
+                                        <td class="py-1.5 pr-2 whitespace-nowrap">{{ r.current ? 'Hoje' : formatDate(r.week) }}</td>
+                                        <td v-if="costHistory.length" class="py-1.5 pr-2 text-right whitespace-nowrap">
+                                            {{ money(r.cost) }}
+                                            <span v-if="r.costDelta" class="block text-xs" :class="r.costDelta > 0 ? 'text-red-700' : 'text-green-700'">{{ signedMoney(r.costDelta) }}</span>
+                                        </td>
+                                        <td v-if="scheduleHistory.length" class="py-1.5 text-right whitespace-nowrap">
+                                            {{ r.finish ? formatDate(r.finish) : '—' }}
+                                            <span v-if="r.finishDelta" class="block text-xs" :class="r.finishDelta > 0 ? 'text-red-700' : 'text-green-700'">{{ signedDays(r.finishDelta) }}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </AppCard>
+
             <details class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm">
                 <summary class="cursor-pointer font-semibold text-slate-900">Como se calcula</summary>
                 <div class="mt-3 space-y-3">
@@ -322,6 +453,17 @@ const scheduleBadge = computed(() => {
                             <li>
                                 As razões apontam as atividades do caminho crítico atrasadas por si próprias. As que estão só à espera da anterior aparecem na lista, mas não como
                                 causa.
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Histórico e alertas</p>
+                        <ul class="mt-1 list-disc space-y-1 pl-5">
+                            <li>Todos os dias, às 7h, a previsão fica guardada como a da semana; a de cada semana é a do último dia calculado. O ponto "hoje" é o desta página.</li>
+                            <li>
+                                Ao mesmo tempo, o ObraConnect abre alertas automáticos (perto ou acima do teto, fim depois do prazo, custo ou fim a piorar numa semana, medições
+                                atrasadas, pontos de paragem por libertar) e envia-os por email ao diretor de obra. Fecham-se sozinhos quando a situação passa. As regras estão em
+                                <strong>Empresa → Alertas automáticos</strong>.
                             </li>
                         </ul>
                     </div>

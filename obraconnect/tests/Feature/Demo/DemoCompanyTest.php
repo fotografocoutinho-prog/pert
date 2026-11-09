@@ -8,9 +8,11 @@ use App\Economics\CostReport;
 use App\Forecasting\CostForecast;
 use App\Forecasting\ScheduleForecast;
 use App\Inspections\InspectionHistory;
+use App\Models\ForecastSnapshot;
 use App\Models\Inspection;
 use App\Models\Media;
 use App\Models\Project;
+use App\Models\ProjectAlert;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\TenantContext;
@@ -61,6 +63,15 @@ class DemoCompanyTest extends TestCase
                     default => null,
                 };
             }
+
+            // Histórico das previsões (seis semanas fictícias + a atual nas obras em curso, a atual no pavilhão) e alertas,
+            // sem emails por ser a empresa de demonstração.
+            $this->assertSame(15, ForecastSnapshot::query()->count());
+            $alerts = ProjectAlert::query()->open()->with('project:id,code')->get()->map(fn (ProjectAlert $a) => ($a->project?->code ?? '-').':'.$a->type->value)->all();
+            foreach (['ATL-26-01:cost_ceiling', 'ATL-26-02:cost_ceiling', 'ATL-26-02:cost_worse', 'ATL-26-02:finish_worse'] as $expected) {
+                $this->assertContains($expected, $alerts);
+            }
+            $this->assertSame(0, ProjectAlert::query()->whereNull('notified_at')->count());
 
             foreach (Inspection::query()->with('events')->get() as $inspection) {
                 $this->assertNull(InspectionHistory::firstBroken($inspection->events->sortBy('sequence')->values()), "Cadeia da inspeção {$inspection->number}");

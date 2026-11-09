@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { subscriptionApi } from '@/api';
+import { alertsApi, type ProjectAlert } from '@/api/economics';
 import type { UsageItem } from '@/api/types';
 import { useSessionStore } from '@/stores/session';
 import { daysUntil, formatDate } from '@/utils/format';
@@ -11,11 +12,13 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 
 const session = useSessionStore();
 const usage = ref<Record<string, UsageItem> | null>(null);
+const alerts = ref<ProjectAlert[] | null>(null);
 
 const subscription = computed(() => session.current?.subscription ?? null);
 const trialDays = computed(() => (subscription.value?.status === 'trialing' ? daysUntil(subscription.value.trial_ends_at) : null));
 
 onMounted(async () => {
+    alertsApi.list().then((a) => (alerts.value = a)).catch(() => (alerts.value = []));
     if (session.can('subscription.view')) {
         usage.value = (await subscriptionApi.get()).usage;
     }
@@ -60,6 +63,24 @@ function percent(item: UsageItem): number {
             </AppCard>
         </div>
 
+        <AppCard title="Alertas das obras" class="mt-4" data-test="alerts">
+            <p v-if="alerts === null" class="text-sm text-slate-500">A carregar…</p>
+            <p v-else-if="!alerts.length" class="text-sm text-slate-600">Sem alertas abertos nas obras que acompanha.</p>
+            <ul v-else class="divide-y divide-slate-100">
+                <li v-for="a in alerts" :key="a.id" class="flex gap-3 py-3 first:pt-0 last:pb-0">
+                    <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" :class="a.level === 'danger' ? 'bg-red-600' : 'bg-amber-500'" :title="a.level === 'danger' ? 'Grave' : 'Aviso'" />
+                    <div class="min-w-0 text-sm">
+                        <RouterLink :to="a.path" class="font-semibold text-slate-900 hover:underline">{{ a.title }}</RouterLink>
+                        <span v-if="a.project" class="text-slate-500"> · {{ a.project.code }} {{ a.project.name }}</span>
+                        <p class="text-slate-600">{{ a.detail }}</p>
+                    </div>
+                </li>
+            </ul>
+            <p v-if="session.can('company.update')" class="mt-3 text-xs text-slate-500">
+                Os alertas abrem e fecham-se sozinhos todos os dias às 7h. Regras em <RouterLink to="/app/empresa" class="font-medium text-brand-700 hover:underline">Empresa</RouterLink>.
+            </p>
+        </AppCard>
+
         <AppCard v-if="usage" title="Utilização do plano" class="mt-4">
             <ul class="grid gap-5 sm:grid-cols-3">
                 <li v-for="(item, key) in usage" :key="key">
@@ -74,9 +95,10 @@ function percent(item: UsageItem): number {
             </ul>
         </AppCard>
 
-        <AppAlert class="mt-6" title="Novo: gestão económica da obra">
-            Em cada <RouterLink to="/app/obras" class="font-semibold underline">obra</RouterLink> há agora orçamento, medições e autos,
-            compras e subempreitadas, horas e equipamentos, custos com teto e planeamento com caminho crítico.
+        <AppAlert class="mt-6" title="Novo: previsões e alertas automáticos">
+            Em cada <RouterLink to="/app/obras" class="font-semibold underline">obra</RouterLink>, o separador <strong>Previsões</strong> diz quanto vai custar e
+            quando acaba, com as razões e a evolução semana a semana. Quando uma obra se aproxima do teto, passa o prazo ou piora de uma semana para a outra, aparece
+            um alerta aqui e o diretor de obra recebe um email.
             <template v-if="session.can('finance.view')">
                 O resumo de todas as obras está no <RouterLink to="/app/financas" class="font-semibold underline">painel financeiro</RouterLink>.
             </template>

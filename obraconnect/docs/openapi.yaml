@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.17.0
+  version: 0.18.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -758,6 +758,11 @@ paths:
     get: { tags: [Custos], summary: "Painel financeiro de todas as obras (finance.view); outlook = custo previsto no fim, margem, teto e fim previsto" }
   /api/v1/projects/{project}/forecast:
     get: { tags: [Custos], summary: "Previsões explicadas: cost (custo no fim, cenários, confiança, reasons) para costs.view/costs.manage/finance.view; schedule (fim previsto, atraso, atividades, reasons) para planning.view/planning.manage; null sem acesso a essa parte" }
+  /api/v1/alerts:
+    get: { tags: [Custos], summary: "Alertas automáticos abertos que a pessoa pode ver (?project_id= para uma obra)" }
+  /api/v1/company/alerts:
+    get: { tags: [Empresa], summary: "Regras dos alertas automáticos (company.view)" }
+    put: { tags: [Empresa], summary: "Mudar as regras dos alertas automáticos (company.update)" }
   /api/v1/projects/{project}/planning:
     get: { tags: [Planeamento], summary: "Atividades com datas, folgas, caminho crítico e PERT" }
   /api/v1/projects/{project}/activities:

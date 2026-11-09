@@ -22,6 +22,19 @@ const alertColor = (a: string | null) => (a === 'over' ? 'red' : a === 'warning'
 const alertLabel = (a: string | null) => (a === 'over' ? 'Acima do teto' : a === 'warning' ? 'Perto do teto' : a === 'ok' ? 'Dentro do teto' : 'Sem teto');
 const confidenceLabel = (c: string | null) => (c === 'high' ? 'confiança alta' : c === 'medium' ? 'confiança média' : 'confiança baixa');
 const days = (n: number) => `${Math.abs(n)} ${Math.abs(n) === 1 ? 'dia' : 'dias'}`;
+// Diferença para a fotografia da semana anterior (histórico das previsões).
+function eacChange(o: FinanceOutlook): { text: string; worse: boolean } | null {
+    if (!o.previous || o.previous.eac_cents === null || o.eac_cents === null) return null;
+    const d = o.eac_cents - o.previous.eac_cents;
+    if (Math.abs(d) < 100) return null;
+    return { text: `${d > 0 ? '▲ +' : '▼ −'}${formatMoney(Math.abs(d))} desde ${formatDate(o.previous.taken_on)}`, worse: d > 0 };
+}
+function finishChange(o: FinanceOutlook): { text: string; worse: boolean } | null {
+    if (!o.previous?.forecast_finish_on || !o.forecast_finish_on) return null;
+    const d = Math.round((Date.parse(o.forecast_finish_on) - Date.parse(o.previous.forecast_finish_on)) / 86400000);
+    if (d === 0) return null;
+    return { text: `${d > 0 ? '▲ +' : '▼ −'}${days(d)} desde ${formatDate(o.previous.taken_on)}`, worse: d > 0 };
+}
 function finish(o: FinanceOutlook): { color: 'red' | 'amber' | 'green' | 'gray'; label: string } {
     switch (o.schedule_status) {
         case 'late':
@@ -97,6 +110,7 @@ function finish(o: FinanceOutlook): { color: 'red' | 'amber' | 'green' | 'gray';
                                     <template v-if="r.outlook.cost_available">
                                         <span class="font-semibold">{{ money(r.outlook.eac_cents) }}</span>
                                         <span class="block text-xs text-slate-500">{{ confidenceLabel(r.outlook.confidence) }}</span>
+                                        <span v-if="eacChange(r.outlook)" class="block text-xs" :class="eacChange(r.outlook)!.worse ? 'text-red-700' : 'text-green-700'">{{ eacChange(r.outlook)!.text }}</span>
                                     </template>
                                     <span v-else class="text-xs text-slate-500">sem orçamento aprovado</span>
                                 </td>
@@ -111,6 +125,7 @@ function finish(o: FinanceOutlook): { color: 'red' | 'amber' | 'green' | 'gray';
                                     <template v-if="r.outlook.schedule_available">
                                         {{ formatDate(r.outlook.forecast_finish_on) }}
                                         <span class="block"><AppBadge :color="finish(r.outlook).color">{{ finish(r.outlook).label }}</AppBadge></span>
+                                        <span v-if="finishChange(r.outlook)" class="block text-xs" :class="finishChange(r.outlook)!.worse ? 'text-red-700' : 'text-green-700'">{{ finishChange(r.outlook)!.text }}</span>
                                     </template>
                                     <span v-else class="text-xs text-slate-500">—</span>
                                 </td>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AlertController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\BudgetController;
 use App\Http\Controllers\Api\V1\CertificateController;
@@ -78,6 +79,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('company/logo', [CompanyController::class, 'logo'])->name('company.logo');
             Route::post('company/logo', [CompanyController::class, 'uploadLogo'])->name('company.logo.store');
             Route::delete('company/logo', [CompanyController::class, 'deleteLogo'])->name('company.logo.destroy');
+            Route::get('company/alerts', [CompanyController::class, 'alerts'])->name('company.alerts');
+            Route::put('company/alerts', [CompanyController::class, 'updateAlerts'])->name('company.alerts.update');
+            Route::get('alerts', [AlertController::class, 'index'])->name('alerts.index');
 
             Route::get('members', [MemberController::class, 'index'])->name('members.index');
             Route::patch('members/{membership}', [MemberController::class, 'update'])->name('members.update');

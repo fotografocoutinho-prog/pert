@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Access\AccessResolver;
+use App\Alerts\ForecastWatch;
 use App\Audit\Auditor;
 use App\Calendar\WorkCalendars;
 use App\Economics\CostReport;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
 use App\Models\CostCenter;
 use App\Models\CostEntry;
+use App\Models\ForecastSnapshot;
 use App\Models\InvoiceDraft;
 use App\Models\Project;
 use App\Models\SupplierDocument;
@@ -128,7 +130,11 @@ class CostController extends Controller
             ->groupBy('project_id')->map(fn ($drafts) => (int) $drafts->sum(fn (InvoiceDraft $d) => $d->totals()['net_cents']));
 
         $today = CarbonImmutable::today('Europe/Lisbon');
-        $rows = $projects->map(function (Project $p) use ($invoiced, $today, $calendars) {
+        // A fotografia da semana anterior (ForecastWatch), para mostrar quanto mudou.
+        $previous = ForecastSnapshot::query()->whereIn('project_id', $projects->pluck('id'))
+            ->where('week_start', '<', ForecastWatch::weekStart($today)->toDateString())
+            ->orderByDesc('week_start')->get()->unique('project_id')->keyBy('project_id');
+        $rows = $projects->map(function (Project $p) use ($invoiced, $today, $calendars, $previous) {
             $movements = CostReport::movements($p);
             $r = CostReport::for($p, $movements);
             $cost = CostForecast::for($p, $today, $movements, $r);
@@ -167,6 +173,11 @@ class CostController extends Controller
                     'contract_end_on' => $schedule['contract_end_on'] ?? $p->planned_end_on?->toDateString(),
                     'delay_contract_days' => $schedule['delay_contract_days'] ?? null,
                     'delay_plan_days' => $schedule['delay_plan_days'] ?? null,
+                    'previous' => ($prev = $previous->get($p->id)) ? [
+                        'taken_on' => $prev->taken_on->toDateString(),
+                        'eac_cents' => $prev->cost_available ? $prev->forecast_cents : null,
+                        'forecast_finish_on' => $schedule !== null ? $prev->forecast_finish_on?->toDateString() : null,
+                    ] : null,
                 ],
             ];
         })->values();

@@ -31,6 +31,11 @@ Schedule::call(fn () => Artisan::call('obraconnect:subscriptions-sweep'))
     ->name('obraconnect-subscricoes')
     ->dailyAt('02:15')
     ->withoutOverlapping();
+Schedule::call(fn () => Artisan::call('obraconnect:forecast-watch'))
+    ->name('obraconnect-previsoes-alertas')
+    ->dailyAt('07:00')
+    ->timezone('Europe/Lisbon')
+    ->withoutOverlapping();
 Schedule::call(fn () => Artisan::call('obraconnect:escalate-issues'))
     ->name('obraconnect-escalonamento')
     ->dailyAt('07:30')
