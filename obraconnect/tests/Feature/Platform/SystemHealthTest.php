@@ -52,6 +52,29 @@ class SystemHealthTest extends TestCase
         $this->assertSame(3, DB::table('system_tasks')->sum('runs') + 0);
     }
 
+    public function test_a_task_added_in_a_new_version_counts_from_when_it_appears(): void
+    {
+        $status = fn (string $name) => collect(app(SystemHealth::class)->checks())->firstWhere('key', "task:{$name}")['status'];
+
+        Carbon::setTestNow('2026-11-10 10:00:00');
+        TaskMonitor::pulse();
+        // Como se a versão anterior ainda não tivesse esta tarefa.
+        DB::table('system_tasks')->where('name', 'obraconnect-webhooks')->delete();
+
+        // Três horas depois, a atualização traz a tarefa: o primeiro sinal do cron regista-a.
+        Carbon::setTestNow('2026-11-10 13:00:00');
+        TaskMonitor::pulse();
+        $this->assertSame('2026-11-10 13:00:00', (string) $this->task('obraconnect-webhooks')->created_at);
+        $this->assertSame('failing', $status('obraconnect-exportacoes'));
+        $this->assertSame('ok', $status('obraconnect-webhooks'));
+
+        // Passado o prazo dela (130 minutos) sem correr, aí sim conta como parada.
+        Carbon::setTestNow('2026-11-10 15:11:00');
+        TaskMonitor::pulse();
+        $this->assertSame('failing', $status('obraconnect-webhooks'));
+        $this->assertSame(1, DB::table('system_tasks')->where('name', 'obraconnect-webhooks')->count());
+    }
+
     public function test_public_health_reports_a_stopped_cron_or_a_stuck_queue(): void
     {
         Carbon::setTestNow('2026-11-10 10:00:00');

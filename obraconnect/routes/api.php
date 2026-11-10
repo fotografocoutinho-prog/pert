@@ -45,6 +45,7 @@ use App\Http\Controllers\Api\V1\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\SpecialtyController;
 use App\Http\Controllers\Api\V1\StructureController;
+use App\Http\Controllers\Api\V1\SubscriptionChangeController;
 use App\Http\Controllers\Api\V1\SubscriptionController;
 use App\Http\Controllers\Api\V1\SupplierDocumentController;
 use App\Http\Controllers\Api\V1\SupportGrantController;
@@ -121,6 +122,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
             Route::get('audit-logs', AuditLogController::class)->name('audit.index');
             Route::get('subscription', SubscriptionController::class)->name('subscription.show');
+            Route::post('subscription/quote', [SubscriptionChangeController::class, 'quote'])->name('subscription.quote');
+            Route::post('subscription/change', [SubscriptionChangeController::class, 'change'])->name('subscription.change');
+            Route::delete('subscription/scheduled-change', [SubscriptionChangeController::class, 'cancelScheduled'])->name('subscription.scheduled.cancel');
+            Route::post('subscription/orders', [SubscriptionChangeController::class, 'storeOrder'])->middleware('throttle:invitations')->name('subscription.orders.store');
+            Route::post('subscription/orders/{order}/cancel', [SubscriptionChangeController::class, 'cancelOrder'])->whereNumber('order')->name('subscription.orders.cancel');
+            Route::post('subscription/coupon', [SubscriptionChangeController::class, 'redeemCoupon'])->middleware('throttle:invitations')->name('subscription.coupon');
 
             Route::get('support-grants', [SupportGrantController::class, 'index'])->name('support-grants.index');
             Route::post('support-grants', [SupportGrantController::class, 'store'])->name('support-grants.store');
@@ -413,6 +420,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 ->middleware('platform:billing')->name('tenants.subscription');
 
             Route::get('plans', [Platform\PlanController::class, 'index'])->name('plans.index');
+            Route::middleware('platform:billing')->group(function () {
+                Route::get('coupons', [Platform\CouponController::class, 'index'])->name('coupons.index');
+                Route::post('coupons', [Platform\CouponController::class, 'store'])->name('coupons.store');
+                Route::put('coupons/{coupon}', [Platform\CouponController::class, 'update'])->name('coupons.update');
+                Route::get('subscription-orders', [Platform\SubscriptionOrderController::class, 'index'])->name('orders.index');
+                Route::post('subscription-orders/{order}/confirm', [Platform\SubscriptionOrderController::class, 'confirm'])->name('orders.confirm');
+                Route::post('subscription-orders/{order}/cancel', [Platform\SubscriptionOrderController::class, 'cancel'])->name('orders.cancel');
+            });
             Route::post('plans', [Platform\PlanController::class, 'store'])->middleware('platform:billing')->name('plans.store');
             Route::put('plans/{plan}', [Platform\PlanController::class, 'update'])->middleware('platform:billing')->name('plans.update');
 

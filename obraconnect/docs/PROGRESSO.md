@@ -1,5 +1,19 @@
 # Registo de progresso
 
+## v0.22.0 — Fase 6, parte 3: planos pela empresa e cupões (2026-11-10)
+
+| Área | Verificação |
+| --- | --- |
+| Período experimental: mudança imediata; descer bloqueado quando a empresa não cabe (obras, utilizadores) | Testes (`SelfServiceSubscriptionTest`) + browser |
+| Ativação com cupão (percentagem só anual), período a começar no fim do período experimental, emails à faturação e a quem pediu, confirmação só pela faturação | Testes + browser (pedido, confirmação no backoffice) |
+| Empresa expirada em só leitura pede a ativação, cancela (cupão libertado), volta a pedir; confirmação reativa | Testes |
+| Subida a meio do período com a diferença proporcional; descida marcada, desmarcada, renovação antecipada que prolonga e muda o plano no dia certo | Testes |
+| Cupões de dias extra (expirado, futuro, desligado, já usado, tipo errado), limite de usos entre empresas, pedidos caducados | Testes + browser |
+| Condições combinadas (limites à medida, ativa sem fim) só pela plataforma | Testes + browser (demonstração) |
+| Página Subscrição a 360 px; Pedidos e Cupões no backoffice | Browser |
+
+Decisões: sem pagamento online, o período pago só começa quando a faturação confirma; subir de plano é imediato (fica a faturar), descer só no fim do período (sem reembolsos); cada empresa usa cada cupão uma vez.
+
 ## v0.21.0 — Fase 6, parte 2: API pública e webhooks (2026-11-09)
 
 | Área | Verificação |

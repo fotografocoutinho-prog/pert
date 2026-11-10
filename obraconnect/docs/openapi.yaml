@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.21.0
+  version: 0.22.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
@@ -333,7 +333,33 @@ paths:
         - { name: to, in: query, schema: { type: string, format: date } }
       responses: { "200": { description: Lista paginada } }
   /api/v1/subscription:
-    get: { tags: [Subscrição], summary: Subscrição atual e utilização vs limites (subscription.view), responses: { "200": { description: OK } } }
+    get: { tags: [Subscrição], summary: "Subscrição atual, utilização vs limites, can_manage, custom_terms, renewal_opens_at, últimos pedidos (subscription.view)", responses: { "200": { description: OK } } }
+  /api/v1/subscription/quote:
+    post:
+      tags: [Subscrição]
+      summary: "Pré-visualizar (subscription.manage): intent change (switch, upgrade com diferença a faturar, schedule no fim do período) ou order (activation/renewal com cupão); over = limites que a empresa já passa"
+      requestBody: { content: { application/json: { schema: { type: object, required: [intent, plan_id, billing_cycle], properties: { intent: { type: string, enum: [change, order] }, plan_id: { type: integer }, billing_cycle: { type: string, enum: [monthly, yearly] }, coupon_code: { type: [string, "null"] } } } } } }
+  /api/v1/subscription/change:
+    post: { tags: [Subscrição], summary: "Mudar de plano: SUBSCRIPTION_OVER_LIMITS, SUBSCRIPTION_NO_CHANGE, SUBSCRIPTION_RENEW_FIRST, SUBSCRIPTION_CUSTOM, PLAN_CONTACT_SALES" }
+  /api/v1/subscription/scheduled-change:
+    delete: { tags: [Subscrição], summary: Desmarcar a mudança marcada para o fim do período }
+  /api/v1/subscription/orders:
+    post: { tags: [Subscrição], summary: "Pedido de ativação ou renovação (a pagar; também em só leitura): ORDER_PENDING, SUBSCRIPTION_NOT_DUE, COUPON_*" }
+  /api/v1/subscription/orders/{order}/cancel:
+    post: { tags: [Subscrição], summary: Cancelar um pedido por confirmar (liberta o cupão) }
+  /api/v1/subscription/coupon:
+    post: { tags: [Subscrição], summary: "Cupão de dias extra de período experimental (COUPON_INVALID, COUPON_EXPIRED, COUPON_NOT_STARTED, COUPON_EXHAUSTED, COUPON_ALREADY_USED, COUPON_NOT_APPLICABLE)" }
+  /api/v1/platform/subscription-orders:
+    get: { tags: [Plataforma], summary: "Pedidos (platform:billing), por estado; meta.pending" }
+  /api/v1/platform/subscription-orders/{order}/confirm:
+    post: { tags: [Plataforma], summary: "Pagamento recebido (invoice_reference, notes): ativa ou prolonga o período; subidas = faturadas" }
+  /api/v1/platform/subscription-orders/{order}/cancel:
+    post: { tags: [Plataforma], summary: "Cancelar (reason obrigatório; vai por email à empresa)" }
+  /api/v1/platform/coupons:
+    get: { tags: [Plataforma], summary: Cupões (platform:billing) }
+    post: { tags: [Plataforma], summary: "Criar: um de percent_off, amount_off_cents, trial_extension_days; plan_ids, billing_cycles, max_redemptions, valid_from, valid_until, is_active" }
+  /api/v1/platform/coupons/{coupon}:
+    put: { tags: [Plataforma], summary: "Alterar (COUPON_IN_USE se mudar código ou desconto de um cupão já usado)" }
   /api/v1/support-grants:
     get: { tags: [Suporte], summary: Autorizações dadas ao suporte (support.manage), responses: { "200": { description: Lista } } }
     post:

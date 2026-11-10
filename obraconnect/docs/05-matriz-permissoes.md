@@ -21,6 +21,7 @@ Estas são as permissões reais em `app/Access/PermissionRegistry.php` e os valo
 | `roles.manage` | Criar e editar perfis | ● | | | | | | | | | | | | | |
 | `audit.view` | Consultar auditoria | ● | ● | | | | | | | | | | | | |
 | `subscription.view` | Ver plano e utilização | ● | ● | | | | | | | | ● | | | | |
+| `subscription.manage` | Mudar de plano, pedir ativação ou renovação, usar cupões | ● | | | | | | | | | | | | | |
 | `support.manage` | Autorizar acesso do suporte | ● | | | | | | | | | | | | | |
 | `data.export` | Exportar todos os dados | ● | | | | | | | | | | | | | |
 | `integrations.manage` | Chaves da API e webhooks (planos Business e Enterprise) | ● | | | | | | | | | | | | | |

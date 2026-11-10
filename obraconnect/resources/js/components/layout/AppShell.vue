@@ -55,6 +55,8 @@ const platformNav = computed<NavItem[]>(() => [
     { to: '/plataforma/empresas', label: 'Empresas', show: session.isPlatformStaff },
     { to: '/plataforma/sistema', label: 'Saúde do sistema', show: session.isPlatformStaff },
     { to: '/plataforma/planos', label: 'Planos e preços', show: session.hasPlatformRole('billing') },
+    { to: '/plataforma/pedidos', label: 'Pedidos de subscrição', show: session.hasPlatformRole('billing') },
+    { to: '/plataforma/cupoes', label: 'Cupões', show: session.hasPlatformRole('billing') },
     { to: '/plataforma/suporte', label: 'Pedidos de suporte', show: session.hasPlatformRole('support') },
     { to: '/plataforma/seguranca', label: 'Logs de segurança', show: session.hasPlatformRole('support') },
 ]);

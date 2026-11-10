@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Audit\Auditor;
 use App\Billing\PlanLimits;
+use App\Billing\SubscriptionChanges;
 use App\Enums\SubscriptionStatus;
 use App\Enums\TenantStatus;
 use App\Models\Subscription;
@@ -14,6 +15,7 @@ use Illuminate\Console\Command;
 
 /**
  * Ciclo de vida (agendado diariamente):
+ * mudanças de plano marcadas para hoje; pedidos por pagar caducados;
  * trial terminado → expirada; período terminado → pagamento em atraso → expirada (após carência);
  * empresa sem subscrição válida → só leitura → suspensa (após N dias).
  * Nunca apaga dados.
@@ -22,9 +24,11 @@ use Illuminate\Console\Command;
 #[Description('Aplica o ciclo de vida das subscrições (trial, atraso, expiração, só leitura)')]
 class SweepSubscriptions extends Command
 {
-    public function handle(PlanLimits $limits, Auditor $auditor): int
+    public function handle(PlanLimits $limits, Auditor $auditor, SubscriptionChanges $changes): int
     {
         $now = now();
+        $scheduled = $changes->applyScheduled($now);
+        $staleOrders = $changes->expireStaleOrders($now);
         $grace = (int) config('obraconnect.lifecycle.past_due_grace_days');
         $readOnlyDays = (int) config('obraconnect.lifecycle.read_only_days_before_suspension');
 
@@ -79,8 +83,8 @@ class SweepSubscriptions extends Command
             });
 
         $this->info(sprintf(
-            'Trials expirados: %d · Em atraso: %d · Expiradas: %d · Só leitura: %d · Suspensas: %d',
-            $expiredTrials->count(), $pastDue->count(), $overdue->count(), $readOnly, $suspended,
+            'Mudanças de plano: %d · Pedidos caducados: %d · Trials expirados: %d · Em atraso: %d · Expiradas: %d · Só leitura: %d · Suspensas: %d',
+            $scheduled, $staleOrders, $expiredTrials->count(), $pastDue->count(), $overdue->count(), $readOnly, $suspended,
         ));
 
         return self::SUCCESS;

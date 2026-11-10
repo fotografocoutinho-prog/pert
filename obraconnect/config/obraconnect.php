@@ -21,6 +21,16 @@ return [
         'read_only_days_before_suspension' => (int) env('OBRA_READ_ONLY_DAYS', 30),
     ],
 
+    // Mudanças de plano e pedidos de ativação/renovação feitos pela empresa (sem pagamento online: a
+    // equipa de faturação recebe o pedido por email, fatura no programa certificado e confirma no backoffice).
+    'billing' => [
+        'payment_instructions' => env('BILLING_PAYMENT_INSTRUCTIONS', 'A equipa ObraConnect envia a fatura com as indicações de pagamento. O período começa quando o pagamento for confirmado.'),
+        // Renovar só a partir de X dias antes do fim do período.
+        'renewal_window_days' => (int) env('BILLING_RENEWAL_WINDOW_DAYS', 30),
+        // Pedidos por pagar caducam ao fim de X dias (o cupão volta a ficar livre).
+        'pending_order_days' => (int) env('BILLING_PENDING_ORDER_DAYS', 30),
+    ],
+
     'invitations' => [
         'expires_days' => 7,
     ],

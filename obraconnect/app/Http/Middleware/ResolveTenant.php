@@ -25,7 +25,9 @@ class ResolveTenant
     public const SUPPORT_SESSION_KEY = 'support_grant_id';
 
     /** Rotas que continuam disponíveis com a empresa em modo só leitura. */
-    private const READ_ONLY_ALLOWED_ROUTES = ['api.v1.exports.store'];
+    // Exportar e voltar a ativar a subscrição (pedido, cupão de período experimental) funcionam em só leitura.
+    private const READ_ONLY_ALLOWED_ROUTES = ['api.v1.exports.store', 'api.v1.subscription.quote', 'api.v1.subscription.orders.store',
+        'api.v1.subscription.orders.cancel', 'api.v1.subscription.coupon'];
 
     public function __construct(
         private readonly TenantContext $context,

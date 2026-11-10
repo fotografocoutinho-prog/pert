@@ -1,5 +1,20 @@
 # Histórico de versões
 
+## 0.22.0 — 2026-11-10
+
+Fase 6, parte 3: **mudanças de plano pela própria empresa e cupões**, sem pagamento online (a fatura continua a ser emitida no programa certificado).
+
+- **Subscrição** (permissão nova `subscription.manage`, só o administrador por omissão): pré-visualização do que acontece e quanto custa antes de confirmar.
+  - Período experimental: muda logo de plano, sem custos; o período experimental continua.
+  - Subscrição paga: plano mais caro aplica-se logo, com a diferença proporcional até ao fim do período a faturar; plano mais barato ou troca de ciclo fica marcada para o fim do período (pode desmarcar-se).
+  - Descer de plano só se a empresa já couber no plano novo (utilizadores, obras ativas, armazenamento): o ecrã diz o que passa.
+  - **Ativação e renovação** por pedido (a pagar): a equipa de faturação recebe um email, confirma no backoffice depois de faturar e o período começa (no fim do período experimental, ou onde o atual acaba numa renovação antecipada). Renovar abre 30 dias antes do fim. Funciona também em só leitura: a empresa volta ao normal quando o pedido é confirmado.
+  - Subscrições com condições combinadas (limites à medida, plano não público, sem fim de período) ficam com a equipa.
+- **Cupões** (backoffice → Cupões, equipa de faturação): percentagem ou valor de desconto num pedido, ou dias extra de período experimental; por plano, ciclo, datas e número de usos; um uso por empresa, reservado no pedido e libertado se for cancelado ou caducar.
+- **Pedidos de subscrição** (backoffice): confirmar pagamento com o n.º da fatura, cancelar com motivo; pedidos por pagar caducam ao fim de 30 dias.
+- A tarefa diária das subscrições aplica as mudanças marcadas para o dia.
+- Saúde do sistema: uma tarefa agendada nova (de uma atualização) passa a contar "nunca correu" a partir de quando aparece, e não do primeiro sinal do cron (dava um alarme falso logo a seguir a atualizar).
+
 ## 0.21.0 — 2026-11-09
 
 Fase 6, parte 2: **API pública e webhooks** (planos Business e Enterprise), para ligar o ObraConnect à faturação, contabilidade, ERP ou BI da empresa.

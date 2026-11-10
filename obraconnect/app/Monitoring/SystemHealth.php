@@ -129,6 +129,10 @@ final class SystemHealth
             if ($name === self::PULSE) {
                 return self::check($key, 'Cron', $label, 'warning', 'Ainda sem sinal do cron. Se continuar assim, confirme a tarefa cron do cPanel (schedule:run a cada minuto).');
             }
+            // Uma tarefa que só existe a partir de uma versão nova conta desde que apareceu.
+            if ($since !== null && $row?->created_at !== null && CarbonImmutable::parse($row->created_at)->gt($since)) {
+                $since = CarbonImmutable::parse($row->created_at);
+            }
             if ($since === null || $since->gt($now->subMinutes($minutes))) {
                 return self::check($key, 'Tarefas agendadas', $label, 'ok', 'Ainda não chegou a hora de correr.');
             }

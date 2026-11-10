@@ -182,6 +182,83 @@ export interface AuditEntry {
     created_at: string;
 }
 
+export interface SubscriptionOrder {
+    id: number;
+    kind: 'activation' | 'renewal' | 'upgrade';
+    kind_label: string;
+    status: 'pending' | 'confirmed' | 'canceled' | 'expired';
+    status_label: string;
+    plan: { id: number; code: string; name: string } | null;
+    billing_cycle: 'monthly' | 'yearly';
+    list_price_cents: number;
+    discount_cents: number;
+    total_cents: number;
+    currency: string;
+    coupon: string | null;
+    period_starts_at: string | null;
+    period_ends_at: string | null;
+    confirmed_at: string | null;
+    invoice_reference: string | null;
+    canceled_at: string | null;
+    cancel_reason: string | null;
+    created_at: string | null;
+}
+
+export interface PlatformSubscriptionOrder extends SubscriptionOrder {
+    tenant: { id: number; name: string; nif: string | null; email: string | null; status: string } | null;
+    from_plan: string | null;
+    requested_by: { name: string; email: string } | null;
+    confirmed_by: string | null;
+    notes: string | null;
+}
+
+export interface SubscriptionOverview {
+    subscription: Subscription | null;
+    usage: Record<string, UsageItem>;
+    tenant_status: string;
+    can_manage: boolean;
+    custom_terms: boolean;
+    renewal_opens_at: string | null;
+    payment_instructions: string;
+    orders: SubscriptionOrder[];
+}
+
+export interface SubscriptionQuote {
+    intent: 'change' | 'order';
+    action: 'switch' | 'upgrade' | 'schedule' | 'activation' | 'renewal';
+    plan: Plan;
+    billing_cycle: 'monthly' | 'yearly';
+    list_price_cents?: number;
+    discount_cents?: number;
+    total_cents: number;
+    coupon?: { code: string; description: string } | null;
+    effective_at?: string;
+    period_starts_at?: string;
+    period_ends_at: string | null;
+    over: { key: string; label: string; used: number; limit: number }[];
+    allowed: boolean;
+    message: string;
+    payment_instructions?: string;
+}
+
+export interface Coupon {
+    id: number;
+    code: string;
+    description: string | null;
+    percent_off: number | null;
+    amount_off_cents: number | null;
+    trial_extension_days: number | null;
+    summary: string;
+    plan_ids: number[];
+    billing_cycles: string[];
+    max_redemptions: number | null;
+    redemptions_count: number;
+    valid_from: string | null;
+    valid_until: string | null;
+    is_active: boolean;
+    created_at: string | null;
+}
+
 export interface Plan {
     id: number;
     code: string;
@@ -209,6 +286,7 @@ export interface Subscription {
     trial_ends_at: string | null;
     current_period_starts_at: string | null;
     current_period_ends_at: string | null;
+    scheduled_change: { plan: { id: number; code: string; name: string } | null; billing_cycle: 'monthly' | 'yearly' | null; at: string } | null;
     canceled_at: string | null;
     ends_at: string | null;
     custom_limits?: Record<string, number | null> | null;

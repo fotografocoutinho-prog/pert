@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * a empresa só a lê através de Tenant::currentSubscription().
  */
 #[Fillable([
-    'plan_id', 'status', 'billing_cycle', 'trial_ends_at', 'current_period_starts_at',
+    'plan_id', 'scheduled_plan_id', 'scheduled_billing_cycle', 'scheduled_change_at', 'status', 'billing_cycle', 'trial_ends_at', 'current_period_starts_at',
     'current_period_ends_at', 'canceled_at', 'ends_at', 'custom_limits', 'provider',
     'provider_reference', 'notes',
 ])]
@@ -23,6 +23,7 @@ class Subscription extends Model
         return [
             'status' => SubscriptionStatus::class,
             'trial_ends_at' => 'datetime',
+            'scheduled_change_at' => 'datetime',
             'current_period_starts_at' => 'datetime',
             'current_period_ends_at' => 'datetime',
             'canceled_at' => 'datetime',
@@ -39,5 +40,11 @@ class Subscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /** Plano para onde muda no fim do período (descida de plano ou troca de ciclo marcada). */
+    public function scheduledPlan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'scheduled_plan_id');
     }
 }

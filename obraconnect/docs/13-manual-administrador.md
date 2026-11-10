@@ -37,7 +37,14 @@ Regista entradas, falhas de login, alterações à empresa, utilizadores, perfis
 
 ### Subscrição
 
-**Subscrição** mostra o plano, o fim do período experimental e a utilização. A mudança de plano é feita pela equipa ObraConnect nesta versão.
+**Subscrição** mostra o plano, o fim do período experimental, o período pago e a utilização. Desde a 0.22.0 quem tem `subscription.manage` (o administrador) muda de plano aqui, sem pagamento online:
+
+- **No período experimental**, «Mudar para este plano» muda logo (o período experimental continua). «Pedir a ativação» faz um pedido a pagar: a equipa ObraConnect envia a fatura e, quando o pagamento é confirmado, o período pago começa no fim do período experimental (não se perdem dias).
+- **Com a subscrição paga**, um plano mais caro aplica-se logo e a diferença até ao fim do período é faturada à parte; um plano mais barato (ou passar de mensal a anual) fica marcado para o fim do período e pode ser desmarcado. Descer de plano só é possível se a empresa já couber no plano novo (utilizadores, obras ativas e armazenamento).
+- **Renovar** fica disponível 30 dias antes do fim do período; se for paga antes do fim, o período novo começa onde o atual acaba.
+- **Cupões**: os de desconto usam-se no pedido; os de dias extra de período experimental em «Tem um código?». Cada empresa usa cada cupão uma vez.
+- Subscrições com condições combinadas com a equipa ObraConnect (limites à medida, plano não público, sem fim de período) só são mudadas pela equipa.
+- Uma empresa em só leitura por a subscrição ter terminado pode pedir a ativação (ou usar um cupão de dias): volta ao normal quando o pedido é confirmado.
 
 Se a subscrição expirar, a empresa passa a **só leitura** (consulta e exportação continuam disponíveis). Ao fim de 30 dias (configurável) fica **suspensa**. Os dados não são apagados automaticamente.
 
@@ -55,6 +62,14 @@ Em **Integrações (API)** (planos Business e Enterprise, permissão `integratio
 **Exportação de dados → Pedir exportação**: gera um ZIP com JSON de todos os dados da empresa. Recebe um email quando estiver pronto. O ficheiro fica disponível 48 horas.
 
 ## Administrador da plataforma
+
+### Pedidos de subscrição e cupões (0.22.0)
+
+Para a equipa de **faturação** (e super administradores):
+
+- **Pedidos de subscrição**: cada pedido de ativação ou renovação chega por email. Emita a fatura no programa certificado e, quando o pagamento entrar, **Confirmar pagamento** (com o n.º da fatura): o período começa ou é prolongado e a empresa recebe um email. As **subidas de plano** já estão aplicadas: quando estiverem faturadas, marque-as como faturadas. **Cancelar** pede um motivo, que vai no email à empresa. Pedidos por pagar caducam ao fim de 30 dias (`BILLING_PENDING_ORDER_DAYS`).
+- **Cupões**: percentagem ou valor de desconto (num pedido) ou dias extra de período experimental; opcionalmente só para alguns planos, só mensal ou anual, com início, fim e número máximo de usos. Depois de usado, o código e o desconto não mudam: desative-o e crie outro.
+- O texto das indicações de pagamento mostrado às empresas é `BILLING_PAYMENT_INSTRUCTIONS` no `.env`.
 
 ### Saúde do sistema (0.19.0)
 

@@ -62,6 +62,7 @@ final class PermissionRegistry
                 'label' => 'Subscrição',
                 'permissions' => [
                     'subscription.view' => 'Ver plano, limites e utilização',
+                    'subscription.manage' => 'Mudar de plano, pedir a ativação ou a renovação e usar cupões',
                 ],
             ],
             'support' => [

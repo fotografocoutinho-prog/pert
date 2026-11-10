@@ -33,10 +33,21 @@ final class TaskMonitor
         return $code;
     }
 
-    /** O cron está vivo: corre a cada minuto e não faz mais nada. */
+    /**
+     * O cron está vivo: corre a cada minuto. Regista também as tarefas que ainda não têm linha (ex.: uma
+     * tarefa nova depois de uma atualização), para o "nunca correu" contar a partir de agora e não do
+     * primeiro sinal do cron.
+     */
     public static function pulse(): void
     {
         self::run(SystemHealth::PULSE, fn () => 0);
+        self::safely(function (): void {
+            $missing = array_diff(array_keys(SystemHealth::TASKS), DB::table('system_tasks')->pluck('name')->all());
+            if ($missing !== []) {
+                $now = now();
+                DB::table('system_tasks')->insertOrIgnore(array_values(array_map(fn (string $name) => ['name' => $name, 'created_at' => $now, 'updated_at' => $now], $missing)));
+            }
+        });
     }
 
     private static function finish(string $name, int $clock, bool $ok, ?string $error): void

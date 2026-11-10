@@ -275,7 +275,8 @@ As previsões explicadas (0.17.0) não têm tabelas: calculam-se no momento a pa
 
 | Tabela | Campos principais |
 | --- | --- |
-| `coupons`, `coupon_redemptions` | code, percent_off/amount_off, max_redemptions, valid_until |
+| `coupons`, `coupon_redemptions` (0.22.0) | code, percent_off / amount_off_cents / trial_extension_days (só um), plan_ids, billing_cycles, max_redemptions, valid_from, valid_until, is_active · um uso por empresa (unique coupon_id + tenant_id), ligado ao pedido |
+| `subscription_orders` (0.22.0) | kind activation/renewal/upgrade, plan_id, from_plan_id, billing_cycle, list_price/discount/total_cents, coupon_id, status pending/confirmed/canceled/expired, period_starts_at/ends_at, invoice_reference, confirmed_by · `subscriptions.scheduled_plan_id/scheduled_billing_cycle/scheduled_change_at` (mudança no fim do período) |
 | `invoices` (subscrições) | tenant_id, number externo (software certificado), amount_cents, status, paid_at |
 | `payment_methods` | provider, provider_ref (sem dados de cartão) |
 | `integrations` | provider, status, credentials (encriptado), settings (ERP/BIM/assinatura, por fazer) |

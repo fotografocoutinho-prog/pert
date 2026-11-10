@@ -10,6 +10,7 @@ import type {
     ClientOption,
     Company,
     CostCenter,
+    Coupon,
     DataExport,
     Department,
     DiaryEntry,
@@ -31,6 +32,7 @@ import type {
     PermissionModule,
     Plan,
     PlatformDashboard,
+    PlatformSubscriptionOrder,
     PlatformTenant,
     PlatformTenantDetail,
     Project,
@@ -42,8 +44,10 @@ import type {
     Specialty,
     StructureLinks,
     Subscription,
+    SubscriptionOrder,
+    SubscriptionOverview,
+    SubscriptionQuote,
     SupportGrant,
-    UsageItem,
     WebhookDeliveryInfo,
     WebhookInfo,
     WeeklyHours,
@@ -181,12 +185,23 @@ export const auditApi = {
         (await http.get<Paginated<AuditEntry>>('/api/v1/audit-logs', { params })).data,
 };
 
+export interface SubscriptionChoice {
+    plan_id: number;
+    billing_cycle: 'monthly' | 'yearly';
+    coupon_code?: string | null;
+}
+
 export const subscriptionApi = {
-    get: () =>
-        getData<{ subscription: Subscription | null; usage: Record<string, UsageItem>; tenant_status: string }>(
-            '/api/v1/subscription',
-        ),
+    get: () => getData<SubscriptionOverview>('/api/v1/subscription'),
     publicPlans: () => getData<Plan[]>('/api/v1/plans'),
+    quote: async (intent: 'change' | 'order', choice: SubscriptionChoice) =>
+        (await http.post<{ data: SubscriptionQuote }>('/api/v1/subscription/quote', { intent, ...choice })).data.data,
+    change: async (choice: SubscriptionChoice) =>
+        (await http.post<{ data: { action: string; subscription: Subscription; order: SubscriptionOrder | null } }>('/api/v1/subscription/change', choice)).data.data,
+    cancelScheduled: () => http.delete('/api/v1/subscription/scheduled-change'),
+    order: async (choice: SubscriptionChoice) => (await http.post<{ data: SubscriptionOrder }>('/api/v1/subscription/orders', choice)).data.data,
+    cancelOrder: (id: number) => http.post(`/api/v1/subscription/orders/${id}/cancel`),
+    redeemCoupon: async (code: string) => (await http.post<{ data: Subscription }>('/api/v1/subscription/coupon', { code })).data.data,
 };
 
 export const supportApi = {
@@ -529,6 +544,15 @@ export const platformApi = {
     plans: () => getData<Plan[]>('/api/v1/platform/plans'),
     createPlan: (payload: Record<string, unknown>) => http.post('/api/v1/platform/plans', payload),
     updatePlan: (id: number, payload: Record<string, unknown>) => http.put(`/api/v1/platform/plans/${id}`, payload),
+    coupons: () => getData<Coupon[]>('/api/v1/platform/coupons'),
+    createCoupon: async (payload: Record<string, unknown>) => (await http.post<{ data: Coupon }>('/api/v1/platform/coupons', payload)).data.data,
+    updateCoupon: async (id: number, payload: Record<string, unknown>) => (await http.put<{ data: Coupon }>(`/api/v1/platform/coupons/${id}`, payload)).data.data,
+    orders: async (params: { status?: string; page?: number }) =>
+        (await http.get<{ data: PlatformSubscriptionOrder[]; meta: { page: number; last_page: number; total: number; pending: number } }>('/api/v1/platform/subscription-orders', { params })).data,
+    confirmOrder: async (id: number, payload: { invoice_reference: string | null; notes: string | null }) =>
+        (await http.post<{ data: PlatformSubscriptionOrder }>(`/api/v1/platform/subscription-orders/${id}/confirm`, payload)).data.data,
+    cancelOrder: async (id: number, reason: string) =>
+        (await http.post<{ data: PlatformSubscriptionOrder }>(`/api/v1/platform/subscription-orders/${id}/cancel`, { reason })).data.data,
     supportGrants: () => getData<SupportGrant[]>('/api/v1/platform/support-grants'),
     enterSupport: (grantId: number) => http.post(`/api/v1/platform/support-grants/${grantId}/enter`),
     leaveSupport: () => http.post('/api/v1/platform/support/leave'),

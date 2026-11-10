@@ -20,6 +20,11 @@ class SubscriptionResource extends JsonResource
             'trial_ends_at' => $this->trial_ends_at?->toIso8601String(),
             'current_period_starts_at' => $this->current_period_starts_at?->toIso8601String(),
             'current_period_ends_at' => $this->current_period_ends_at?->toIso8601String(),
+            'scheduled_change' => $this->scheduled_change_at ? [
+                'plan' => $this->relationLoaded('scheduledPlan') && $this->scheduledPlan ? ['id' => $this->scheduledPlan->id, 'code' => $this->scheduledPlan->code, 'name' => $this->scheduledPlan->name] : null,
+                'billing_cycle' => $this->scheduled_billing_cycle,
+                'at' => $this->scheduled_change_at->toIso8601String(),
+            ] : null,
             'canceled_at' => $this->canceled_at?->toIso8601String(),
             'ends_at' => $this->ends_at?->toIso8601String(),
             'custom_limits' => $this->when($request->is('api/v1/platform/*'), $this->custom_limits),

@@ -117,6 +117,8 @@ const routes: RouteRecordRaw[] = [
             { path: 'sistema', component: () => import('@/pages/platform/PlatformSystemPage.vue'), meta: { title: 'Saúde do sistema' } },
             { path: 'empresas/:id', component: () => import('@/pages/platform/PlatformTenantPage.vue'), meta: { title: 'Empresa' } },
             { path: 'planos', component: () => import('@/pages/platform/PlatformPlansPage.vue'), meta: { platformRoles: ['billing'], title: 'Planos' } },
+            { path: 'pedidos', component: () => import('@/pages/platform/PlatformOrdersPage.vue'), meta: { platformRoles: ['billing'], title: 'Pedidos de subscrição' } },
+            { path: 'cupoes', component: () => import('@/pages/platform/PlatformCouponsPage.vue'), meta: { platformRoles: ['billing'], title: 'Cupões' } },
             { path: 'suporte', component: () => import('@/pages/platform/PlatformSupportPage.vue'), meta: { platformRoles: ['support'], title: 'Suporte' } },
             { path: 'seguranca', component: () => import('@/pages/platform/PlatformSecurityLogsPage.vue'), meta: { platformRoles: ['support'], title: 'Segurança' } },
         ],
