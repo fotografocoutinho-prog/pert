@@ -63,6 +63,14 @@ Em **Integrações (API)** (planos Business e Enterprise, permissão `integratio
 
 ## Administrador da plataforma
 
+### Apresentação pública e preços (0.24.0)
+
+Quem abre o endereço da plataforma sem sessão vê a apresentação do ObraConnect (o que faz, para quem, segurança, planos e preços, perguntas frequentes) e o botão para criar a empresa; quem já tem sessão vai direto para a aplicação. A mesma página está sempre em `/apresentacao` e em PDF em `/apresentacao.pdf` (para enviar a clientes).
+
+- Os preços, limites e funcionalidades de cada plano vêm de **Planos e preços**: mudar lá muda a página e o PDF. Só aparecem os planos públicos e ativos. Das funcionalidades de cada plano só se anunciam as que já existem.
+- O email para pedidos de proposta e de demonstração é `SALES_EMAIL` no `.env`; vazio, esses botões não aparecem.
+- O texto está em `app/Marketing/Catalog.php` (o mesmo para a página e o PDF).
+
 ### Pedidos de subscrição e cupões (0.22.0)
 
 Para a equipa de **faturação** (e super administradores):

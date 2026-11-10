@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.24.0 — 2026-11-10
+
+**Apresentação pública do ObraConnect**, para vender a plataforma.
+
+- `/` (para quem não tem sessão) e `/apresentacao`: o que muda no dia a dia, tudo o que inclui (obra no terreno, fiscalização, orçamento e autos, custos e compras, previsões e alertas, planeamento e recursos, pré-faturação, subempreiteiros, ligação a outros programas), o que é útil para cada pessoa da equipa, como começar, segurança dos dados, planos e preços e perguntas frequentes. Quem já tem sessão continua a ir direto para a aplicação.
+- Planos e preços lidos de Planos e preços (só os públicos e ativos), com a poupança anual; só se anunciam funcionalidades que já existem.
+- A mesma apresentação em PDF (`/apresentacao.pdf`), para enviar a clientes.
+- Botões de pedido de proposta e de demonstração com o email de `SALES_EMAIL` (sem ele não aparecem).
+- Página servida pelo servidor (sem depender de JavaScript), com título, descrição e etiquetas para partilha; funciona a 360 px.
+
 ## 0.23.0 — 2026-11-10
 
 **Cópias de segurança automáticas** e verificações de dependências (pontos da lista "antes de cobrar" e da checklist de segurança).

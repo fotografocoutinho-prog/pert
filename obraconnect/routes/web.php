@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SetupController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,11 @@ Route::withoutMiddleware(['web'])->group(function () {
     Route::get('instalar', [SetupController::class, 'show'])->name('setup.show');
     Route::post('instalar', [SetupController::class, 'store'])->name('setup.store');
 });
+
+// Apresentação pública (o que faz, para quem, planos e preços) e a mesma em PDF.
+Route::get('/', [LandingController::class, 'home'])->name('landing');
+Route::get('/apresentacao', [LandingController::class, 'show'])->name('landing.show');
+Route::get('/apresentacao.pdf', [LandingController::class, 'brochure'])->middleware('throttle:30,1')->name('landing.pdf');
 
 // SPA: todas as outras rotas GET servem a aplicação Vue.
 Route::view('/entrar', 'app')->name('login');

@@ -19,7 +19,7 @@ Este documento organiza o lançamento. Não inclui estimativas de mercado nem pr
 - [ ] Contacto de suporte, horário e tempos de resposta definidos.
 - [ ] Backups automáticos fora do servidor e teste de restauro feito.
 - [ ] Domínio, email transacional com SPF/DKIM/DMARC, certificado SSL.
-- [ ] Página pública de preços e de funcionalidades (fora desta aplicação ou a acrescentar).
+- [x] Página pública de apresentação e preços (0.24.0): `/` para quem não tem sessão e `/apresentacao`, com a apresentação em PDF em `/apresentacao.pdf`. Os preços vêm de **Plataforma → Planos e preços** (só os planos públicos e ativos).
 
 ## Planos (estrutura já configurável)
 

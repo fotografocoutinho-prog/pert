@@ -1,5 +1,16 @@
 # Registo de progresso
 
+## v0.24.0 — apresentação pública (2026-11-10)
+
+| Área | Verificação |
+| --- | --- |
+| Página pública com o conteúdo, planos públicos e preços do backoffice (plano não público escondido), sem anunciar o que não existe, indexável | Testes (`LandingTest`) + browser (360 px e 1280 px) |
+| Email de contacto só com `SALES_EMAIL` | Testes |
+| Com sessão, `/` vai para a aplicação; `/apresentacao` abre sempre; a SPA continua igual | Testes (`LandingTest`, `SubdirectoryInstallTest`) |
+| Apresentação em PDF (5 páginas A4) | Testes + PDF revisto página a página |
+
+No mesmo dia: registo DMARC publicado no DNS da coda.pt (`v=DMARC1; p=none; rua=mailto:carlos@coda.pt`).
+
 ## v0.23.0 — cópias de segurança automáticas (2026-11-10)
 
 | Área | Verificação |

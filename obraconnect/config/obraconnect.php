@@ -23,6 +23,11 @@ return [
 
     // Mudanças de plano e pedidos de ativação/renovação feitos pela empresa (sem pagamento online: a
     // equipa de faturação recebe o pedido por email, fatura no programa certificado e confirma no backoffice).
+    // Página pública de apresentação: email para pedidos de proposta e demonstração (vazio = não aparece).
+    'sales' => [
+        'contact_email' => env('SALES_EMAIL'),
+    ],
+
     'billing' => [
         'payment_instructions' => env('BILLING_PAYMENT_INSTRUCTIONS', 'A equipa ObraConnect envia a fatura com as indicações de pagamento. O período começa quando o pagamento for confirmado.'),
         // Renovar só a partir de X dias antes do fim do período.
