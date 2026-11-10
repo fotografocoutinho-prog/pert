@@ -57,6 +57,17 @@ return [
         ],
     ],
 
+    // Cópia de segurança diária feita pela aplicação (03:30): base de dados e ficheiros das empresas, numa
+    // pasta privada fora do public_html. Não substitui uma cópia fora do servidor.
+    'backup' => [
+        'path' => env('BACKUP_PATH', storage_path('app/backups')),
+        'keep_days' => (int) env('BACKUP_KEEP_DAYS', 14),
+        'files' => (bool) env('BACKUP_FILES', true),
+        // Cada zip tem todos os ficheiros: guardam-se só os últimos (a quota do alojamento é limitada).
+        'files_keep' => (int) env('BACKUP_FILES_KEEP', 3),
+        'files_max_mb' => (int) env('BACKUP_FILES_MAX_MB', 5120),
+    ],
+
     'exports' => [
         'retention_hours' => 48,
     ],

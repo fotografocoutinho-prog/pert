@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 0.23.0 — 2026-11-10
+
+**Cópias de segurança automáticas** e verificações de dependências (pontos da lista "antes de cobrar" e da checklist de segurança).
+
+- Todos os dias às 03:30 (`obraconnect:backup`): a base de dados inteira em `.sql.gz` (feita em PHP, porque no cPanel a aplicação não pode chamar o `mysqldump`) e os ficheiros das empresas em `.zip` (sem as exportações temporárias; acima de 5 GB não se faz). Em `storage/app/backups`: a base de dados 14 dias (sempre as 3 últimas), os ficheiros só os 3 últimos zips (quota do alojamento).
+- Saúde do sistema: tarefa nova e verificação "Cópias de segurança" com a última cópia; falha (e avisa por email) se passar mais de 26 horas sem cópia.
+- CI: a cópia é restaurada numa base vazia de MySQL 8.4 com o cliente normal e comparada tabela a tabela (`CHECKSUM TABLE`) com a original, com a empresa de demonstração completa; `composer audit` e `npm audit --omit=dev`.
+- Continua a ser preciso copiar as cópias para fora do servidor (docs/11).
+
 ## 0.22.0 — 2026-11-10
 
 Fase 6, parte 3: **mudanças de plano pela própria empresa e cupões**, sem pagamento online (a fatura continua a ser emitida no programa certificado).

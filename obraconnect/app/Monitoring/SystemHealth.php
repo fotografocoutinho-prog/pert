@@ -2,6 +2,7 @@
 
 namespace App\Monitoring;
 
+use App\Backup\Backups;
 use App\Enums\SupplierDocumentStatus;
 use App\Models\SupplierDocument;
 use App\Tenancy\TenantContext;
@@ -31,6 +32,7 @@ final class SystemHealth
         'obraconnect-subscricoes' => ['Subscrições e períodos de experiência (02:15)', 26 * 60],
         'obraconnect-previsoes-alertas' => ['Previsões e alertas das obras (07:00)', 26 * 60],
         'obraconnect-escalonamento' => ['Ocorrências com o prazo ultrapassado (07:30)', 26 * 60],
+        'obraconnect-backup' => ['Cópia de segurança diária (03:30)', 26 * 60],
         'obraconnect-tokens' => ['Limpeza de sessões da API (diária)', 26 * 60],
         'obraconnect-reposicoes' => ['Limpeza de pedidos de reposição de palavra-passe (diária)', 26 * 60],
         'obraconnect-falhados' => ['Limpeza de tarefas falhadas antigas (semanal)', 8 * 24 * 60],
@@ -68,6 +70,7 @@ final class SystemHealth
         if ($disk = $this->disk()) {
             $out[] = $disk;
         }
+        $out[] = $this->backups($now);
 
         return $out;
     }
@@ -263,5 +266,28 @@ final class SystemHealth
 
         return self::check('disk', 'Configuração', 'Espaço em disco', $gb < 1 ? 'warning' : 'ok',
             number_format($gb, 1, ',', ' ').' GB livres no disco do servidor (a quota da conta cPanel pode ser menor).');
+    }
+
+    private function backups(CarbonImmutable $now): array
+    {
+        try {
+            $all = app(Backups::class)->list();
+        } catch (Throwable $e) {
+            return self::check('backups', 'Cópias de segurança', 'Cópias de segurança', 'failing', 'Não foi possível ler a pasta das cópias: '.Str::limit($e->getMessage(), 150));
+        }
+        $db = collect($all)->firstWhere('kind', 'db');
+        if ($db === null) {
+            return self::check('backups', 'Cópias de segurança', 'Cópias de segurança', 'ok', 'Ainda não há cópias: a primeira faz-se às 03:30.');
+        }
+        $at = $db['at']->timezone('Europe/Lisbon')->format('d/m/Y H:i');
+        if ($db['at']->lt($now->subHours(26))) {
+            return self::check('backups', 'Cópias de segurança', 'Cópias de segurança', 'failing', "A última cópia da base de dados é de {$at}.");
+        }
+        $files = collect($all)->firstWhere('kind', 'files');
+        $mb = fn (int $b) => number_format($b / 1048576, 1, ',', ' ').' MB';
+
+        return self::check('backups', 'Cópias de segurança', 'Cópias de segurança', 'ok', "Última a {$at}: base de dados {$mb($db['bytes'])}"
+            .($files ? ", ficheiros {$mb($files['bytes'])}" : '').' · '.count($all).' ficheiros guardados ('.config('obraconnect.backup.keep_days')
+            .' dias). Ficam só neste servidor: copie-os para fora com regularidade.');
     }
 }

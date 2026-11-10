@@ -55,6 +55,11 @@ Schedule::call($run('obraconnect-escalonamento', 'obraconnect:escalate-issues'))
     ->withoutOverlapping();
 Schedule::call($run('obraconnect-exportacoes', 'obraconnect:prune-exports'))->hourly()->name('obraconnect-exportacoes');
 Schedule::call($run('obraconnect-webhooks', 'obraconnect:prune-webhooks'))->hourly()->name('obraconnect-webhooks');
+Schedule::call($run('obraconnect-backup', 'obraconnect:backup'))
+    ->name('obraconnect-backup')
+    ->dailyAt('03:30')
+    ->timezone('Europe/Lisbon')
+    ->withoutOverlapping(120);
 Schedule::call($run('obraconnect-tokens', 'sanctum:prune-expired', ['--hours' => 24]))->daily()->name('obraconnect-tokens');
 Schedule::call($run('obraconnect-reposicoes', 'auth:clear-resets'))->daily()->name('obraconnect-reposicoes');
 Schedule::call($run('obraconnect-falhados', 'queue:prune-failed', ['--hours' => 720]))->weekly()->name('obraconnect-falhados');

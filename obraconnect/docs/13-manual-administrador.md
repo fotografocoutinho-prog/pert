@@ -71,6 +71,10 @@ Para a equipa de **faturação** (e super administradores):
 - **Cupões**: percentagem ou valor de desconto (num pedido) ou dias extra de período experimental; opcionalmente só para alguns planos, só mensal ou anual, com início, fim e número máximo de usos. Depois de usado, o código e o desconto não mudam: desative-o e crie outro.
 - O texto das indicações de pagamento mostrado às empresas é `BILLING_PAYMENT_INSTRUCTIONS` no `.env`.
 
+### Cópias de segurança (0.23.0)
+
+A aplicação faz todos os dias às 03:30 uma cópia da base de dados e dos ficheiros das empresas em `storage/app/backups` (base de dados 14 dias; ficheiros, os 3 últimos). Na **Saúde do sistema** vê-se a última; se passar um dia sem cópia, há aviso por email. Copie estes ficheiros para fora do servidor com regularidade (ver `docs/11-backup-restauro.md`).
+
 ### Saúde do sistema (0.19.0)
 
 Em **Plataforma → Saúde do sistema**: o cron (sinal a cada minuto), cada tarefa agendada (quando correu e se correu bem), a fila de trabalhos, os trabalhos falhados, o DocIntel, os erros registados hoje e a configuração (envio de emails, modo de depuração, disco). Verde está bem, amarelo merece atenção, vermelho está a falhar.

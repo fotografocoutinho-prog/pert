@@ -10,6 +10,19 @@
 
 Sem a `APP_KEY` original, os segredos 2FA e as sessões existentes deixam de ser legíveis. Guarde-a num gestor de passwords.
 
+## Cópia automática da aplicação (0.23.0)
+
+Todos os dias às 03:30 (`obraconnect:backup`, pelo cron que já corre o `schedule:run`) a aplicação guarda:
+
+- `db-AAAAMMDD-HHMMSS.sql.gz`: a base de dados inteira em SQL (feito em PHP, porque no cPanel a aplicação não pode chamar o `mysqldump`);
+- `files-AAAAMMDD-HHMMSS.zip`: os ficheiros das empresas (fotografias, documentos, faturas), sem as exportações temporárias. Acima de `BACKUP_FILES_MAX_MB` (5 GB) não se faz: use a cópia do alojamento.
+
+Ficam em `storage/app/backups` (pasta privada, fora do `public_html`, que as atualizações não mexem): a base de dados 14 dias (`BACKUP_KEEP_DAYS`, sempre pelo menos as 3 últimas) e os ficheiros só os 3 últimos zips (`BACKUP_FILES_KEEP`), porque cada um tem tudo e a quota do alojamento é limitada. A **Saúde do sistema** mostra a última cópia e falha (com email) se passar mais de 26 horas sem nenhuma.
+
+Para fazer uma já: `php artisan obraconnect:backup` (ou `--no-files`). O CI confirma a cada versão que esta cópia restaura numa base vazia de MySQL 8.4 com o conteúdo igual, tabela a tabela.
+
+**Continua a ser preciso copiar para fora do servidor** (ver abaixo): uma cópia que só existe no servidor não protege contra a perda do servidor ou da conta.
+
 ## cPanel
 
 ### Backups do próprio cPanel
@@ -51,7 +64,7 @@ Copie regularmente `~/backups/` para fora do servidor (cPanel → Backup remoto,
 ## Restauro
 
 1. Colocar a aplicação em manutenção (`php artisan down`) ou fora de horas.
-2. Base de dados:
+2. Base de dados (a cópia da aplicação ou a do cron restauram-se da mesma maneira):
    ```bash
    gunzip -c db-AAAAMMDD-HHMM.sql.gz | mysql --defaults-file=$HOME/.my.cnf conta_obraconnect
    ```

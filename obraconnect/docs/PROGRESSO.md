@@ -1,5 +1,17 @@
 # Registo de progresso
 
+## v0.23.0 — cópias de segurança automáticas (2026-11-10)
+
+| Área | Verificação |
+| --- | --- |
+| Dump da base de dados em PHP restaura numa base vazia com as mesmas linhas em todas as tabelas (aspas, barras, quebras de linha, acentos) | Testes (`BackupTest`, SQLite) + CI (MySQL 8.4, demonstração completa, `CHECKSUM TABLE`) |
+| Ficheiros das empresas num zip, sem exportações temporárias; só base de dados com `--no-files` | Testes |
+| Base de dados 14 dias (sempre as 3 últimas), ficheiros só os 3 últimos zips; outros ficheiros da pasta ficam | Testes |
+| Saúde do sistema: sem cópias (ok antes da primeira), última com mais de 26 h (falha) | Testes |
+| Dependências PHP e JavaScript sem vulnerabilidades conhecidas | `composer audit`, `npm audit` (local e CI) |
+
+Verificação pública de produção feita no mesmo dia: HTTPS válido até 14/12/2026 e redirecionamento de http, cabeçalhos de segurança presentes, erros sem detalhe interno, `.env` não acessível, `/instalar` e `/docs` do DocIntel fechados; email com SPF e DKIM, **sem DMARC**.
+
 ## v0.22.0 — Fase 6, parte 3: planos pela empresa e cupões (2026-11-10)
 
 | Área | Verificação |

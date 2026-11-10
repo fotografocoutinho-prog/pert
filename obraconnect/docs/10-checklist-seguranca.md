@@ -59,7 +59,7 @@ Referências: OWASP ASVS 4.0 (nível 2 como alvo) e OWASP Top 10. **✔** implem
 - [ ] Utilizador MySQL com privilégios só na base da aplicação.
 - [ ] Permissões: `.env` com `600` ou `640`.
 - [ ] Cron configurado (sem ele, emails e ciclo de subscrições param).
-- [ ] Backups automáticos e um teste de restauro feito (ver `11-backup-restauro.md`).
+- [ ] Backups automáticos e um teste de restauro feito (ver `11-backup-restauro.md`). Desde a 0.23.0 a aplicação faz uma cópia diária no servidor e o CI testa o restauro; falta a cópia **fora** do servidor.
 - [ ] `PASSWORD_CHECK_UNCOMPROMISED=true` se o servidor tiver saída HTTPS.
 - [ ] `TRUSTED_PROXIES` só se houver Cloudflare/proxy à frente.
 - [ ] Contas da plataforma com 2FA ativa e emails pessoais (não partilhados).
@@ -76,7 +76,6 @@ Referências: OWASP ASVS 4.0 (nível 2 como alvo) e OWASP Top 10. **✔** implem
 
 ## Por fazer (próximas fases)
 
-- `composer audit` e `npm audit --omit=dev` no CI.
 - Antivírus em uploads; quarentena.
 - Comando de eliminação definitiva de empresas com registo.
 - Rate limiting por empresa em uploads.

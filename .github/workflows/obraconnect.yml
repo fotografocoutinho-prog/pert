@@ -60,9 +60,13 @@ jobs:
       - name: Estilo (Pint)
         run: vendor/bin/pint --test
 
+      - name: Dependências sem vulnerabilidades conhecidas
+        run: composer audit --no-dev --no-interaction
+
       - name: Frontend (tipos e build)
         run: |
           npm ci --no-audit --no-fund
+          npm audit --omit=dev
           npm run typecheck
           npm run build
 
@@ -98,6 +102,34 @@ jobs:
           mysql -h 127.0.0.1 -uroot -proot obraconnect_sql < database/sql/obraconnect-install.sql
           DB_DATABASE=obraconnect_sql php artisan migrate --force | tee /tmp/migrate.log
           grep -q "Nothing to migrate" /tmp/migrate.log
+
+      - name: Cópia de segurança da aplicação e restauro em MySQL 8.4
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          APP_KEY: base64:b2JyYWNvbm5lY3QtY2hhdmUtc28tcGFyYS10ZXN0ZXM=
+        run: |
+          my() { mysql -h 127.0.0.1 -uroot -proot -N "$@"; }
+          my -e "CREATE DATABASE obraconnect_bk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE DATABASE obraconnect_rs CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          # 1. Base com a empresa de demonstração (todas as áreas) e a cópia feita pela aplicação.
+          DB_DATABASE=obraconnect_bk php artisan migrate --force --seed
+          DB_DATABASE=obraconnect_bk php artisan obraconnect:demo
+          DB_DATABASE=obraconnect_bk php artisan obraconnect:backup --no-files --path=/tmp/copias
+          # 2. Restaura numa base vazia com o cliente normal e compara o conteúdo tabela a tabela.
+          gunzip -c /tmp/copias/db-*.sql.gz | mysql -h 127.0.0.1 -uroot -proot obraconnect_rs
+          n=0
+          for t in $(my -e "select table_name from information_schema.tables where table_schema = 'obraconnect_bk' and table_type = 'BASE TABLE'"); do
+            a=$(my -e "checksum table obraconnect_bk.\`$t\`" | awk '{print $2}')
+            b=$(my -e "checksum table obraconnect_rs.\`$t\`" | awk '{print $2}')
+            [ "$a" = "$b" ] || { echo "::error::Tabela $t diferente depois do restauro ($a ≠ $b)"; exit 1; }
+            n=$((n + 1))
+          done
+          echo "Restauro igual ao original em $n tabelas."
+          DB_DATABASE=obraconnect_rs php artisan migrate --force | tee /tmp/migrate-rs.log
+          grep -q "Nothing to migrate" /tmp/migrate-rs.log
 
   release:
     name: ZIP de instalação (cPanel)
