@@ -278,8 +278,9 @@ As previsões explicadas (0.17.0) não têm tabelas: calculam-se no momento a pa
 | `coupons`, `coupon_redemptions` | code, percent_off/amount_off, max_redemptions, valid_until |
 | `invoices` (subscrições) | tenant_id, number externo (software certificado), amount_cents, status, paid_at |
 | `payment_methods` | provider, provider_ref (sem dados de cartão) |
-| `integrations` | provider, status, credentials (encriptado), settings |
-| `webhooks`, `webhook_deliveries` | url, secret (encriptado), events, last_status |
+| `integrations` | provider, status, credentials (encriptado), settings (ERP/BIM/assinatura, por fazer) |
+| `api_keys` (0.21.0) | name, prefix, key_hash (SHA-256; a chave em claro não se guarda), scopes, last_used_at/ip, expires_at, revoked_at |
+| `webhook_endpoints`, `webhook_deliveries` (0.21.0) | url, secret (encriptado), events, active, consecutive_failures, disabled_reason · event, event_id, payload, status, attempts, response_status, error, next_attempt_at |
 | `platform_announcements` | title, body, audience, starts_at, ends_at |
 | `support_tickets` | tenant_id, subject, status, priority |
 

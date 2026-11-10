@@ -27,6 +27,7 @@ final class SystemHealth
         'obraconnect-fila' => ['Fila: emails, pré-visualizações e leituras de faturas (a cada minuto)', 10],
         'obraconnect-sistema' => ['Verificação do sistema (a cada 10 minutos)', 30],
         'obraconnect-exportacoes' => ['Limpeza das exportações (de hora a hora)', 130],
+        'obraconnect-webhooks' => ['Limpeza do registo de envios de webhooks (de hora a hora)', 130],
         'obraconnect-subscricoes' => ['Subscrições e períodos de experiência (02:15)', 26 * 60],
         'obraconnect-previsoes-alertas' => ['Previsões e alertas das obras (07:00)', 26 * 60],
         'obraconnect-escalonamento' => ['Ocorrências com o prazo ultrapassado (07:30)', 26 * 60],

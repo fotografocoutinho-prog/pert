@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\ForecastController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\InspectionController;
 use App\Http\Controllers\Api\V1\InspectionItemController;
+use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\InvitationAcceptanceController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\InvoiceDraftController;
@@ -50,6 +51,7 @@ use App\Http\Controllers\Api\V1\SupportGrantController;
 use App\Http\Controllers\Api\V1\TimeEntryController;
 use App\Http\Controllers\Api\V1\WorkCalendarController;
 use App\Http\Controllers\Api\V1\WorkerController;
+use App\Http\Controllers\PublicApi\V1\PublicApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -123,6 +125,19 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('support-grants', [SupportGrantController::class, 'index'])->name('support-grants.index');
             Route::post('support-grants', [SupportGrantController::class, 'store'])->name('support-grants.store');
             Route::delete('support-grants/{supportAccessGrant}', [SupportGrantController::class, 'destroy'])->name('support-grants.destroy');
+
+            // Integrações: chaves da API pública e webhooks
+            Route::get('integrations', [IntegrationController::class, 'index'])->name('integrations.index');
+            Route::post('integrations/api-keys', [IntegrationController::class, 'storeKey'])->name('integrations.keys.store');
+            Route::delete('integrations/api-keys/{apiKey}', [IntegrationController::class, 'revokeKey'])->whereNumber('apiKey')->name('integrations.keys.revoke');
+            Route::post('integrations/webhooks', [IntegrationController::class, 'storeWebhook'])->name('integrations.webhooks.store');
+            Route::put('integrations/webhooks/{webhookEndpoint}', [IntegrationController::class, 'updateWebhook'])->whereNumber('webhookEndpoint')->name('integrations.webhooks.update');
+            Route::delete('integrations/webhooks/{webhookEndpoint}', [IntegrationController::class, 'destroyWebhook'])->whereNumber('webhookEndpoint')->name('integrations.webhooks.destroy');
+            Route::post('integrations/webhooks/{webhookEndpoint}/secret', [IntegrationController::class, 'rotateSecret'])->whereNumber('webhookEndpoint')->name('integrations.webhooks.secret');
+            Route::post('integrations/webhooks/{webhookEndpoint}/test', [IntegrationController::class, 'test'])->whereNumber('webhookEndpoint')->middleware('throttle:invitations')->name('integrations.webhooks.test');
+            Route::get('integrations/webhooks/{webhookEndpoint}/deliveries', [IntegrationController::class, 'deliveries'])->whereNumber('webhookEndpoint')->name('integrations.webhooks.deliveries');
+            Route::post('integrations/webhooks/{webhookEndpoint}/deliveries/{delivery}/retry', [IntegrationController::class, 'retry'])
+                ->whereNumber(['webhookEndpoint', 'delivery'])->scopeBindings()->name('integrations.webhooks.retry');
 
             Route::get('exports', [ExportController::class, 'index'])->name('exports.index');
             Route::post('exports', [ExportController::class, 'store'])->middleware('throttle:exports')->name('exports.store');
@@ -410,4 +425,18 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             });
         });
     });
+});
+
+/*
+| API pública v1, para outros programas da empresa (faturação, ERP, BI). Autenticação por chave de API
+| ("Authorization: Bearer oc_…"); a empresa vem sempre da chave. Sem sessão nem cookies.
+*/
+Route::prefix('public/v1')->name('public.v1.')->middleware(['throttle:public-api', 'api.key'])->group(function () {
+    Route::get('ping', [PublicApiController::class, 'ping'])->name('ping');
+    Route::get('projects', [PublicApiController::class, 'projects'])->name('projects.index');
+    Route::get('projects/{project}', [PublicApiController::class, 'showProject'])->name('projects.show');
+    Route::get('projects/{project}/certificates', [PublicApiController::class, 'certificates'])->name('projects.certificates');
+    Route::get('invoice-drafts', [PublicApiController::class, 'invoiceDrafts'])->name('invoice-drafts.index');
+    Route::post('supplier-documents', [PublicApiController::class, 'storeSupplierDocument'])->name('supplier-documents.store');
+    Route::get('supplier-documents/{document}', [PublicApiController::class, 'showSupplierDocument'])->name('supplier-documents.show');
 });

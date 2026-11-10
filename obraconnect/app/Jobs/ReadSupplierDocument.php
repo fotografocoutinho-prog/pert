@@ -4,6 +4,8 @@ namespace App\Jobs;
 
 use App\DocIntel\DocIntelClient;
 use App\Enums\SupplierDocumentStatus;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Models\SupplierDocument;
 use App\Purchasing\SupplierDocuments;
 use App\Tenancy\MissingTenantContextException;
@@ -55,6 +57,7 @@ class ReadSupplierDocument implements ShouldQueue
         }
 
         $doc->forceFill(['status' => SupplierDocumentStatus::ToReview, 'read_at' => now()])->save();
+        Webhooks::dispatch('supplier_document.read', fn () => Payloads::supplierDocument($doc));
     }
 
     /** Tempo esgotado ou erro fora do try: não deixar o documento preso em "a ler". */

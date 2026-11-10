@@ -46,6 +46,7 @@ const tenantNav = computed<NavItem[]>(() => [
     { to: '/app/auditoria', label: 'Auditoria', show: session.can('audit.view') },
     { to: '/app/subscricao', label: 'Subscrição', show: session.can('subscription.view') },
     { to: '/app/suporte', label: 'Suporte técnico', show: session.can('support.manage') },
+    { to: '/app/integracoes', label: 'Integrações (API)', show: session.can('integrations.manage') },
     { to: '/app/exportacoes', label: 'Exportação de dados', show: session.can('data.export') },
 ]);
 

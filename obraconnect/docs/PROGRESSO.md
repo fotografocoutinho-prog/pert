@@ -1,5 +1,19 @@
 # Registo de progresso
 
+## v0.21.0 — Fase 6, parte 2: API pública e webhooks (2026-11-09)
+
+| Área | Verificação |
+| --- | --- |
+| Chaves: só o hash guardado, chave mostrada uma vez, âmbitos, validade, revogação, X-API-Key, chave errada com o início certo | Testes (`PublicApiTest`) |
+| Isolamento: a chave só vê a sua empresa (obra de outra = 404), outra empresa não revoga chaves alheias | Testes |
+| Empresa só leitura (só GET), suspensa (423), plano sem integrações (402 nas chaves e na gestão) | Testes |
+| Envio de faturas pela API (obra pelo código, repetido = 409, auditoria com «api:nome») | Testes |
+| Webhooks: só https público (localhost, .local, redes privadas, CGNAT, 169.254, ::1, utilizador:palavra-passe), assinatura, só a quem escuta o evento, só a própria empresa | Testes (`WebhooksTest`) |
+| Repetições (1 min … 6 h), desistência à 6.ª, desligado à 10.ª falha seguida, voltar a ligar, teste, reenvio com o mesmo id, troca de segredo, limpeza aos 30 dias | Testes |
+| Página Integrações a 360 px e no computador | Browser |
+
+Decisões: os webhooks saem pela fila depois de a ação terminar e nunca a estragam; o teste é síncrono (uma tentativa) para se ver logo o resultado; reenviar cria uma entrega nova com o mesmo id de evento (o recetor ignora repetidos).
+
 ## v0.20.0 — portal de subempreiteiros (2026-11-09)
 
 | Área | Verificação |

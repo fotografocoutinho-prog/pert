@@ -2,6 +2,7 @@ import { appUrl } from '@/utils/base';
 import { cachedRead } from '@/offline/cache';
 import { ensureCsrfCookie, getData, http } from './http';
 import type {
+    ApiKeyInfo,
     AuditEntry,
     ChecklistItemDef,
     ChecklistTemplate,
@@ -13,15 +14,16 @@ import type {
     Department,
     DiaryEntry,
     DocumentListing,
+    EvidenceIndex,
     Holiday,
     Inspection,
     InspectionDetail,
     InspectionItem,
+    IntegrationsOverview,
+    Invitation,
     Issue,
     IssueAssignee,
     IssueDetail,
-    EvidenceIndex,
-    Invitation,
     MediaItem,
     Member,
     MePayload,
@@ -42,6 +44,8 @@ import type {
     Subscription,
     SupportGrant,
     UsageItem,
+    WebhookDeliveryInfo,
+    WebhookInfo,
     WeeklyHours,
     WorkCalendar,
 } from './types';
@@ -190,6 +194,29 @@ export const supportApi = {
     create: async (reason: string, hours: number) =>
         (await http.post<{ data: SupportGrant }>('/api/v1/support-grants', { reason, hours })).data.data,
     revoke: (id: number) => http.delete(`/api/v1/support-grants/${id}`),
+};
+
+export interface WebhookPayload {
+    url: string;
+    description: string | null;
+    events: string[];
+    active?: boolean;
+}
+
+export const integrationsApi = {
+    overview: () => getData<IntegrationsOverview>('/api/v1/integrations'),
+    createKey: async (payload: { name: string; scopes: string[]; expires_at: string | null }) =>
+        (await http.post<{ data: ApiKeyInfo }>('/api/v1/integrations/api-keys', payload)).data.data,
+    revokeKey: (id: number) => http.delete(`/api/v1/integrations/api-keys/${id}`),
+    createWebhook: async (payload: WebhookPayload) => (await http.post<{ data: WebhookInfo }>('/api/v1/integrations/webhooks', payload)).data.data,
+    updateWebhook: async (id: number, payload: WebhookPayload) =>
+        (await http.put<{ data: WebhookInfo }>(`/api/v1/integrations/webhooks/${id}`, payload)).data.data,
+    deleteWebhook: (id: number) => http.delete(`/api/v1/integrations/webhooks/${id}`),
+    rotateSecret: async (id: number) => (await http.post<{ data: WebhookInfo }>(`/api/v1/integrations/webhooks/${id}/secret`)).data.data,
+    test: async (id: number) => (await http.post<{ data: WebhookDeliveryInfo }>(`/api/v1/integrations/webhooks/${id}/test`)).data.data,
+    deliveries: (id: number) => getData<WebhookDeliveryInfo[]>(`/api/v1/integrations/webhooks/${id}/deliveries`),
+    retry: async (id: number, deliveryId: number) =>
+        (await http.post<{ data: WebhookDeliveryInfo }>(`/api/v1/integrations/webhooks/${id}/deliveries/${deliveryId}/retry`)).data.data,
 };
 
 export const exportsApi = {

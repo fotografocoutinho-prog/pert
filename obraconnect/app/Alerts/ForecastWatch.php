@@ -10,6 +10,8 @@ use App\Enums\SupplierDocumentStatus;
 use App\Forecasting\CostForecast;
 use App\Forecasting\Explain;
 use App\Forecasting\ScheduleForecast;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Mail\ProjectAlertsMail;
 use App\Models\ForecastSnapshot;
 use App\Models\Inspection;
@@ -263,12 +265,13 @@ final class ForecastWatch
                 }
                 $alert->save();
             } else {
-                ProjectAlert::query()->create($attributes + [
+                $new = ProjectAlert::query()->create($attributes + [
                     'project_id' => $c['project_id'],
                     'type' => $c['type'],
                     'open_key' => $key,
                     'opened_at' => now(),
                 ]);
+                Webhooks::dispatch('alert.opened', fn () => Payloads::alert($new));
                 $opened++;
             }
         }

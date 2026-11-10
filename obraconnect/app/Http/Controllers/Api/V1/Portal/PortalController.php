@@ -8,6 +8,8 @@ use App\Enums\CertificateStatus;
 use App\Enums\ContractStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Models\Certificate;
 use App\Models\CertificateLine;
 use App\Models\Contract;
@@ -123,6 +125,7 @@ class PortalController extends Controller
 
         $this->auditor->record('certificate.proposed_by_portal', $certificate, ['project' => $c->project->code, 'contract' => $c->code, 'number' => $certificate->number, 'by' => $portalUser->email]);
         $notifier->portalProposal($c->project, $c, $certificate, $portalUser);
+        Webhooks::dispatch('certificate.proposed', fn () => Payloads::certificate($certificate));
 
         return response()->json(['data' => $this->detail($c->refresh())], 201);
     }

@@ -1,12 +1,13 @@
 openapi: 3.1.0
 info:
   title: ObraConnect API
-  version: 0.20.0
+  version: 0.21.0
   description: |
     API REST v1 do ObraConnect (fase 1 — fundação; fase 2 — obras e diário de obra).
 
     **Autenticação.** A SPA usa sessão por cookie (Laravel Sanctum): `GET /sanctum/csrf-cookie`,
-    depois `POST /auth/login` com o cabeçalho `X-XSRF-TOKEN`. Integrações futuras usarão tokens Bearer (Sanctum).
+    depois `POST /auth/login` com o cabeçalho `X-XSRF-TOKEN`. Outros programas usam a **API pública** (`/api/public/v1`)
+    com uma chave da empresa (`Authorization: Bearer oc_…`): ver `docs/16-api-publica.md`.
 
     **Empresa ativa.** As rotas de empresa usam sempre a empresa ativa da conta (`users.current_tenant_id`),
     validada no servidor. Nenhum parâmetro ou cabeçalho escolhe a empresa. Para mudar: `POST /api/v1/me/tenants/{id}/switch`.
@@ -342,6 +343,61 @@ paths:
       responses: { "201": { description: Criada } }
   /api/v1/support-grants/{supportAccessGrant}:
     delete: { tags: [Suporte], summary: Revogar, parameters: [{ name: supportAccessGrant, in: path, required: true, schema: { type: integer } }], responses: { "204": { description: OK } } }
+  /api/v1/integrations:
+    get: { tags: [Integrações], summary: "Chaves da API, webhooks, âmbitos e eventos (integrations.manage); enabled = o plano inclui integrações" }
+  /api/v1/integrations/api-keys:
+    post:
+      tags: [Integrações]
+      summary: Criar chave (a chave em claro, plain_key, só vem nesta resposta). 402 sem o plano; 409 API_KEYS_LIMIT (20 ativas)
+      requestBody: { content: { application/json: { schema: { type: object, required: [name, scopes], properties: { name: { type: string, maxLength: 100 }, scopes: { type: array, items: { type: string, enum: ["projects:read", "invoicing:read", "supplier-documents:read", "supplier-documents:write"] } }, expires_at: { type: [string, "null"], format: date } } } } } }
+      responses: { "201": { description: Criada } }
+  /api/v1/integrations/api-keys/{apiKey}:
+    delete: { tags: [Integrações], summary: Revogar (imediato), responses: { "204": { description: OK } } }
+  /api/v1/integrations/webhooks:
+    post:
+      tags: [Integrações]
+      summary: "Criar webhook (só https público: WEBHOOK_URL_INSECURE, WEBHOOK_URL_PRIVATE); o segredo (secret) só vem nesta resposta. Até 10"
+      requestBody: { content: { application/json: { schema: { type: object, required: [url, events], properties: { url: { type: string }, description: { type: [string, "null"] }, events: { type: array, items: { type: string, enum: [certificate.approved, certificate.proposed, invoice_draft.ready, supplier_document.read, supplier_document.posted, alert.opened] } } } } } } }
+      responses: { "201": { description: Criado } }
+  /api/v1/integrations/webhooks/{webhookEndpoint}:
+    put: { tags: [Integrações], summary: "Alterar endereço, eventos e active (voltar a ligar recomeça a contagem de falhas)" }
+    delete: { tags: [Integrações], summary: Apagar (com o histórico de envios) }
+  /api/v1/integrations/webhooks/{webhookEndpoint}/secret:
+    post: { tags: [Integrações], summary: Trocar o segredo (o novo só vem nesta resposta) }
+  /api/v1/integrations/webhooks/{webhookEndpoint}/test:
+    post: { tags: [Integrações], summary: "Enviar já um evento ping (uma tentativa) e devolver o resultado" }
+  /api/v1/integrations/webhooks/{webhookEndpoint}/deliveries:
+    get: { tags: [Integrações], summary: Últimos 50 envios (estado, tentativas, resposta, conteúdo) }
+  /api/v1/integrations/webhooks/{webhookEndpoint}/deliveries/{delivery}/retry:
+    post: { tags: [Integrações], summary: "Reenviar como nova entrega, com o mesmo id de evento (202)" }
+
+  # API pública (chave da empresa, sem sessão). Detalhe e formato dos webhooks em docs/16-api-publica.md.
+  /api/public/v1/ping:
+    get: { tags: [API pública], summary: "Empresa, nome e âmbitos da chave, versão", security: [{ apiKey: [] }] }
+  /api/public/v1/projects:
+    get:
+      tags: [API pública]
+      summary: Obras (projects:read), paginado
+      security: [{ apiKey: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [planning, active, suspended, completed, archived] } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+  /api/public/v1/projects/{project}:
+    get: { tags: [API pública], summary: "Obra por id ou código, com costs e forecast (projects:read)", security: [{ apiKey: [] }] }
+  /api/public/v1/projects/{project}/certificates:
+    get: { tags: [API pública], summary: "Autos não rascunho, com as linhas do período (projects:read)", security: [{ apiKey: [] }] }
+  /api/public/v1/invoice-drafts:
+    get: { tags: [API pública], summary: "Pré-faturas no formato da exportação JSON, com id (invoicing:read)", security: [{ apiKey: [] }] }
+  /api/public/v1/supplier-documents:
+    post:
+      tags: [API pública]
+      summary: "Enviar fatura ou guia (supplier-documents:write); 409 se repetida"
+      security: [{ apiKey: [] }]
+      requestBody: { content: { multipart/form-data: { schema: { type: object, required: [file], properties: { file: { type: string, format: binary }, project_code: { type: string } } } } } }
+      responses: { "201": { description: Documento }, "409": { description: Repetido } }
+  /api/public/v1/supplier-documents/{document}:
+    get: { tags: [API pública], summary: "Documento de fornecedor (supplier-documents:read)", security: [{ apiKey: [] }] }
+
   /api/v1/exports:
     get: { tags: [Exportação], summary: Exportações (data.export), responses: { "200": { description: Lista } } }
     post: { tags: [Exportação], summary: Pedir exportação ZIP/JSON (também em modo só leitura), responses: { "201": { description: Em fila }, "409": { description: EXPORT_RUNNING } } }
@@ -841,6 +897,10 @@ components:
       in: cookie
       name: obraconnect-session
       description: Cookie de sessão Laravel + cabeçalho X-XSRF-TOKEN nas escritas.
+    apiKey:
+      type: http
+      scheme: bearer
+      description: "API pública: chave da empresa (oc_…), criada em Integrações. Também aceite em X-API-Key."
   responses:
     Validation:
       description: Erro de validação

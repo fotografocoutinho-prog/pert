@@ -6,6 +6,8 @@ use App\Enums\CertificateStatus;
 use App\Enums\InvoiceDraftStatus;
 use App\Enums\VatMode;
 use App\Exceptions\ApiException;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Models\Certificate;
 use App\Models\Client;
 use App\Models\InvoiceDraft;
@@ -112,6 +114,7 @@ final class InvoiceDrafts
             $draft->ready_at = now();
             $draft->save();
         });
+        Webhooks::dispatch('invoice_draft.ready', fn () => Payloads::invoiceDraft($draft));
     }
 
     public static function markInvoiced(InvoiceDraft $draft, string $officialNumber, string $officialDate, ?int $userId): void

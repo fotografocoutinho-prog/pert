@@ -76,6 +76,12 @@ final class PermissionRegistry
                     'data.export' => 'Exportar todos os dados da empresa',
                 ],
             ],
+            'integrations' => [
+                'label' => 'Integrações',
+                'permissions' => [
+                    'integrations.manage' => 'Criar chaves da API e webhooks para ligar outros programas',
+                ],
+            ],
             'organization' => [
                 'label' => 'Organização da empresa',
                 'permissions' => [

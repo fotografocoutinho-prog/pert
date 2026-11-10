@@ -11,6 +11,8 @@ use App\Enums\InvoiceDraftStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Models\Certificate;
 use App\Models\CertificateLine;
 use App\Models\Contract;
@@ -109,6 +111,7 @@ class CertificateController extends Controller
         $this->assertStatus($certificate, [CertificateStatus::Submitted], 'aprovar');
         $certificate->forceFill(['status' => CertificateStatus::Approved, 'approved_by_user_id' => $request->user()->id, 'approved_at' => now()])->save();
         $this->auditor->record('certificate.approved', $certificate, ['project' => $project->code, 'number' => $certificate->number, 'amount_cents' => $certificate->amount_cents]);
+        Webhooks::dispatch('certificate.approved', fn () => Payloads::certificate($certificate));
         if ($certificate->contract_id) {
             $this->portal->certificateDecided($certificate, 'approved');
         }

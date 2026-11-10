@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 0.21.0 — 2026-11-09
+
+Fase 6, parte 2: **API pública e webhooks** (planos Business e Enterprise), para ligar o ObraConnect à faturação, contabilidade, ERP ou BI da empresa.
+
+- **Integrações (API)** (permissão nova `integrations.manage`, só o administrador por omissão): chaves da API com nome, âmbitos (`projects:read`, `invoicing:read`, `supplier-documents:read`, `supplier-documents:write`) e validade; a chave aparece uma vez e só fica guardado o hash; revogar é imediato; último uso à vista.
+- **API pública** em `/api/public/v1` com `Authorization: Bearer oc_…`: obras (com custos e previsões), autos, pré-faturas (formato da exportação JSON) e faturas/guias de fornecedores (ler e **enviar**, que entram e são lidas pelo DocIntel como pelo ecrã). 60 pedidos por minuto por chave. Empresa só leitura: só leituras; suspensa ou sem o plano: nada.
+- **Webhooks**: até 10 endereços https por empresa, cada um com os seus eventos — `certificate.approved`, `certificate.proposed`, `invoice_draft.ready`, `supplier_document.read`, `supplier_document.posted`, `alert.opened`. Assinados (HMAC-SHA256 com o segredo do webhook), repetidos ao fim de 1 min, 5 min, 30 min, 2 h e 6 h; dez eventos falhados seguidos desligam o webhook. Envio de teste, histórico dos envios com reenvio, troca do segredo.
+- Segurança: só endereços públicos (nada de localhost, redes privadas, CGNAT, metadados), confirmados ao gravar e a cada envio, e a ligação vai para o IP confirmado; segredos encriptados; tudo na auditoria.
+- Tarefa nova de hora a hora `obraconnect:prune-webhooks` (apaga o registo de envios terminados com mais de 30 dias), também na Saúde do sistema.
+- Documentação: `docs/16-api-publica.md`.
+
 ## 0.20.0 — 2026-11-09
 
 Fecha a Fase 4: **portal de subempreiteiros**.

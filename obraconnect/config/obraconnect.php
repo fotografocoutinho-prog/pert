@@ -61,6 +61,14 @@ return [
         'max_mb' => (int) env('DOCINTEL_MAX_MB', 25),
     ],
 
+    // API pública (chaves "oc_…") e webhooks. Os webhooks só vão para endereços https públicos; as duas
+    // opções abaixo existem para testes locais e nunca se ligam em produção.
+    'integrations' => [
+        'allow_http' => (bool) env('WEBHOOKS_ALLOW_HTTP', false),
+        'block_private_networks' => (bool) env('WEBHOOKS_BLOCK_PRIVATE_NETWORKS', true),
+        'rate_per_minute' => (int) env('PUBLIC_API_RATE_PER_MINUTE', 60),
+    ],
+
     'security' => [
         'force_https' => (bool) env('FORCE_HTTPS', false),
         'password_min_length' => 10,

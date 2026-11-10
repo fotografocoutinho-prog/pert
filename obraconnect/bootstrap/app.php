@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\ApiException;
+use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnsureAccountActive;
 use App\Http\Middleware\EnsurePlatformStaff;
 use App\Http\Middleware\ForceHttps;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform' => EnsurePlatformStaff::class,
             'account.active' => EnsureAccountActive::class,
             'portal' => ResolvePortalAccess::class,
+            'api.key' => AuthenticateApiKey::class,
         ]);
 
         // O contexto da empresa tem de existir antes do route model binding,

@@ -41,6 +41,15 @@ Regista entradas, falhas de login, alterações à empresa, utilizadores, perfis
 
 Se a subscrição expirar, a empresa passa a **só leitura** (consulta e exportação continuam disponíveis). Ao fim de 30 dias (configurável) fica **suspensa**. Os dados não são apagados automaticamente.
 
+### Integrações (API e webhooks) — 0.21.0
+
+Em **Integrações (API)** (planos Business e Enterprise, permissão `integrations.manage`):
+
+- **Nova chave**: nome do programa que a vai usar, o que pode fazer (âmbitos) e, se quiser, até quando vale. A chave aparece **uma só vez**: copie-a para o outro programa. Se a perder, revogue-a e crie outra.
+- **Novo webhook**: endereço `https://` do outro programa e os eventos (auto aprovado, auto proposto no portal, pré-fatura pronta, fatura lida, fatura lançada, alerta aberto). O **segredo** aparece uma só vez e serve para o outro programa confirmar que o aviso veio do ObraConnect.
+- **Enviar teste** experimenta logo; **Envios** mostra cada aviso (entregue, a tentar, falhou), com a resposta e o conteúdo, e deixa reenviar. Se o outro programa falhar dez avisos seguidos, o webhook desliga-se sozinho: corrija o endereço e volte a ligá-lo em **Editar**.
+- Tudo fica na auditoria. Pormenores técnicos para quem faz a ligação: `docs/16-api-publica.md`.
+
 ### Exportação de dados
 
 **Exportação de dados → Pedir exportação**: gera um ZIP com JSON de todos os dados da empresa. Recebe um email quando estiver pronto. O ficheiro fica disponível 48 horas.

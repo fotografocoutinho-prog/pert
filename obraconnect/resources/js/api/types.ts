@@ -223,6 +223,64 @@ export interface UsageItem {
     used: number | null;
 }
 
+export interface IntegrationOption {
+    key: string;
+    label: string;
+}
+
+export interface ApiKeyInfo {
+    id: number;
+    name: string;
+    prefix: string;
+    scopes: string[];
+    created_by: string | null;
+    created_at: string | null;
+    last_used_at: string | null;
+    last_used_ip: string | null;
+    expires_at: string | null;
+    revoked_at: string | null;
+    usable: boolean;
+    plain_key?: string;
+}
+
+export interface WebhookInfo {
+    id: number;
+    url: string;
+    description: string | null;
+    events: string[];
+    active: boolean;
+    consecutive_failures: number;
+    disabled_reason: string | null;
+    last_delivery_at: string | null;
+    created_at: string | null;
+    last_24h: { delivered: number; failed: number; pending: number };
+    secret?: string;
+}
+
+export interface WebhookDeliveryInfo {
+    id: number;
+    event: string;
+    event_id: string;
+    status: 'pending' | 'delivered' | 'failed';
+    attempts: number;
+    response_status: number | null;
+    response_body: string | null;
+    error: string | null;
+    created_at: string | null;
+    delivered_at: string | null;
+    next_attempt_at: string | null;
+    payload: Record<string, unknown>;
+}
+
+export interface IntegrationsOverview {
+    enabled: boolean;
+    base_url: string;
+    scopes: IntegrationOption[];
+    events: IntegrationOption[];
+    api_keys: ApiKeyInfo[];
+    webhooks: WebhookInfo[];
+}
+
 export interface SupportGrant {
     id: number;
     reason: string;

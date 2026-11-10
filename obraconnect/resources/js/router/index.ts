@@ -99,6 +99,7 @@ const routes: RouteRecordRaw[] = [
             { path: 'auditoria', component: () => import('@/pages/app/AuditPage.vue'), meta: { tenant: true, permission: 'audit.view', title: 'Auditoria' } },
             { path: 'subscricao', component: () => import('@/pages/app/SubscriptionPage.vue'), meta: { tenant: true, permission: 'subscription.view', title: 'Subscrição' } },
             { path: 'suporte', component: () => import('@/pages/app/SupportAccessPage.vue'), meta: { tenant: true, permission: 'support.manage', title: 'Suporte técnico' } },
+            { path: 'integracoes', component: () => import('@/pages/app/IntegrationsPage.vue'), meta: { tenant: true, permission: 'integrations.manage', title: 'Integrações (API e webhooks)' } },
             { path: 'exportacoes', component: () => import('@/pages/app/ExportsPage.vue'), meta: { tenant: true, permission: 'data.export', title: 'Exportação de dados' } },
             { path: 'conta', component: () => import('@/pages/app/AccountPage.vue'), meta: { title: 'A minha conta' } },
             { path: 'sem-empresa', component: () => import('@/pages/app/NoCompanyPage.vue'), meta: { title: 'Sem empresa' } },

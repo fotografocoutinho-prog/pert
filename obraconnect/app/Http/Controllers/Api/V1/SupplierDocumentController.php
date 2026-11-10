@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Audit\Auditor;
-use App\Billing\PlanLimits;
 use App\Billing\StorageUsage;
 use App\DocIntel\DocIntelClient;
 use App\Enums\CostCategory;
@@ -12,18 +11,19 @@ use App\Enums\SupplierDocumentStatus;
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\Concerns\GuardsProjectWrites;
 use App\Http\Controllers\Controller;
+use App\Integrations\Payloads;
+use App\Integrations\Webhooks;
 use App\Jobs\ReadSupplierDocument;
 use App\Models\Project;
 use App\Models\PurchaseOrder;
 use App\Models\SupplierDocument;
+use App\Purchasing\SupplierDocumentIntake;
 use App\Purchasing\SupplierDocuments;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -78,7 +78,7 @@ class SupplierDocumentController extends Controller
         ]);
     }
 
-    public function store(Request $request, PlanLimits $limits, StorageUsage $usage): JsonResponse
+    public function store(Request $request, SupplierDocumentIntake $intake): JsonResponse
     {
         $tenant = $this->tenantContext()->tenantOrFail();
         $data = $request->validate([
@@ -97,44 +97,7 @@ class SupplierDocumentController extends Controller
             $this->authorize('supplier_docs.manage');
         }
 
-        $file = $request->file('file');
-        $mime = $file->getMimeType() ?: 'application/octet-stream';
-        if (! in_array($mime, SupplierDocument::MIME_TYPES, true)) {
-            throw ApiException::unprocessable('O conteúdo do ficheiro não é PDF nem fotografia.', 'SUPPLIER_DOC_FILE');
-        }
-        $sha = hash_file('sha256', $file->getRealPath());
-        if ($existing = SupplierDocument::query()->where('sha256', $sha)->first()) {
-            throw new ApiException("Este ficheiro já foi carregado (documento n.º {$existing->id}).", 'SUPPLIER_DOC_DUPLICATE_FILE', 409, ['id' => $existing->id]);
-        }
-        $limits->assertCanAdd($tenant, 'storage_mb', (int) ceil($file->getSize() / 1048576));
-
-        $reading = $this->reader->enabled();
-        $doc = DB::transaction(function () use ($file, $mime, $sha, $project, $reading, $request): SupplierDocument {
-            $doc = new SupplierDocument(['project_id' => $project?->id]);
-            $doc->forceFill([
-                'status' => $reading ? SupplierDocumentStatus::Reading : SupplierDocumentStatus::ToReview,
-                'reader' => $reading ? 'docintel' : null,
-                'disk' => config('obraconnect.files.disk'),
-                'path' => '',
-                'original_name' => Str::limit($file->getClientOriginalName() ?: 'documento', 250, ''),
-                'mime' => $mime,
-                'size_bytes' => $file->getSize(),
-                'sha256' => $sha,
-                'category' => CostCategory::Material,
-                'cost_center_id' => $project?->cost_center_id,
-                'created_by_user_id' => $request->user()->id,
-            ])->save();
-            $extension = strtolower($file->getClientOriginalExtension()) ?: ($mime === 'application/pdf' ? 'pdf' : 'jpg');
-            $doc->forceFill(['path' => Storage::disk($doc->disk)->putFileAs($doc->directory(), $file, 'original-'.Str::lower(Str::random(8)).".{$extension}")])->save();
-
-            return $doc;
-        });
-        $usage->add($tenant, $doc->size_bytes);
-        $this->auditor->record('supplier_document.uploaded', $doc, ['file' => $doc->original_name, 'project' => $project?->code]);
-
-        if ($reading) {
-            ReadSupplierDocument::dispatch($doc->id);
-        }
+        $doc = $intake->receive($tenant, $request->file('file'), $project, $request->user()->id);
 
         return response()->json(['data' => $this->present($doc->refresh())], 201);
     }
@@ -228,6 +191,7 @@ class SupplierDocumentController extends Controller
                 $this->authorizePosting($doc);
                 $done = SupplierDocuments::post($doc, $request->user()->id);
                 $this->auditor->record('supplier_document.posted', $doc, $done + ['document' => $doc->label(), 'project' => $doc->project?->code]);
+                Webhooks::dispatch('supplier_document.posted', fn () => Payloads::supplierDocument($doc) + ['posted' => $done]);
                 break;
             case 'unpost':
                 $this->authorizePosting($doc);

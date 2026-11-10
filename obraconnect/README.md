@@ -25,6 +25,7 @@ Laravel 13 + Vue 3, MySQL/MariaDB, pensada para correr em **cPanel** e migrar pa
 | | [API (OpenAPI 3.1)](docs/openapi.yaml) |
 | | [Manual do administrador](docs/13-manual-administrador.md) · [Manual do utilizador](docs/14-manual-utilizador.md) |
 | | [Plano comercial](docs/15-plano-comercial.md) |
+| | [API pública e webhooks](docs/16-api-publica.md) |
 
 ## Estrutura
 

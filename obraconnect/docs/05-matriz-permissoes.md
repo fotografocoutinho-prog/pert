@@ -23,6 +23,7 @@ Estas são as permissões reais em `app/Access/PermissionRegistry.php` e os valo
 | `subscription.view` | Ver plano e utilização | ● | ● | | | | | | | | ● | | | | |
 | `support.manage` | Autorizar acesso do suporte | ● | | | | | | | | | | | | | |
 | `data.export` | Exportar todos os dados | ● | | | | | | | | | | | | | |
+| `integrations.manage` | Chaves da API e webhooks (planos Business e Enterprise) | ● | | | | | | | | | | | | | |
 
 Regras adicionais aplicadas pelo servidor (não configuráveis):
 

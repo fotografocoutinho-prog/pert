@@ -145,5 +145,13 @@ class AppServiceProvider extends ServiceProvider
 
         // Fotografias: um dia de obra pode ter dezenas, mas não milhares por hora.
         RateLimiter::for('uploads', fn (Request $request) => Limit::perHour(300)->by('up:'.($request->user()?->id ?: $request->ip())));
+
+        // API pública: por chave (o prefixo identifica-a; o limite "api" do grupo já trava cada IP).
+        RateLimiter::for('public-api', function (Request $request) {
+            $plain = (string) ($request->bearerToken() ?: $request->header('X-API-Key', ''));
+
+            return Limit::perMinute(max(1, (int) config('obraconnect.integrations.rate_per_minute', 60)))
+                ->by('papi:'.(str_starts_with($plain, 'oc_') ? substr($plain, 0, 12) : $request->ip()));
+        });
     }
 }
