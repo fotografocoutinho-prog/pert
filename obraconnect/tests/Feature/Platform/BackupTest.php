@@ -43,8 +43,15 @@ class BackupTest extends TestCase
         $db = glob("{$this->dir}/db-*.sql.gz");
         $this->assertCount(1, $db);
         $sql = gzdecode(file_get_contents($db[0]));
-        $this->assertStringContainsString('CREATE TABLE "projects"', $sql);
         $this->assertStringEndsWith("linhas\n", $sql);
+        $this->assertStringContainsString('Construções «Aspas» & Filhos', $sql);
+        if (DB::getDriverName() !== 'sqlite') {
+            // Em MySQL o restauro completo (cliente mysql + CHECKSUM TABLE) é um passo próprio do CI.
+            $this->assertStringContainsString('CREATE TABLE `projects`', $sql);
+
+            return;
+        }
+        $this->assertStringContainsString('CREATE TABLE "projects"', $sql);
 
         // Restaura numa base vazia e compara tabela a tabela.
         $target = dirname($this->dir).'/restauro.sqlite';
