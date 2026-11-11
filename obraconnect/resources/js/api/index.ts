@@ -32,6 +32,7 @@ import type {
     PermissionModule,
     Plan,
     PlatformDashboard,
+    PlatformPaymentDetails,
     PlatformSubscriptionOrder,
     PlatformTenant,
     PlatformTenantDetail,
@@ -553,6 +554,9 @@ export const platformApi = {
         (await http.post<{ data: PlatformSubscriptionOrder }>(`/api/v1/platform/subscription-orders/${id}/confirm`, payload)).data.data,
     cancelOrder: async (id: number, reason: string) =>
         (await http.post<{ data: PlatformSubscriptionOrder }>(`/api/v1/platform/subscription-orders/${id}/cancel`, { reason })).data.data,
+    paymentDetails: () => getData<PlatformPaymentDetails>('/api/v1/platform/payment-details'),
+    updatePaymentDetails: async (payload: Record<string, string | null>) =>
+        (await http.put<{ data: PlatformPaymentDetails }>('/api/v1/platform/payment-details', payload)).data.data,
     supportGrants: () => getData<SupportGrant[]>('/api/v1/platform/support-grants'),
     enterSupport: (grantId: number) => http.post(`/api/v1/platform/support-grants/${grantId}/enter`),
     leaveSupport: () => http.post('/api/v1/platform/support/leave'),

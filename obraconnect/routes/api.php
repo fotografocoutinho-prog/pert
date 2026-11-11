@@ -427,7 +427,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 Route::get('subscription-orders', [Platform\SubscriptionOrderController::class, 'index'])->name('orders.index');
                 Route::post('subscription-orders/{order}/confirm', [Platform\SubscriptionOrderController::class, 'confirm'])->name('orders.confirm');
                 Route::post('subscription-orders/{order}/cancel', [Platform\SubscriptionOrderController::class, 'cancel'])->name('orders.cancel');
+                Route::get('payment-details', [Platform\PaymentDetailsController::class, 'show'])->name('payment-details.show');
             });
+            Route::put('payment-details', [Platform\PaymentDetailsController::class, 'update'])
+                ->middleware('platform:super_admin')->name('payment-details.update');
             Route::post('plans', [Platform\PlanController::class, 'store'])->middleware('platform:billing')->name('plans.store');
             Route::put('plans/{plan}', [Platform\PlanController::class, 'update'])->middleware('platform:billing')->name('plans.update');
 

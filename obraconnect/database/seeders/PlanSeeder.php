@@ -39,7 +39,7 @@ class PlanSeeder extends Seeder
             [
                 'code' => 'business',
                 'name' => 'Business',
-                'description' => 'Mais obras, inteligência artificial, integrações e automações.',
+                'description' => 'Até 60 obras ativas e 100 utilizadores, com tudo o que o Professional inclui e ligação a outros programas por API e webhooks.',
                 'price_monthly_cents' => 29900,
                 'price_yearly_cents' => 299000,
                 'trial_days' => 30,

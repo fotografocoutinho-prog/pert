@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Billing\PaymentDetails;
 use App\Billing\SubscriptionChanges;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanResource;
@@ -46,7 +47,7 @@ class SubscriptionChangeController extends Controller
             'coupon' => $q['coupon'] ? ['code' => $q['coupon']->code, 'description' => $q['coupon']->describe()] : null,
             'period_starts_at' => $q['period_starts_at']->toIso8601String(), 'period_ends_at' => $q['period_ends_at']->toIso8601String(),
             'over' => $q['over'], 'allowed' => $q['over'] === [], 'message' => $q['message'],
-            'payment_instructions' => config('obraconnect.billing.payment_instructions'),
+            'payment_instructions' => PaymentDetails::current()['instructions'],
         ]]);
     }
 
@@ -116,6 +117,7 @@ class SubscriptionChangeController extends Controller
             'period_ends_at' => $o->period_ends_at?->toIso8601String(),
             'confirmed_at' => $o->confirmed_at?->toIso8601String(),
             'invoice_reference' => $o->invoice_reference,
+            'payment_reference' => PaymentDetails::reference($o),
             'canceled_at' => $o->canceled_at?->toIso8601String(),
             'cancel_reason' => $o->cancel_reason,
             'created_at' => $o->created_at?->toIso8601String(),

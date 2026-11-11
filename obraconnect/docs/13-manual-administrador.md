@@ -77,7 +77,7 @@ Para a equipa de **faturação** (e super administradores):
 
 - **Pedidos de subscrição**: cada pedido de ativação ou renovação chega por email. Emita a fatura no programa certificado e, quando o pagamento entrar, **Confirmar pagamento** (com o n.º da fatura): o período começa ou é prolongado e a empresa recebe um email. As **subidas de plano** já estão aplicadas: quando estiverem faturadas, marque-as como faturadas. **Cancelar** pede um motivo, que vai no email à empresa. Pedidos por pagar caducam ao fim de 30 dias (`BILLING_PENDING_ORDER_DAYS`).
 - **Cupões**: percentagem ou valor de desconto (num pedido) ou dias extra de período experimental; opcionalmente só para alguns planos, só mensal ou anual, com início, fim e número máximo de usos. Depois de usado, o código e o desconto não mudam: desative-o e crie outro.
-- O texto das indicações de pagamento mostrado às empresas é `BILLING_PAYMENT_INSTRUCTIONS` no `.env`.
+- **Dados de pagamento** (0.25.0): titular, IBAN (pode escrever o NIB), banco, BIC/SWIFT, email para os comprovativos e o texto das indicações. É o que as empresas veem no pedido por confirmar e no email do pedido, com o descritivo a usar na transferência (`ObraConnect <n.º do pedido>`, também visível em Pedidos de subscrição). A faturação vê; só o super administrador altera, e uma troca de IBAN ou de titular é avisada por email a toda a equipa de faturação — se não foi alguém da equipa, reponha os dados e mude as palavras-passe. Sem nada guardado, as empresas só veem o texto de `BILLING_PAYMENT_INSTRUCTIONS` no `.env`.
 
 ### Cópias de segurança (0.23.0)
 

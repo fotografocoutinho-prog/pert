@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Billing\PaymentDetails;
 use App\Billing\PlanLimits;
 use App\Billing\SubscriptionChanges;
 use App\Http\Controllers\Controller;
@@ -27,7 +28,8 @@ class SubscriptionController extends Controller
             'can_manage' => $request->user()->can('subscription.manage') && ! $custom,
             'custom_terms' => $custom,
             'renewal_opens_at' => $changes->renewalOpensAt($subscription)?->toIso8601String(),
-            'payment_instructions' => config('obraconnect.billing.payment_instructions'),
+            'payment_instructions' => PaymentDetails::current()['instructions'],
+            'payment' => PaymentDetails::forCompanies(),
             'orders' => $tenant->subscriptionOrders()->with(['plan', 'coupon'])->latest('id')->limit(20)->get()
                 ->map(fn (SubscriptionOrder $o) => SubscriptionChangeController::order($o))->values(),
         ]]);

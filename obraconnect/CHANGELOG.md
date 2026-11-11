@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 0.25.0 — 2026-11-11
+
+**Dados de pagamento no backoffice**: o IBAN (ou NIB) e as indicações de pagamento editam-se em **Plataforma → Dados de pagamento**, sem mexer no `.env`.
+
+- Titular, IBAN (um NIB de 21 algarismos passa a IBAN PT50; os algarismos de controlo são verificados), banco e BIC/SWIFT (opcionais), email para os comprovativos e o texto das indicações, com pré-visualização do que as empresas veem.
+- A equipa de faturação vê; só o super administrador altera. Cada alteração fica nos logs de segurança (com o IBAN mascarado) e, se mudar o IBAN ou o titular, toda a equipa de faturação recebe um aviso por email (um IBAN trocado desvia os pagamentos).
+- As empresas veem os dados da transferência no pedido por confirmar (página Subscrição, com botão para copiar o IBAN) e no email do pedido, com o descritivo a usar (`ObraConnect <n.º do pedido>`), que aparece também nos Pedidos de subscrição do backoffice.
+- Sem dados guardados fica como antes: só o texto de `BILLING_PAYMENT_INSTRUCTIONS`.
+- Descrição do plano Business sem promessas de inteligência artificial e automações (ainda não existem): "Até 60 obras ativas e 100 utilizadores, com tudo o que o Professional inclui e ligação a outros programas por API e webhooks." Já corrigida em produção a 11/11/2026; aqui fica no seeder e no SQL de instalação.
+
 ## 0.24.0 — 2026-11-10
 
 **Apresentação pública do ObraConnect**, para vender a plataforma.

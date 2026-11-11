@@ -7,6 +7,7 @@ import type { Plan, SubscriptionOverview, SubscriptionQuote } from '@/api/types'
 import { useSessionStore } from '@/stores/session';
 import { useToastStore } from '@/stores/toast';
 import { formatDate, formatMoney } from '@/utils/format';
+import PaymentInfoBlock from '@/components/billing/PaymentInfoBlock.vue';
 import AppAlert from '@/components/ui/AppAlert.vue';
 import AppBadge from '@/components/ui/AppBadge.vue';
 import AppButton from '@/components/ui/AppButton.vue';
@@ -202,7 +203,7 @@ const statusColor = (s: string) => (s === 'confirmed' ? 'green' : s === 'pending
                     Pedido n.º {{ pending.id }} · {{ pending.kind_label }} do plano <strong>{{ pending.plan?.name }}</strong> ({{ cycleLabel(pending.billing_cycle) }}):
                     <strong>{{ formatMoney(pending.total_cents, pending.currency) }}</strong> sem IVA<template v-if="pending.coupon"> (cupão {{ pending.coupon }})</template>.
                 </p>
-                <p class="mt-2 text-sm text-slate-600">{{ data.payment_instructions }}</p>
+                <PaymentInfoBlock class="mt-3" :info="data.payment" :reference="pending.payment_reference" />
                 <AppButton v-if="data.can_manage" size="sm" variant="secondary" class="mt-3" @click="cancelOrder(pending.id)">Cancelar o pedido</AppButton>
             </AppCard>
 
@@ -285,7 +286,9 @@ const statusColor = (s: string) => (s === 'confirmed' ? 'green' : s === 'pending
                         <span v-for="(o, i) in quote.over" :key="o.key">{{ o.label.toLowerCase() }} {{ o.used }} (máximo {{ o.limit }})<template v-if="i < quote.over.length - 1">; </template></span>.
                         Reduza primeiro (ex.: arquive ou conclua obras, retire utilizadores).
                     </AppAlert>
-                    <p v-if="quote.intent === 'order'" class="text-xs text-slate-500">{{ quote.payment_instructions }}</p>
+                    <p v-if="quote.intent === 'order'" class="text-xs text-slate-500">
+                        {{ quote.payment_instructions }}<template v-if="data?.payment.transfer"> Depois de enviar o pedido, os dados para a transferência ficam nesta página e no email.</template>
+                    </p>
                 </template>
                 <form v-if="modal.intent === 'order' && !quoteError" class="flex flex-wrap items-start gap-2" novalidate @submit.prevent="refreshQuote">
                     <div class="min-w-0 flex-1"><AppInput v-model="coupon" aria-label="Cupão de desconto" placeholder="Cupão de desconto (opcional)" :maxlength="40" :error="couponError ?? undefined" /></div>

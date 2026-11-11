@@ -1,5 +1,15 @@
 # Registo de progresso
 
+## v0.25.0 — dados de pagamento no backoffice (2026-11-11)
+
+| Área | Verificação |
+| --- | --- |
+| NIB passa a IBAN PT50; IBAN com algarismos de controlo errados, IBAN sem titular, BIC e email inválidos recusados | Testes (`PaymentDetailsTest`) + browser |
+| Faturação vê, só o super administrador altera; empresas e suporte sem acesso | Testes |
+| Auditoria com o IBAN mascarado; aviso por email à equipa de faturação só quando muda o IBAN ou o titular | Testes |
+| Empresa vê os dados da transferência e o descritivo no pedido por confirmar e no email | Testes + browser (360 px e desktop) |
+| Sem dados guardados, continua o texto de `BILLING_PAYMENT_INSTRUCTIONS` | Testes |
+
 ## v0.24.0 — apresentação pública (2026-11-10)
 
 | Área | Verificação |

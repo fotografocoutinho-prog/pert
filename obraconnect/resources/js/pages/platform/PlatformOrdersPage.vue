@@ -114,6 +114,7 @@ async function submit(): Promise<void> {
                         <p class="text-xs text-slate-500">
                             Pedido a {{ formatDateTime(o.created_at) }}<template v-if="o.requested_by"> por {{ o.requested_by.name }} ({{ o.requested_by.email }})</template>
                             · período {{ formatDate(o.period_starts_at) }} – {{ formatDate(o.period_ends_at) }}
+                            · descritivo da transferência «{{ o.payment_reference }}»
                             <template v-if="o.confirmed_at"> · confirmado a {{ formatDateTime(o.confirmed_at) }} por {{ o.confirmed_by }}<template v-if="o.invoice_reference"> (fatura {{ o.invoice_reference }})</template></template>
                             <template v-if="o.cancel_reason"> · {{ o.cancel_reason }}</template>
                         </p>

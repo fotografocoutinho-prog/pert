@@ -199,9 +199,36 @@ export interface SubscriptionOrder {
     period_ends_at: string | null;
     confirmed_at: string | null;
     invoice_reference: string | null;
+    payment_reference: string;
     canceled_at: string | null;
     cancel_reason: string | null;
     created_at: string | null;
+}
+
+/** Dados para pagar por transferência, como as empresas os veem. */
+export interface PaymentInfo {
+    transfer: boolean;
+    account_holder: string | null;
+    iban: string | null;
+    bank: string | null;
+    bic: string | null;
+    proof_email: string | null;
+    instructions: string;
+}
+
+export interface PlatformPaymentDetails {
+    account_holder: string | null;
+    iban: string | null;
+    bank: string | null;
+    bic: string | null;
+    proof_email: string | null;
+    instructions: string;
+    default_instructions: string;
+    preview: PaymentInfo;
+    updated_at: string | null;
+    updated_by: string | null;
+    can_edit: boolean;
+    changed?: string[];
 }
 
 export interface PlatformSubscriptionOrder extends SubscriptionOrder {
@@ -220,6 +247,7 @@ export interface SubscriptionOverview {
     custom_terms: boolean;
     renewal_opens_at: string | null;
     payment_instructions: string;
+    payment: PaymentInfo;
     orders: SubscriptionOrder[];
 }
 

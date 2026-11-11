@@ -19,6 +19,7 @@ Este documento organiza o lançamento. Não inclui estimativas de mercado nem pr
 - [ ] Contacto de suporte, horário e tempos de resposta definidos.
 - [ ] Backups automáticos fora do servidor e teste de restauro feito.
 - [ ] Domínio, email transacional com SPF/DKIM/DMARC, certificado SSL.
+- [ ] Dados para receber os pagamentos (titular e IBAN) preenchidos em **Plataforma → Dados de pagamento** (o painel existe desde a 0.25.0; falta o IBAN real).
 - [x] Página pública de apresentação e preços (0.24.0): `/` para quem não tem sessão e `/apresentacao`, com a apresentação em PDF em `/apresentacao.pdf`. Os preços vêm de **Plataforma → Planos e preços** (só os planos públicos e ativos).
 
 ## Planos (estrutura já configurável)
@@ -27,7 +28,7 @@ Este documento organiza o lançamento. Não inclui estimativas de mercado nem pr
 | --- | --- | --- |
 | Start | 5 utilizadores, 3 obras, 5 GB | diário, documentos |
 | Professional | 25 utilizadores, 15 obras, 50 GB | + fiscalização, custos, relatórios avançados |
-| Business | 100 utilizadores, 60 obras, 200 GB | + IA, integrações, automações |
+| Business | 100 utilizadores, 60 obras, 200 GB | + integrações (API pública e webhooks). Os códigos `ai` e `automations` já estão no plano mas ainda não fazem nada, nem se anunciam: a descrição não os promete (corrigida em produção a 11/11/2026) |
 | Enterprise | sob consulta | + base de dados dedicada, integrações dedicadas, suporte prioritário |
 
 Tudo isto é editável em **Plataforma → Planos e preços** sem alterar código.
