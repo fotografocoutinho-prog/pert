@@ -64,7 +64,10 @@ class PaymentDetailsTest extends TestCase
         $this->assertSame(self::IBAN, PlatformSetting::for(PaymentDetails::KEY)->value['iban']);
         $log = AuditLog::query()->where('event', 'platform.payment_details_updated')->sole();
         $this->assertNull($log->tenant_id);
-        $this->assertSame(['old' => 'sem IBAN', 'new' => 'PT50 … 0135'], $log->properties['iban']);
+        // Campo a campo: o MySQL reordena as chaves das colunas JSON.
+        $this->assertSame('sem IBAN', $log->properties['iban']['old']);
+        $this->assertSame('PT50 … 0135', $log->properties['iban']['new']);
+        $this->assertEqualsCanonicalizing(['account_holder', 'iban', 'bank', 'bic', 'proof_email'], $log->properties['changed']);
         $this->assertStringNotContainsString(self::IBAN, json_encode($log->properties));
 
         foreach ([$admin, $billing] as $staff) {
